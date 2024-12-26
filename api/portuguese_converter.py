@@ -194,28 +194,18 @@ def stitch_tokens(token_tuples):
             result.append((curr_token, curr_punct))
             continue
             
-        # Apply vowel combination rules
-        combined = handle_vowel_combination(prev_token, curr_token)
-        
-        # Update the last token with the combined result
-        result[-1] = (combined, curr_punct)
+        # Only combine if both tokens are non-empty and no punctuation between
+        if prev_token and curr_token and not prev_punct:
+            # Apply vowel combination rules
+            combined = handle_vowel_combination(prev_token, curr_token)
+            if combined != prev_token + curr_token:  # Only combine if there was a transformation
+                result[-1] = (combined, curr_punct)
+                continue
+                
+        # If no combination occurred, add as separate token
+        result.append((curr_token, curr_punct))
         
     return result
-
-def apply_initial_transformations(clean_tokens):
-    """Apply initial transformations to tokens."""
-    transformed = []
-    for token in clean_tokens:
-        lower_token = token.lower()
-        if lower_token in BYPASS_TRANSFORMATIONS:
-            transformed_token = BYPASS_TRANSFORMATIONS[lower_token]
-            # Preserve capitalization
-            if token[0].isupper():
-                transformed_token = transformed_token[0].upper() + transformed_token[1:]
-            transformed.append(transformed_token)
-        else:
-            transformed.append(token)
-    return transformed
 
 def handle_special_pronouns(current_token, next_token, next_next_token):
     """Handle special cases with pronouns."""
@@ -288,12 +278,9 @@ def transform_tokens(clean_tokens):
     updated_tokens = [final_endings_change(token) for token in updated_tokens]
     print(f"After final endings change: {updated_tokens}", file=sys.stderr)
     
-    # Do both passes of stitching
-    first_stitch = stitch_tokens([(token, '') for token in updated_tokens])
-    print(f"After first stitch: {first_stitch}", file=sys.stderr)
-    
-    final_stitch = stitch_tokens(first_stitch)
-    print(f"After final stitch: {final_stitch}", file=sys.stderr)
+    # Do one pass of stitching with empty punctuation
+    final_stitch = stitch_tokens([(token, '') for token in updated_tokens])
+    print(f"After stitching: {final_stitch}", file=sys.stderr)
     
     # Get just the transformed words
     final_output = [token for token, _ in final_stitch]
@@ -304,3 +291,18 @@ def transform_tokens(clean_tokens):
     
     print(f"Final output: {final_output}", file=sys.stderr)
     return final_output
+
+def apply_initial_transformations(clean_tokens):
+    """Apply initial transformations to tokens."""
+    transformed = []
+    for token in clean_tokens:
+        lower_token = token.lower()
+        if lower_token in BYPASS_TRANSFORMATIONS:
+            transformed_token = BYPASS_TRANSFORMATIONS[lower_token]
+            # Preserve capitalization
+            if token[0].isupper():
+                transformed_token = transformed_token[0].upper() + transformed_token[1:]
+            transformed.append(transformed_token)
+        else:
+            transformed.append(token)
+    return transformed
