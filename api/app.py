@@ -1,21 +1,18 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from portuguese_converter import transform_tokens, tokenize_punct, reattach_punct
+from portuguese_converter import transform_tokens
 import sys
 import traceback
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)
 
-@app.route('/api/convert', methods=['POST', 'OPTIONS'])
+@app.route('/', methods=['GET'])
+def home():
+    return "Portuguese Text Converter API is running!"
+
+@app.route('/api/convert', methods=['POST'])
 def convert():
-    if request.method == 'OPTIONS':
-        response = jsonify({'status': 'ok'})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.add('Access-Control-Allow-Methods', 'POST')
-        return response
-
     try:
         data = request.get_json()
         if not data or 'text' not in data:
@@ -27,27 +24,15 @@ def convert():
         
         print(f"Input text: {text}", file=sys.stderr)
         
-        # First tokenize with punctuation
-        token_pairs = tokenize_punct(text)
-        print(f"Tokenized with punct: {token_pairs}", file=sys.stderr)
+        # Split into tokens and transform
+        tokens = text.split()
+        print(f"Tokens: {tokens}", file=sys.stderr)
         
-        # Get clean tokens for transformation
-        clean_tokens = [token for token, _ in token_pairs]
-        print(f"Clean tokens: {clean_tokens}", file=sys.stderr)
+        transformed = transform_tokens(tokens)
+        print(f"Transformed: {transformed}", file=sys.stderr)
         
-        # Transform the tokens
-        transformed = transform_tokens(clean_tokens)
-        print(f"Transformed tokens: {transformed}", file=sys.stderr)
-        
-        # Reattach punctuation
-        if len(transformed) == len(token_pairs):
-            result_pairs = [(t, p) for t, (_, p) in zip(transformed, token_pairs)]
-            result = ' '.join(reattach_punct(result_pairs))
-        else:
-            # If token count changed, just join transformed tokens
-            result = ' '.join(transformed)
-            
-        print(f"Final result: {result}", file=sys.stderr)
+        result = ' '.join(transformed)
+        print(f"Result: {result}", file=sys.stderr)
         
         return jsonify({'result': result})
     except Exception as e:
