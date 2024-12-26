@@ -1,5 +1,6 @@
 import re
 import sys
+import traceback
 
 BYPASS_TRANSFORMATIONS = {
     "muito": "muyntu",
@@ -263,46 +264,58 @@ def process_token_sequence(merged_tokens):
 
 def transform_tokens(clean_tokens):
     """Transform a list of tokens according to our rules."""
-    if not clean_tokens:
-        return []
-    
-    print(f"Starting transformation of tokens: {clean_tokens}", file=sys.stderr)
-    
-    # Transform the words first
-    merged_tokens = apply_initial_transformations(clean_tokens)
-    print(f"After initial transformations: {merged_tokens}", file=sys.stderr)
-    
-    updated_tokens = process_token_sequence(merged_tokens)
-    print(f"After token sequence processing: {updated_tokens}", file=sys.stderr)
-    
-    updated_tokens = [final_endings_change(token) for token in updated_tokens]
-    print(f"After final endings change: {updated_tokens}", file=sys.stderr)
-    
-    # Do one pass of stitching with empty punctuation
-    final_stitch = stitch_tokens([(token, '') for token in updated_tokens])
-    print(f"After stitching: {final_stitch}", file=sys.stderr)
-    
-    # Get just the transformed words
-    final_output = [token for token, _ in final_stitch]
-    
-    # Preserve capitalization only for the first word if it matches
-    if final_output and clean_tokens:
-        final_output[0] = preserve_capital(clean_tokens[0], final_output[0])
-    
-    print(f"Final output: {final_output}", file=sys.stderr)
-    return final_output
+    try:
+        if not clean_tokens:
+            print("No tokens to transform", file=sys.stderr)
+            return []
+        
+        print(f"Starting transformation of tokens: {clean_tokens}", file=sys.stderr)
+        
+        # Transform the words first
+        merged_tokens = apply_initial_transformations(clean_tokens)
+        print(f"After initial transformations: {merged_tokens}", file=sys.stderr)
+        
+        updated_tokens = process_token_sequence(merged_tokens)
+        print(f"After token sequence processing: {updated_tokens}", file=sys.stderr)
+        
+        updated_tokens = [final_endings_change(token) for token in updated_tokens]
+        print(f"After final endings change: {updated_tokens}", file=sys.stderr)
+        
+        # Do one pass of stitching with empty punctuation
+        final_stitch = stitch_tokens([(token, '') for token in updated_tokens])
+        print(f"After stitching: {final_stitch}", file=sys.stderr)
+        
+        # Get just the transformed words
+        final_output = [token for token, _ in final_stitch]
+        
+        # Preserve capitalization only for the first word if it matches
+        if final_output and clean_tokens:
+            final_output[0] = preserve_capital(clean_tokens[0], final_output[0])
+            print(f"After preserving capitalization: {final_output}", file=sys.stderr)
+        
+        print(f"Final output: {final_output}", file=sys.stderr)
+        return final_output
+        
+    except Exception as e:
+        print(f"Error in transform_tokens: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        raise
 
 def apply_initial_transformations(clean_tokens):
     """Apply initial transformations to tokens."""
     transformed = []
     for token in clean_tokens:
         lower_token = token.lower()
+        print(f"Processing token: {token} (lower: {lower_token})", file=sys.stderr)
         if lower_token in BYPASS_TRANSFORMATIONS:
             transformed_token = BYPASS_TRANSFORMATIONS[lower_token]
+            print(f"Found bypass transformation: {lower_token} -> {transformed_token}", file=sys.stderr)
             # Preserve capitalization
             if token[0].isupper():
                 transformed_token = transformed_token[0].upper() + transformed_token[1:]
+                print(f"Preserved capitalization: {transformed_token}", file=sys.stderr)
             transformed.append(transformed_token)
         else:
+            print(f"No bypass transformation found for: {token}", file=sys.stderr)
             transformed.append(token)
     return transformed

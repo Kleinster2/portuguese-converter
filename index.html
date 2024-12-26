@@ -122,21 +122,23 @@
                 });
                 
                 console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
-                
                 const data = await response.json();
                 console.log('Response data:', data);
                 
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
                 document.getElementById('result').style.display = 'block';
-                document.getElementById('output').textContent = data.result;
+                
+                if (data.error || data.details) {
+                    const errorMessage = data.details || data.error || 'Unknown error occurred';
+                    document.getElementById('output').textContent = 'Error: ' + errorMessage;
+                } else if (data.result) {
+                    document.getElementById('output').textContent = data.result;
+                } else {
+                    document.getElementById('output').textContent = 'Error: Invalid response from server';
+                }
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('result').style.display = 'block';
-                document.getElementById('output').textContent = 'Error converting text: ' + error.message;
+                document.getElementById('output').textContent = 'Error: ' + (error.message || 'Failed to convert text');
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
