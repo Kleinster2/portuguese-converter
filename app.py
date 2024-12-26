@@ -1,12 +1,21 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from portuguese_converter import transform_tokens
+import sys
+import traceback
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-@app.route('/convert', methods=['POST'])
+@app.route('/convert', methods=['POST', 'OPTIONS'])
 def convert():
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Methods', 'POST')
+        return response
+
     try:
         data = request.get_json()
         if not data or 'text' not in data:
@@ -22,8 +31,12 @@ def convert():
         
         return jsonify({'result': result})
     except Exception as e:
-        print(f"Error: {str(e)}")  # Log the error
-        return jsonify({'error': 'Internal server error'}), 500
+        print(f"Error: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        return jsonify({
+            'error': 'Internal server error',
+            'details': str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run()
