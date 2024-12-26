@@ -56,20 +56,29 @@ def apply_phonetic_rules(word):
     return word
 
 def tokenize_punct(text):
-    """Split text into tokens, preserving punctuation as separate tokens."""
-    # Add spaces around punctuation
-    text = re.sub(r'([.,!?;:])', r' \1 ', text)
+    """Split text into tokens, preserving punctuation as separate tokens.
+    Returns a list of tuples (word, punctuation) where punctuation may be empty."""
+    # Define all punctuation marks we handle
+    PUNCT_MARKS = '.,!?;:'
+    
+    # Add spaces around punctuation for proper tokenization
+    text = re.sub(f'([{PUNCT_MARKS}])', r' \1 ', text)
+    
     # Split on whitespace
     tokens = text.split()
+    
     # Group tokens with their punctuation
     token_pairs = []
     for token in tokens:
-        if token in '.,!?;:':
+        if token in PUNCT_MARKS:
             if token_pairs:
+                # Attach punctuation to previous token
                 token_pairs[-1] = (token_pairs[-1][0], token)
             else:
+                # Handle case where text starts with punctuation
                 token_pairs.append(('', token))
         else:
+            # Regular word without punctuation
             token_pairs.append((token, ''))
     return token_pairs
 
