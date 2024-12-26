@@ -7,7 +7,7 @@ import traceback
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-@app.route('/convert', methods=['POST', 'OPTIONS'])
+@app.route('/api/convert', methods=['POST', 'OPTIONS'])
 def convert():
     if request.method == 'OPTIONS':
         response = jsonify({'status': 'ok'})

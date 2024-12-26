@@ -2,22 +2,30 @@
     "version": 2,
     "builds": [
         {
-            "src": "app.py",
+            "src": "api/app.py",
             "use": "@vercel/python",
             "config": {
                 "runtime": "python3.9",
                 "maxLambdaSize": "15mb"
             }
+        },
+        {
+            "src": "*.html",
+            "use": "@vercel/static"
         }
     ],
     "routes": [
         {
-            "src": "/convert",
-            "dest": "app.py"
+            "src": "/api/convert",
+            "dest": "api/app.py"
+        },
+        {
+            "src": "/",
+            "dest": "/index.html"
         },
         {
             "src": "/(.*)",
-            "dest": "app.py"
+            "dest": "/$1"
         }
     ]
 }

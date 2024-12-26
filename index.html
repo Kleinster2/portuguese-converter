@@ -110,7 +110,7 @@
             document.getElementById('result').style.display = 'none';
             
             try {
-                const response = await fetch('https://portuguese-phonetic-converter.vercel.app/convert', {
+                const response = await fetch('/api/convert', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
