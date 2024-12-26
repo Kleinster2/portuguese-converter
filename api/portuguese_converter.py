@@ -25,7 +25,10 @@ def apply_phonetic_rules(word):
     # Rule 4: Transform 'lh' to 'ly'
     word = word.replace('lh', 'ly')
     
-    # Rule 5: Common verb endings
+    # Rule 5: Final 'l' becomes 'u'
+    word = re.sub(r'l$', 'u', word)
+    
+    # Rule 6: Common verb endings
     if len(word) > 2:
         if word.endswith('ar'):
             word = word[:-2] + 'á'
@@ -34,16 +37,16 @@ def apply_phonetic_rules(word):
         elif word.endswith('ir'):
             word = word[:-2] + 'í'
             
-    # Rule 6: Common reductions
+    # Rule 7: Common reductions
     word = re.sub(r'^está', 'tá', word)
     word = re.sub(r'^para', 'pra', word)
     word = re.sub(r'^você', 'cê', word)
     
-    # Rule 7: Nasalization
+    # Rule 8: Nasalization
     word = re.sub(r'm$', 'n', word)  # final 'm' becomes 'n'
     word = re.sub(r'([aeiou])m([pbfv])', r'\1n\2', word)  # 'm' before labial consonants becomes 'n'
     
-    # Rule 8: Vowel raising in unstressed syllables
+    # Rule 9: Vowel raising in unstressed syllables
     if len(word) > 2:
         # Only if not already a stressed syllable
         if not any(c in word for c in 'áéíóúâêîôû'):
