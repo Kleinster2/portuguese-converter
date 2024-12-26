@@ -3,31 +3,77 @@ import sys
 import traceback
 
 BYPASS_TRANSFORMATIONS = {
+    # Quantity words
     "muito": "muyntu",
     "muitos": "muyintus",
     "muita": "muynta",
     "muitas": "muyntas",
+    
+    # Common conjunctions and prepositions
     "e": "y",
     "até": "té",
-    "mãe": "mãen",
-    "mães": "mãens",
-    "ou": "ô",
-    "você": "cê",
     "para": "pra",
+    "ou": "ô",
+    "mas": "maz",
+    "mais": "mayz",
+    "em": "in",
+    "no": "nu",
+    "na": "na",
+    "nos": "nus",
+    "nas": "nas",
+    "do": "du",
+    "da": "da",
+    "dos": "dus",
+    "das": "das",
+    
+    # Common verbs
     "está": "tá",
     "estão": "tão",
-    "mais": "mayz",
-    "mas": "maz",
+    "estou": "tô",
+    "estava": "tava",
+    "estavam": "tavam",
+    "ser": "sê",
+    "sou": "sô",
+    
+    # Common pronouns
+    "você": "cê",
+    "vocês": "cês",
+    "ele": "eli",
+    "ela": "ela",
+    "eles": "elis",
+    "elas": "elas",
+    "mãe": "mãen",
+    "mães": "mãens",
+    
+    # Numbers
     "dois": "doyz",
     "três": "trêyz",
     "seis": "seyz",
     "dez": "dêz",
+    
+    # Common nouns with 's' to 'z' transformation
     "casa": "caza",
     "mesa": "meza",
     "coisa": "coiza",
     "causa": "cauza",
     "fase": "fazi",
-    "base": "bazi"
+    "base": "bazi",
+    "rosa": "roza",
+    "caso": "cazu",
+    "casos": "cazus",
+    "meses": "mezis",
+    
+    # Common adjectives
+    "bonito": "bunitu",
+    "bonita": "bunita",
+    "bonitos": "bunitus",
+    "bonitas": "bunitas",
+    "grande": "grandi",
+    "grandes": "grandis",
+    "pequeno": "pequenu",
+    "pequenos": "pequenus",
+    "pequena": "pequena",
+    "pequenas": "pequenas"
 }
 
 def s_between_vowels_to_z(word):
@@ -316,6 +362,7 @@ def apply_initial_transformations(clean_tokens):
                 print(f"Preserved capitalization: {transformed_token}", file=sys.stderr)
             transformed.append(transformed_token)
         else:
+            transformed_token = token
             print(f"No bypass transformation found for: {token}", file=sys.stderr)
-            transformed.append(token)
+            transformed.append(transformed_token)
     return transformed
