@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from portuguese_converter import transform_tokens
+from portuguese_converter import transform_tokens, tokenize_punct, reattach_punct
 import sys
 import traceback
 
@@ -24,10 +24,30 @@ def convert():
         text = data['text']
         if not isinstance(text, str):
             return jsonify({'error': 'Text must be a string'}), 400
-            
-        clean_tokens = text.split()
+        
+        print(f"Input text: {text}", file=sys.stderr)
+        
+        # First tokenize with punctuation
+        token_pairs = tokenize_punct(text)
+        print(f"Tokenized with punct: {token_pairs}", file=sys.stderr)
+        
+        # Get clean tokens for transformation
+        clean_tokens = [token for token, _ in token_pairs]
+        print(f"Clean tokens: {clean_tokens}", file=sys.stderr)
+        
+        # Transform the tokens
         transformed = transform_tokens(clean_tokens)
-        result = ' '.join(transformed)
+        print(f"Transformed tokens: {transformed}", file=sys.stderr)
+        
+        # Reattach punctuation
+        if len(transformed) == len(token_pairs):
+            result_pairs = [(t, p) for t, (_, p) in zip(transformed, token_pairs)]
+            result = ' '.join(reattach_punct(result_pairs))
+        else:
+            # If token count changed, just join transformed tokens
+            result = ' '.join(transformed)
+            
+        print(f"Final result: {result}", file=sys.stderr)
         
         return jsonify({'result': result})
     except Exception as e:

@@ -1,4 +1,5 @@
 import re
+import sys
 
 BYPASS_TRANSFORMATIONS = {
     "muito": "muyntu",
@@ -203,11 +204,15 @@ def stitch_tokens(token_tuples):
 
 def apply_initial_transformations(clean_tokens):
     """Apply initial transformations to tokens."""
-    # First apply any bypass transformations
     transformed = []
     for token in clean_tokens:
-        if token.lower() in BYPASS_TRANSFORMATIONS:
-            transformed.append(BYPASS_TRANSFORMATIONS[token.lower()])
+        lower_token = token.lower()
+        if lower_token in BYPASS_TRANSFORMATIONS:
+            transformed_token = BYPASS_TRANSFORMATIONS[lower_token]
+            # Preserve capitalization
+            if token[0].isupper():
+                transformed_token = transformed_token[0].upper() + transformed_token[1:]
+            transformed.append(transformed_token)
         else:
             transformed.append(token)
     return transformed
@@ -270,15 +275,25 @@ def transform_tokens(clean_tokens):
     """Transform a list of tokens according to our rules."""
     if not clean_tokens:
         return []
-        
+    
+    print(f"Starting transformation of tokens: {clean_tokens}", file=sys.stderr)
+    
     # Transform the words first
     merged_tokens = apply_initial_transformations(clean_tokens)
+    print(f"After initial transformations: {merged_tokens}", file=sys.stderr)
+    
     updated_tokens = process_token_sequence(merged_tokens)
+    print(f"After token sequence processing: {updated_tokens}", file=sys.stderr)
+    
     updated_tokens = [final_endings_change(token) for token in updated_tokens]
+    print(f"After final endings change: {updated_tokens}", file=sys.stderr)
     
     # Do both passes of stitching
-    first_stitch = stitch_tokens([(token, False) for token in updated_tokens])
+    first_stitch = stitch_tokens([(token, '') for token in updated_tokens])
+    print(f"After first stitch: {first_stitch}", file=sys.stderr)
+    
     final_stitch = stitch_tokens(first_stitch)
+    print(f"After final stitch: {final_stitch}", file=sys.stderr)
     
     # Get just the transformed words
     final_output = [token for token, _ in final_stitch]
@@ -287,4 +302,5 @@ def transform_tokens(clean_tokens):
     if final_output and clean_tokens:
         final_output[0] = preserve_capital(clean_tokens[0], final_output[0])
     
+    print(f"Final output: {final_output}", file=sys.stderr)
     return final_output
