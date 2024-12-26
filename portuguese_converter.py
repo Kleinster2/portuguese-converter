@@ -248,6 +248,9 @@ def process_token_sequence(merged_tokens):
 
 def transform_tokens(clean_tokens):
     """Transform a list of tokens according to our rules."""
+    if not clean_tokens:
+        return []
+        
     # Transform the words first
     merged_tokens = apply_initial_transformations(clean_tokens)
     updated_tokens = process_token_sequence(merged_tokens)
@@ -260,10 +263,8 @@ def transform_tokens(clean_tokens):
     # Get just the transformed words
     final_output = [token for token, _ in final_stitch]
     
-    # Preserve capitalization for each word
-    final_output = [
-        preserve_capital(orig, trans)
-        for orig, trans in zip(clean_tokens, final_output)
-    ]
+    # Preserve capitalization only for the first word if it matches
+    if final_output and clean_tokens:
+        final_output[0] = preserve_capital(clean_tokens[0], final_output[0])
     
     return final_output
