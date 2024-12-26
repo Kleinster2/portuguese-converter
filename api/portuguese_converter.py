@@ -2,83 +2,60 @@ import re
 import sys
 import traceback
 
-BYPASS_TRANSFORMATIONS = {
-    # Quantity words
-    "muito": "muyntu",
-    "muitos": "muyintus",
-    "muita": "muynta",
-    "muitas": "muyntas",
+def apply_phonetic_rules(word):
+    """Apply Portuguese phonetic rules to transform a word."""
+    if not word:
+        return word
+        
+    word = word.lower()
     
-    # Common conjunctions and prepositions
-    "e": "y",
-    "até": "té",
-    "para": "pra",
-    "ou": "ô",
-    "mas": "maz",
-    "mais": "mayz",
-    "em": "in",
-    "no": "nu",
-    "na": "na",
-    "nos": "nus",
-    "nas": "nas",
-    "do": "du",
-    "da": "da",
-    "dos": "dus",
-    "das": "das",
+    # Rule 1: Final unstressed vowels often reduce
+    if len(word) > 1:
+        word = re.sub(r'o$', 'u', word)  # final 'o' becomes 'u'
+        word = re.sub(r'os$', 'us', word)  # final 'os' becomes 'us'
+        word = re.sub(r'e$', 'i', word)  # final 'e' becomes 'i'
+        word = re.sub(r'es$', 'is', word)  # final 'es' becomes 'is'
     
-    # Common verbs
-    "está": "tá",
-    "estão": "tão",
-    "estou": "tô",
-    "estava": "tava",
-    "estavam": "tavam",
-    "ser": "sê",
-    "sou": "sô",
+    # Rule 2: 's' between vowels becomes 'z'
+    word = re.sub(r'([aeiouáéíóúâêîôûãẽĩõũ])s([aeiouáéíóúâêîôûãẽĩõũ])', r'\1z\2', word)
     
-    # Common pronouns
-    "você": "cê",
-    "vocês": "cês",
-    "ele": "eli",
-    "ela": "ela",
-    "eles": "elis",
-    "elas": "elas",
-    "mãe": "mãen",
-    "mães": "mãens",
+    # Rule 3: 'ão' becomes 'aum' at the end of words
+    word = re.sub(r'ão$', 'aum', word)
     
-    # Numbers
-    "dois": "doyz",
-    "três": "trêyz",
-    "seis": "seyz",
-    "dez": "dêz",
+    # Rule 4: Simplify double letters
+    word = re.sub(r'rr', 'r', word)
+    word = re.sub(r'ss', 's', word)
     
-    # Common nouns with 's' to 'z' transformation
-    "casa": "caza",
-    "mesa": "meza",
-    "coisa": "coiza",
-    "causa": "cauza",
-    "fase": "fazi",
-    "base": "bazi",
-    "rosa": "roza",
-    "caso": "cazu",
-    "casos": "cazus",
-    "meses": "mezis",
+    # Rule 5: Simplify common consonant clusters
+    word = word.replace('nh', 'ny')
+    word = word.replace('lh', 'ly')
     
-    # Common adjectives
-    "bonito": "bunitu",
-    "bonita": "bunita",
-    "bonitos": "bunitus",
-    "bonitas": "bunitas",
-    "grande": "grandi",
-    "grandes": "grandis",
-    "pequeno": "pequenu",
-    "pequenos": "pequenus",
-    "pequena": "pequena",
-    "pequenas": "pequenas"
-}
-
-def s_between_vowels_to_z(word):
-    """Change 's' to 'z' when it occurs between vowels."""
-    return re.sub(r'([aeiouáéíóúâêîôûãẽĩõũ])s([aeiouáéíóúâêîôûãẽĩõũ])', r'\1z\2', word)
+    # Rule 6: Common verb endings
+    if len(word) > 2:
+        if word.endswith('ar'):
+            word = word[:-2] + 'á'
+        elif word.endswith('er'):
+            word = word[:-2] + 'ê'
+        elif word.endswith('ir'):
+            word = word[:-2] + 'í'
+            
+    # Rule 7: Common reductions
+    word = re.sub(r'^está', 'tá', word)
+    word = re.sub(r'^para', 'pra', word)
+    word = re.sub(r'^você', 'cê', word)
+    
+    # Rule 8: Nasalization
+    word = re.sub(r'm$', 'n', word)  # final 'm' becomes 'n'
+    word = re.sub(r'([aeiou])m([pbfv])', r'\1n\2', word)  # 'm' before labial consonants becomes 'n'
+    
+    # Rule 9: Vowel raising in unstressed syllables
+    if len(word) > 2:
+        # Only if not already a stressed syllable
+        if not any(c in word for c in 'áéíóúâêîôû'):
+            word = re.sub(r'o([^aeiouáéíóúâêîôûãẽĩõũ]+)', r'u\1', word)
+            word = re.sub(r'e([^aeiouáéíóúâêîôûãẽĩõũ]+)', r'i\1', word)
+    
+    return word
 
 def tokenize_punct(text):
     """Split text into tokens, preserving punctuation as separate tokens."""
@@ -110,203 +87,22 @@ def preserve_capital(original, transformed):
         return transformed[0].upper() + transformed[1:]
     return transformed
 
-def is_verb(word):
-    """Check if a word is likely a verb based on common verb endings."""
-    word = word.lower()
-    verb_endings = ['ar', 'er', 'ir', 'ou', 'am', 'em', 'iu']
-    for ending in verb_endings:
-        if word.endswith(ending):
-            return True
-    return False
-
-def final_endings_change(word):
-    """Change final endings according to common pronunciation patterns."""
-    # First apply s-to-z transformation
-    word = s_between_vowels_to_z(word)
-    
-    # Then apply other transformations
-    replacements = {
-        "os": "us", "o": "u", "es": "is", "e": "i", "l": "u"
-    }
-    lw = word.lower()
-    for ending, replacement in replacements.items():
-        if lw.endswith(ending) and len(word) > 1:
-            word = word[: -len(ending)] + replacement
-            break
-    if "à" in word:
-        word = word.replace("à", "a")
-    if "lh" in word:
-        word = word.replace("lh", "ly")
-    if is_verb(word):
-        if lw.endswith("ar"):
-            word = word[:-2] + "á"
-        elif lw.endswith("er"):
-            word = word[:-2] + "ê"
-        elif lw.endswith("ir"):
-            word = word[:-2] + "í"
-    if lw.startswith("h") and len(word) > 1:
-        word = word[1:]
-    return word
-
-def apply_final_endings(tagged_list):
-    """Apply final ending changes to a list of tagged tokens."""
-    return [(final_endings_change(token), tag) for token, tag in tagged_list]
-
-def merge_prepositions(tokens):
-    """Merge prepositions with the following word according to common patterns."""
-    if len(tokens) < 2:
-        return tokens
-        
-    result = []
-    i = 0
-    while i < len(tokens):
-        current = tokens[i].lower()
-        
-        # Check if we can look ahead
-        if i + 1 < len(tokens):
-            next_token = tokens[i + 1]
-            
-            # Handle preposition merging
-            if current in ['de', 'do', 'da', 'em', 'no', 'na']:
-                result.append(current + next_token)
-                i += 2
-                continue
-                
-        result.append(tokens[i])
-        i += 1
-        
-    return result
-
-def handle_vowel_combination(first: str, second: str) -> str:
+def handle_vowel_combination(first, second):
     """Handle vowel combinations between words according to Portuguese pronunciation rules."""
-    # Define vowel groups
-    open_vowels = "aáâã"
-    closed_vowels = "eéêiy"
-    back_vowels = "oóôu"
-    all_vowels = open_vowels + closed_vowels + back_vowels
-    
     if not first or not second:
-        return first + second
+        return first, second
         
-    first_lower = first.lower()
-    second_lower = second.lower()
-    
-    # Only process if ending/starting with vowels
-    if not (first_lower[-1] in all_vowels and second_lower[0] in all_vowels):
-        return first + second
-    
-    last_vowel = first_lower[-1]
-    first_vowel = second_lower[0]
-    
-    # Special case: word ending in 'ê' + word starting with 'é' -> drop 'ê'
-    if last_vowel == 'ê' and first_vowel == 'é':
-        return first[:-1] + second
-    
-    # Rule 1: Same vowels usually merge
-    if last_vowel == first_vowel:
-        return first[:-1] + second
+    # Rule 1: If first word ends in a vowel and second starts with the same vowel, merge them
+    if (first[-1] in 'aeiouáéíóúâêîôûãẽĩõũ' and 
+        second[0] in 'aeiouáéíóúâêîôûãẽĩõũ' and 
+        first[-1].lower() == second[0].lower()):
+        return first + second[1:], ''
         
-    # Rule 2: 'a' + 'e/i' drops the 'a' but keeps second vowel
-    if last_vowel in open_vowels and first_vowel in closed_vowels:
-        return first[:-1] + second  # "casa escura" → "casescura", "fala isso" → "falisso"
+    # Rule 2: If first word ends in 'a' or 'o' and second starts with unstressed 'e', merge with 'i'
+    if first[-1] in 'ao' and second.startswith('e'):
+        return first + 'i' + second[1:], ''
         
-    # Rule 3: 'e/i' + 'a' adds 'y'
-    if last_vowel in closed_vowels and first_vowel in open_vowels:
-        return first + 'y' + second
-        
-    # Rule 4: 'o/u' + 'a/e/i' adds 'w'
-    if last_vowel in back_vowels and first_vowel in (open_vowels + closed_vowels):
-        return first + 'w' + second
-    
-    # Rule 5: Keep both vowels in other cases (hiatus)
-    return first + second
-
-def stitch_tokens(token_tuples):
-    """Stitch together tokens based on vowel combination rules."""
-    if not token_tuples:
-        return token_tuples
-        
-    result = [token_tuples[0]]
-    
-    for i in range(1, len(token_tuples)):
-        prev_token, prev_punct = result[-1]
-        curr_token, curr_punct = token_tuples[i]
-        
-        # Skip empty tokens
-        if not curr_token:
-            continue
-            
-        # If previous token ended with punctuation, start new token
-        if prev_punct:
-            result.append((curr_token, curr_punct))
-            continue
-            
-        # Only combine if both tokens are non-empty and no punctuation between
-        if prev_token and curr_token and not prev_punct:
-            # Apply vowel combination rules
-            combined = handle_vowel_combination(prev_token, curr_token)
-            if combined != prev_token + curr_token:  # Only combine if there was a transformation
-                result[-1] = (combined, curr_punct)
-                continue
-                
-        # If no combination occurred, add as separate token
-        result.append((curr_token, curr_punct))
-        
-    return result
-
-def handle_special_pronouns(current_token, next_token, next_next_token):
-    """Handle special cases with pronouns."""
-    pronouns = {'me', 'te', 'se', 'lhe'}
-    if current_token.lower() in pronouns:
-        # If followed by a verb
-        if next_token and is_verb(next_token):
-            return current_token + next_token
-        # If part of a chain like "me a"
-        if next_token and next_token.lower() in {'o', 'a', 'os', 'as'}:
-            if next_next_token and is_verb(next_next_token):
-                return current_token + next_token + next_next_token
-    return None
-
-def handle_s_vowel_merge(current_token, next_token, vowels):
-    """Handle cases where 's' becomes 'z' between vowels across words."""
-    if current_token.endswith('s') and next_token and next_token[0].lower() in vowels:
-        return current_token[:-1] + 'z' + next_token
-    return None
-
-def process_token_sequence(merged_tokens):
-    """Process a sequence of tokens applying various transformation rules."""
-    if not merged_tokens:
-        return merged_tokens
-        
-    result = []
-    i = 0
-    vowels = set('aeiouáéíóúâêîôûãẽĩõũ')
-    
-    while i < len(merged_tokens):
-        current = merged_tokens[i]
-        next_token = merged_tokens[i + 1] if i + 1 < len(merged_tokens) else None
-        next_next = merged_tokens[i + 2] if i + 2 < len(merged_tokens) else None
-        
-        # Try special pronoun handling
-        special_form = handle_special_pronouns(current, next_token, next_next)
-        if special_form:
-            result.append(special_form)
-            i += 3 if next_next else 2
-            continue
-            
-        # Try s+vowel merge
-        if next_token:
-            merged = handle_s_vowel_merge(current, next_token, vowels)
-            if merged:
-                result.append(merged)
-                i += 2
-                continue
-                
-        # No special cases applied, add token as is
-        result.append(current)
-        i += 1
-        
-    return result
+    return first, second
 
 def transform_tokens(clean_tokens):
     """Transform a list of tokens according to our rules."""
@@ -314,55 +110,40 @@ def transform_tokens(clean_tokens):
         if not clean_tokens:
             print("No tokens to transform", file=sys.stderr)
             return []
-        
+            
         print(f"Starting transformation of tokens: {clean_tokens}", file=sys.stderr)
         
-        # Transform the words first
-        merged_tokens = apply_initial_transformations(clean_tokens)
-        print(f"After initial transformations: {merged_tokens}", file=sys.stderr)
+        # Apply phonetic rules to each token
+        transformed = []
+        for token in clean_tokens:
+            transformed_token = apply_phonetic_rules(token)
+            transformed.append(transformed_token)
+            print(f"Transformed {token} -> {transformed_token}", file=sys.stderr)
         
-        updated_tokens = process_token_sequence(merged_tokens)
-        print(f"After token sequence processing: {updated_tokens}", file=sys.stderr)
+        # Handle vowel combinations between words
+        final_tokens = []
+        i = 0
+        while i < len(transformed):
+            if i < len(transformed) - 1:
+                first, second = handle_vowel_combination(transformed[i], transformed[i + 1])
+                if second:  # No combination occurred
+                    final_tokens.append(first)
+                    i += 1
+                else:  # Combination occurred
+                    final_tokens.append(first)
+                    i += 2
+            else:
+                final_tokens.append(transformed[i])
+                i += 1
         
-        updated_tokens = [final_endings_change(token) for token in updated_tokens]
-        print(f"After final endings change: {updated_tokens}", file=sys.stderr)
+        # Preserve capitalization of the first word
+        if final_tokens and clean_tokens:
+            final_tokens[0] = preserve_capital(clean_tokens[0], final_tokens[0])
         
-        # Do one pass of stitching with empty punctuation
-        final_stitch = stitch_tokens([(token, '') for token in updated_tokens])
-        print(f"After stitching: {final_stitch}", file=sys.stderr)
-        
-        # Get just the transformed words
-        final_output = [token for token, _ in final_stitch]
-        
-        # Preserve capitalization only for the first word if it matches
-        if final_output and clean_tokens:
-            final_output[0] = preserve_capital(clean_tokens[0], final_output[0])
-            print(f"After preserving capitalization: {final_output}", file=sys.stderr)
-        
-        print(f"Final output: {final_output}", file=sys.stderr)
-        return final_output
+        print(f"Final output: {final_tokens}", file=sys.stderr)
+        return final_tokens
         
     except Exception as e:
         print(f"Error in transform_tokens: {str(e)}", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
         raise
-
-def apply_initial_transformations(clean_tokens):
-    """Apply initial transformations to tokens."""
-    transformed = []
-    for token in clean_tokens:
-        lower_token = token.lower()
-        print(f"Processing token: {token} (lower: {lower_token})", file=sys.stderr)
-        if lower_token in BYPASS_TRANSFORMATIONS:
-            transformed_token = BYPASS_TRANSFORMATIONS[lower_token]
-            print(f"Found bypass transformation: {lower_token} -> {transformed_token}", file=sys.stderr)
-            # Preserve capitalization
-            if token[0].isupper():
-                transformed_token = transformed_token[0].upper() + transformed_token[1:]
-                print(f"Preserved capitalization: {transformed_token}", file=sys.stderr)
-            transformed.append(transformed_token)
-        else:
-            transformed_token = token
-            print(f"No bypass transformation found for: {token}", file=sys.stderr)
-            transformed.append(transformed_token)
-    return transformed
