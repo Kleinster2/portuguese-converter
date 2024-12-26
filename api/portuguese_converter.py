@@ -7,9 +7,25 @@ BYPASS_TRANSFORMATIONS = {
     "muitas": "muyntas",
     "e": "y",
     "até": "té",
-    "mãe" : "mãen",
-    "mães" : "mãens",
-    "ou" : "ô",
+    "mãe": "mãen",
+    "mães": "mãens",
+    "ou": "ô",
+    "você": "cê",
+    "para": "pra",
+    "está": "tá",
+    "estão": "tão",
+    "mais": "mayz",
+    "mas": "maz",
+    "dois": "doyz",
+    "três": "trêyz",
+    "seis": "seyz",
+    "dez": "dêz",
+    "casa": "caza",
+    "mesa": "meza",
+    "coisa": "coiza",
+    "causa": "cauza",
+    "fase": "fazi",
+    "base": "bazi"
 }
 
 def s_between_vowels_to_z(word):
@@ -57,6 +73,10 @@ def is_verb(word):
 
 def final_endings_change(word):
     """Change final endings according to common pronunciation patterns."""
+    # First apply s-to-z transformation
+    word = s_between_vowels_to_z(word)
+    
+    # Then apply other transformations
     replacements = {
         "os": "us", "o": "u", "es": "is", "e": "i", "l": "u"
     }
