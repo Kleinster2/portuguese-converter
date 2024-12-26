@@ -8,6 +8,10 @@
     ],
     "routes": [
         {
+            "src": "/convert",
+            "dest": "app.py"
+        },
+        {
             "src": "/(.*)",
             "dest": "app.py"
         }
