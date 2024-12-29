@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from portuguese_converter import transform_tokens
+from portuguese_converter import convert_text
 import sys
 import os
 import traceback
@@ -26,7 +26,7 @@ CORS(app)
 def home():
     return jsonify({"status": "running", "message": "Portuguese Text Converter API is running!"})
 
-@app.route('/api/convert', methods=['POST'])
+@app.route('/api/portuguese_converter', methods=['POST'])
 def convert():
     try:
         # Get request data
@@ -60,33 +60,20 @@ def convert():
                 'details': 'Text cannot be empty'
             }), 400
         
-        # Log input
-        logger.info(f"Processing text: {text}")
+        # Convert the text
+        result = convert_text(text)
+        logger.info(f"Successfully converted text: {text[:50]}...")
         
-        # Split into tokens and transform
-        tokens = text.split()
-        logger.info(f"Tokens: {tokens}")
-        
-        transformed = transform_tokens(tokens)
-        logger.info(f"Transformed tokens: {transformed}")
-        
-        if not transformed:
-            logger.error("Transformation returned no results")
-            return jsonify({
-                'error': 'Transformation failed',
-                'details': 'No output was generated'
-            }), 500
-        
-        result = ' '.join(transformed)
-        logger.info(f"Final result: {result}")
-        
-        return jsonify({'result': result})
-        
-    except Exception as e:
-        logger.error(f"Error processing request: {str(e)}")
-        logger.error(traceback.format_exc())
         return jsonify({
-            'error': 'Internal server error',
+            'result': result,
+            'original': text
+        })
+
+    except Exception as e:
+        logger.error(f"Error converting text: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'error': 'Server error',
             'details': str(e)
         }), 500
 
@@ -94,6 +81,5 @@ def convert():
 app.debug = True
 
 if __name__ == '__main__':
-    # Only run the development server if we're running locally
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
