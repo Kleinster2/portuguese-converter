@@ -112,7 +112,7 @@
             try {
                 console.log('Sending request with text:', input);
                 
-                const response = await fetch('/api/convert', {
+                const response = await fetch('https://portuguese-converter.vercel.app/api/portuguese_converter', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
