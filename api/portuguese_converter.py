@@ -111,41 +111,51 @@ def handle_vowel_combination(first, second):
         
     return first, second
 
-def transform_tokens(clean_tokens):
-    """Transform a list of tokens according to our rules."""
+def transform_tokens(token_pairs):
+    """Transform a list of token pairs according to our rules.
+    Each token pair is (word, punctuation)."""
     try:
-        if not clean_tokens:
+        if not token_pairs:
             print("No tokens to transform", file=sys.stderr)
             return []
             
-        print(f"Starting transformation of tokens: {clean_tokens}", file=sys.stderr)
+        print(f"Starting transformation of tokens: {token_pairs}", file=sys.stderr)
         
-        # Apply phonetic rules to each token
-        transformed = []
-        for token in clean_tokens:
-            transformed_token = apply_phonetic_rules(token)
-            transformed.append(transformed_token)
-            print(f"Transformed {token} -> {transformed_token}", file=sys.stderr)
+        # Apply phonetic rules to each word (not the punctuation)
+        transformed_pairs = []
+        for word, punct in token_pairs:
+            transformed_word = apply_phonetic_rules(word)
+            transformed_pairs.append((transformed_word, punct))
+            print(f"Transformed {word} -> {transformed_word}", file=sys.stderr)
         
         # Handle vowel combinations between words
-        final_tokens = []
+        final_pairs = []
         i = 0
-        while i < len(transformed):
-            if i < len(transformed) - 1:
-                first, second = handle_vowel_combination(transformed[i], transformed[i + 1])
-                if second:  # No combination occurred
-                    final_tokens.append(first)
+        while i < len(transformed_pairs):
+            if i < len(transformed_pairs) - 1:
+                word1, punct1 = transformed_pairs[i]
+                word2, punct2 = transformed_pairs[i + 1]
+                
+                combined_word, remaining = handle_vowel_combination(word1, word2)
+                if remaining:  # No combination occurred
+                    final_pairs.append((word1, punct1))
                     i += 1
                 else:  # Combination occurred
-                    final_tokens.append(first)
+                    # Keep punctuation from both words
+                    final_pairs.append((combined_word, punct1 + punct2))
                     i += 2
             else:
-                final_tokens.append(transformed[i])
+                final_pairs.append(transformed_pairs[i])
                 i += 1
         
         # Preserve capitalization of the first word
-        if final_tokens and clean_tokens:
-            final_tokens[0] = preserve_capital(clean_tokens[0], final_tokens[0])
+        if final_pairs and token_pairs:
+            orig_word, orig_punct = token_pairs[0]
+            transformed_word, transformed_punct = final_pairs[0]
+            final_pairs[0] = (preserve_capital(orig_word, transformed_word), transformed_punct)
+        
+        # Reattach punctuation
+        final_tokens = [word + punct for word, punct in final_pairs]
         
         print(f"Final output: {final_tokens}", file=sys.stderr)
         return final_tokens
@@ -154,3 +164,29 @@ def transform_tokens(clean_tokens):
         print(f"Error in transform_tokens: {str(e)}", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
         raise
+
+def convert_text(text):
+    """Convert Portuguese text to its phonetic representation."""
+    try:
+        # Split text into tokens while preserving punctuation
+        token_pairs = tokenize_punct(text)
+        print(f"Tokenized into: {token_pairs}", file=sys.stderr)
+        
+        # Transform the tokens according to our rules
+        transformed = transform_tokens(token_pairs)
+        
+        # Join the transformed tokens back into text
+        result = ' '.join(transformed)
+        return result
+        
+    except Exception as e:
+        print(f"Error in convert_text: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        raise
+
+def main():
+    text = "Olá, como você está?"
+    print(convert_text(text))
+
+if __name__ == "__main__":
+    main()
