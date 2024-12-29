@@ -57,8 +57,8 @@ def apply_phonetic_rules(word):
     
     # If not in dictionary, apply rules in sequence
     # Rule 1p
-    if len(word) > 1:
-        word = re.sub(r'o$', 'u', word)   # final 'o' => 'u'
+    word = re.sub(r'o$', 'u', word)   # final 'o' => 'u'
+    if len(word) > 1:  # Only check length for plural endings
         word = re.sub(r'os$', 'us', word) # final 'os' => 'us'
         word = re.sub(r'e$', 'i', word)   # final 'e' => 'i'
         word = re.sub(r'es$', 'is', word) # final 'es' => 'is'
