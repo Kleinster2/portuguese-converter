@@ -106,8 +106,8 @@ def handle_vowel_combination(first, second):
     # if first[-1] in 'ao' and second.startswith('e'):
     #     return first + 'i' + second[1:], ''
     
-    # Rule 3: If first ends in 'a' and second starts with an unstressed 'e'
-    if first[-1] in 'a' and second.startswith('eiouáéíóúâêîôûãẽĩõũ'):
+    # Rule 3: If first ends in 'a' and second starts with vowel
+    if first[-1] == 'a' and second[0] in 'eiouáéíóúâêîôûãẽĩõũ':
         return first[:-1] + second, ''
 
     return first, second

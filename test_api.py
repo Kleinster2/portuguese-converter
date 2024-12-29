@@ -15,10 +15,14 @@ def test_conversion(text):
 
 # Test cases focusing on vowel combinations
 test_cases = [
-    "casa escura",  # Testing a + e combination
-    "sobre a mesa",  # Testing e + a combination
-    "muito alto",   # Testing o + a combination
-    "para ela"      # Testing a + e combination
+    "casa escura",     # a + e
+    "casa inteira",    # a + i
+    "casa onde",       # a + o
+    "casa útil",       # a + u
+    "casa amarela",    # a + a
+    "sobre isso",      # e + i
+    "como é",          # o + é
+    "para ela"         # a + e after reduction
 ]
 
 print("Testing Portuguese Text Converter API...")
