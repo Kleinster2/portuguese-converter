@@ -9,46 +9,47 @@ import io
 def apply_phonetic_rules(word):
     """
     Apply Portuguese phonetic rules to transform a word.
-    There are 9 main rules here:
-      1) Final unstressed vowels often reduce ('o'->'u', 'os'->'us', etc.)
-      2) 's' between vowels becomes 'z'
-      3) 'ão' at the end becomes 'aum'
-      4) 'lh' => 'ly'
-      5) Final 'l' => 'u'
-      6) Common verb endings (ar -> á, er -> ê, ir -> í)
-      7) Common reductions (está->tá, para->pra, você->cê)
-      8) Nasalization (final 'm' -> 'n', etc.)
-      9) Vowel raising in unstressed syllables
+    Rules Rule 1p - Rule 9p:
+
+    Rule 1p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', etc.)
+    Rule 2p: Vowel raising in unstressed syllables
+    Rule 3p: 'ão' at the end becomes 'aum'
+    Rule 4p: 's' between vowels becomes 'z'
+    Rule 5p: 'lh' => 'ly'
+    Rule 6p: Final 'l' => 'u'
+    Rule 7p: Final 'm' => 'n' (nasalization)
+    Rule 8p: Verb endings (ar -> á, er -> ê, ir -> í)
+    Rule 9p: Common reductions (está->tá, para->pra, você->cê)
     """
     if not word:
         return word
         
     word = word.lower()
     
-    # Rule 1: Final unstressed vowels often reduce
+    # Rule 1p
     if len(word) > 1:
         word = re.sub(r'o$', 'u', word)   # final 'o' => 'u'
         word = re.sub(r'os$', 'us', word) # final 'os' => 'us'
         word = re.sub(r'e$', 'i', word)   # final 'e' => 'i'
         word = re.sub(r'es$', 'is', word) # final 'es' => 'is'
     
-    # Rule 2: 's' between vowels becomes 'z'
+    # Rule 4p
     word = re.sub(
         r'([aeiouáéíóúâêîôûãẽĩõũ])s([aeiouáéíóúâêîôûãẽĩõũ])', 
         r'\1z\2', 
         word
     )
     
-    # Rule 3: 'ão' becomes 'aum' at the end of words
+    # Rule 3p
     word = re.sub(r'ão$', 'aum', word)
     
-    # Rule 4: 'lh' => 'ly'
+    # Rule 5p
     word = word.replace('lh', 'ly')
     
-    # Rule 5: Final 'l' => 'u'
+    # Rule 6p
     word = re.sub(r'l$', 'u', word)
     
-    # Rule 6: Common verb endings
+    # Rule 8p
     if len(word) > 2:
         if word.endswith('ar'):
             word = word[:-2] + 'á'
@@ -57,16 +58,16 @@ def apply_phonetic_rules(word):
         elif word.endswith('ir'):
             word = word[:-2] + 'í'
             
-    # Rule 7: Common reductions
+    # Rule 9p
     word = re.sub(r'^está', 'tá', word)
     word = re.sub(r'^para', 'pra', word)
     word = re.sub(r'^você', 'cê', word)
     
-    # Rule 8: Nasalization
+    # Rule 7p
     word = re.sub(r'm$', 'n', word)  # final 'm' => 'n'
     word = re.sub(r'([aeiou])m([pbfv])', r'\1n\2', word)
     
-    # Rule 9: Vowel raising in unstressed syllables (if no stressed vowels)
+    # Rule 2p
     # Commented out to prevent over-transformation
     # if len(word) > 2:
     #     if not any(c in word for c in 'áéíóúâêîôûãẽĩõũ'):
@@ -89,30 +90,36 @@ def preserve_capital(original, transformed):
 def handle_vowel_combination(first, second):
     """
     Handle vowel combinations between words according to Portuguese pronunciation rules.
-    There are 3 main checks:
-      1) If the first ends in a vowel and the second starts with the same vowel => merge
-      2) If first ends in 'a' or 'o' and second starts with 'e' => merge with 'i'
-      3) If first ends in 'a' and second starts with vowel
-      4) All other vowel combinations - just stitch them together
+    Rules Rule 1c - Rule 5c:
+
+    Rule 1c: If the first ends in a vowel and the second starts with the same vowel => merge
+    Rule 2c: If first ends in 'a' or 'o' and second starts with 'e' => merge with 'i'
+    Rule 3c: If first ends in 'a' and second starts with vowel
+    Rule 4c: If first ends in 'u' and second starts with vowel => add 'w' between
+    Rule 5c: All other vowel combinations - just stitch them together
     """
     if not first or not second:
         return first, second
     
-    # Rule 1: Merge same vowel
+    # Rule 1c
     if (first[-1] in 'aeiouáéíóúâêîôûãẽĩõũ'
         and second[0] in 'aeiouáéíóúâêîôûãẽĩõũ'
         and first[-1].lower() == second[0].lower()):
         return first + second[1:], ''
     
-    # Rule 2: If first ends in 'a' or 'o' and second starts with an unstressed 'e'
+    # Rule 2c
     # if first[-1] in 'ao' and second.startswith('e'):
     #     return first + 'i' + second[1:], ''
     
-    # Rule 3: If first ends in 'a' and second starts with vowel
+    # Rule 3c
     if first[-1] == 'a' and second[0] in 'eiouáéíóúâêîôûãẽĩõũ':
         return first[:-1] + second, ''
 
-    # Rule 4: All other vowel combinations - just stitch them together
+    # Rule 4c
+    if first[-1] == 'u' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũ':
+        return first + 'w' + second, ''
+
+    # Rule 5c
     if first[-1] in 'eiouáéíóúâêîôûãẽĩõũ' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũ':
         return first + second, ''
 
