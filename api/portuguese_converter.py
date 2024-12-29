@@ -98,8 +98,8 @@ def apply_phonetic_rules(word):
         word = word[1:]
     
     # Rule 7p
-    word = re.sub(r'm$', 'ym', word)  # final 'm' => 'n'
-    word = re.sub(r'([aeiou])m([pbfv])', r'\1n\2', word)
+    # word = re.sub(r'm$', 'ym', word)  # final 'm' => 'n'
+    word = re.sub(r'([aeiou])m([pbfv])', r'\1ym\2', word)
     
     # Rule 2p
     # Commented out to prevent over-transformation
