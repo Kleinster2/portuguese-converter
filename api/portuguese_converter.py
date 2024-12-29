@@ -49,42 +49,100 @@ def apply_phonetic_rules(word):
     # Rule 9: Vowel raising in unstressed syllables
     if len(word) > 2:
         # Only if not already a stressed syllable
-        if not any(c in word for c in 'áéíóúâêîôû'):
+        if not any(c in word for c in 'áéíóúâêîôûãẽĩõũ'):
             word = re.sub(r'o([^aeiouáéíóúâêîôûãẽĩõũ]+)', r'u\1', word)
             word = re.sub(r'e([^aeiouáéíóúâêîôûãẽĩõũ]+)', r'i\1', word)
     
     return word
 
-def tokenize_punct(text):
-    """Split text into tokens, preserving punctuation as separate tokens.
-    Returns a list of tuples (word, punctuation) where punctuation may be empty."""
-    # Define all punctuation marks we handle
-    PUNCT_MARKS = '.,!?;:'
+def tokenize_text(text):
+    """Split text into word tokens and punctuation, preserving their order."""
+    # Define punctuation pattern
+    punct_pattern = r'([.,!?;:])'
     
-    # Add spaces around punctuation for proper tokenization
-    text = re.sub(f'([{PUNCT_MARKS}])', r' \1 ', text)
+    # Split on punctuation, keeping the punctuation marks
+    parts = re.split(f'({punct_pattern})', text)
     
-    # Split on whitespace
-    tokens = text.split()
+    # Group into tokens
+    tokens = []
+    current_word = ''
+    current_punct = ''
     
-    # Group tokens with their punctuation
-    token_pairs = []
-    for token in tokens:
-        if token in PUNCT_MARKS:
-            if token_pairs:
-                # Attach punctuation to previous token
-                token_pairs[-1] = (token_pairs[-1][0], token)
-            else:
-                # Handle case where text starts with punctuation
-                token_pairs.append(('', token))
+    for part in parts:
+        if re.match(punct_pattern, part):
+            current_punct += part
         else:
-            # Regular word without punctuation
-            token_pairs.append((token, ''))
-    return token_pairs
+            # Handle whitespace-separated words
+            words = part.split()
+            for i, word in enumerate(words):
+                if i > 0:  # If not the first word, store previous
+                    tokens.append((current_word, current_punct))
+                    current_word = ''
+                    current_punct = ''
+                current_word = word
+            
+            if not words:  # If part was just spaces
+                if current_word:  # Store accumulated word if exists
+                    tokens.append((current_word, current_punct))
+                    current_word = ''
+                    current_punct = ''
+    
+    # Don't forget the last token
+    if current_word or current_punct:
+        tokens.append((current_word, current_punct))
+    
+    return tokens
 
-def reattach_punct(token_pairs):
-    """Reattach punctuation to tokens."""
-    return [t + p for t, p in token_pairs]
+def transform_text(text):
+    """Transform text while properly handling punctuation."""
+    try:
+        # Split into tokens with punctuation
+        tokens = tokenize_text(text)
+        
+        # Transform each word token
+        transformed_tokens = []
+        for word, punct in tokens:
+            if word:  # Only transform non-empty words
+                transformed_word = apply_phonetic_rules(word)
+                transformed_word = preserve_capital(word, transformed_word)
+                transformed_tokens.append((transformed_word, punct))
+            elif punct:  # Preserve standalone punctuation
+                transformed_tokens.append(('', punct))
+        
+        # Handle vowel combinations between words
+        final_tokens = []
+        i = 0
+        while i < len(transformed_tokens):
+            if i < len(transformed_tokens) - 1:
+                curr_word, curr_punct = transformed_tokens[i]
+                next_word, next_punct = transformed_tokens[i + 1]
+                
+                combined_word, remaining = handle_vowel_combination(curr_word, next_word)
+                
+                if remaining:  # No combination occurred
+                    final_tokens.append((curr_word, curr_punct))
+                    i += 1
+                else:  # Combination occurred
+                    final_tokens.append((combined_word, curr_punct + next_punct))
+                    i += 2
+            else:
+                final_tokens.append(transformed_tokens[i])
+                i += 1
+        
+        # Reconstruct text with proper spacing and punctuation
+        result = []
+        for word, punct in final_tokens:
+            if word:
+                result.append(word)
+            if punct:
+                result.append(punct)
+        
+        return ' '.join(result).strip()
+        
+    except Exception as e:
+        print(f"Error in transform_text: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        raise
 
 def preserve_capital(original, transformed):
     """Preserve capitalization from original word in transformed word."""
@@ -111,78 +169,9 @@ def handle_vowel_combination(first, second):
         
     return first, second
 
-def transform_tokens(token_pairs):
-    """Transform a list of token pairs according to our rules.
-    Each token pair is (word, punctuation)."""
-    try:
-        if not token_pairs:
-            print("No tokens to transform", file=sys.stderr)
-            return []
-            
-        print(f"Starting transformation of tokens: {token_pairs}", file=sys.stderr)
-        
-        # Apply phonetic rules to each word (not the punctuation)
-        transformed_pairs = []
-        for word, punct in token_pairs:
-            transformed_word = apply_phonetic_rules(word)
-            transformed_pairs.append((transformed_word, punct))
-            print(f"Transformed {word} -> {transformed_word}", file=sys.stderr)
-        
-        # Handle vowel combinations between words
-        final_pairs = []
-        i = 0
-        while i < len(transformed_pairs):
-            if i < len(transformed_pairs) - 1:
-                word1, punct1 = transformed_pairs[i]
-                word2, punct2 = transformed_pairs[i + 1]
-                
-                combined_word, remaining = handle_vowel_combination(word1, word2)
-                if remaining:  # No combination occurred
-                    final_pairs.append((word1, punct1))
-                    i += 1
-                else:  # Combination occurred
-                    # Keep punctuation from both words
-                    final_pairs.append((combined_word, punct1 + punct2))
-                    i += 2
-            else:
-                final_pairs.append(transformed_pairs[i])
-                i += 1
-        
-        # Preserve capitalization of the first word
-        if final_pairs and token_pairs:
-            orig_word, orig_punct = token_pairs[0]
-            transformed_word, transformed_punct = final_pairs[0]
-            final_pairs[0] = (preserve_capital(orig_word, transformed_word), transformed_punct)
-        
-        # Reattach punctuation
-        final_tokens = [word + punct for word, punct in final_pairs]
-        
-        print(f"Final output: {final_tokens}", file=sys.stderr)
-        return final_tokens
-        
-    except Exception as e:
-        print(f"Error in transform_tokens: {str(e)}", file=sys.stderr)
-        traceback.print_exc(file=sys.stderr)
-        raise
-
 def convert_text(text):
     """Convert Portuguese text to its phonetic representation."""
-    try:
-        # Split text into tokens while preserving punctuation
-        token_pairs = tokenize_punct(text)
-        print(f"Tokenized into: {token_pairs}", file=sys.stderr)
-        
-        # Transform the tokens according to our rules
-        transformed = transform_tokens(token_pairs)
-        
-        # Join the transformed tokens back into text
-        result = ' '.join(transformed)
-        return result
-        
-    except Exception as e:
-        print(f"Error in convert_text: {str(e)}", file=sys.stderr)
-        traceback.print_exc(file=sys.stderr)
-        raise
+    return transform_text(text)
 
 def main():
     text = "Olá, como você está?"
