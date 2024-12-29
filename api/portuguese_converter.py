@@ -107,8 +107,8 @@ def handle_vowel_combination(first, second):
     #     return first + 'i' + second[1:], ''
     
     # Rule 3: If first ends in 'a' and second starts with an unstressed 'e'
-    if first[-1] in 'a' and second.startswith('e'):
-        return first + 'e' + second[1:], ''
+    if first[-1] in 'a' and second.startswith('eiouáéíóúâêîôûãẽĩõũ'):
+        return first[:-1] + second, ''
 
     return first, second
 
