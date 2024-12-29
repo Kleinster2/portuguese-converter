@@ -9,12 +9,19 @@ import io
 # Pre-defined phonetic transformations that bypass regular rules
 PHONETIC_DICTIONARY = {
     'muito': 'muyntu',
+    'muitos': 'muyntus',
+    'muita': 'muynta',
+    'muitas': 'muyntas',
     'mais': 'máys',
     'mas': 'máys',
     'então': 'entãum',
     'não': 'nãum',
     'bem': 'beyn',
     'também': 'tãmbêyn',
+    'último': 'útimu',
+    'última': 'útima',
+    'últimos': 'útimus',
+    'últimas': 'útimas',
     'quem': 'kêyn',
     'sempre': 'seynpri',
     'juntos': 'juntu',
@@ -24,7 +31,8 @@ PHONETIC_DICTIONARY = {
     'eli' : 'êli',
     'ela' :'éla',
     'à' : 'a',
-    'às' : 'as'
+    'às' : 'as',
+    'e' : 'y'
 }
 
 def apply_phonetic_rules(word):
@@ -65,7 +73,7 @@ def apply_phonetic_rules(word):
     
     # Rule 4p
     word = re.sub(
-        r'([aeiouáéíóúâêîôûãẽĩõũ])s([aeiouáéíóúâêîôûãẽĩõũ])', 
+        r'([aeiouáéíóúâêîôûãẽĩõũy])s([aeiouáéíóúâêîôûãẽĩõũy])', 
         r'\1z\2', 
         word
     )
@@ -104,9 +112,9 @@ def apply_phonetic_rules(word):
     # Rule 2p
     # Commented out to prevent over-transformation
     # if len(word) > 2:
-    #     if not any(c in word for c in 'áéíóúâêîôûãẽĩõũ'):
-    #         word = re.sub(r'o([^aeiouáéíóúâêîôûãẽĩõũ]+)', r'u\1', word)
-    #         word = re.sub(r'e([^aeiouáéíóúâêîôûãẽĩõũ]+)', r'i\1', word)
+    #     if not any(c in word for c in 'áéíóúâêîôûãẽĩõũy'):
+    #         word = re.sub(r'o([^aeiouáéíóúâêîôûãẽĩõũy]+)', r'u\1', word)
+    #         word = re.sub(r'e([^aeiouáéíóúâêîôûãẽĩõũy]+)', r'i\1', word)
     
     return word
 
@@ -136,8 +144,8 @@ def handle_vowel_combination(first, second):
         return first, second
     
     # Rule 1c
-    if (first[-1] in 'aeiouáéíóúâêîôûãẽĩõũ'
-        and second[0] in 'aeiouáéíóúâêîôûãẽĩõũ'
+    if (first[-1] in 'aeiouáéíóúâêîôûãẽĩõũy'
+        and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy'
         and first[-1].lower() == second[0].lower()):
         return first + second[1:], ''
     
@@ -146,15 +154,15 @@ def handle_vowel_combination(first, second):
     #     return first + 'i' + second[1:], ''
     
     # Rule 3c
-    if first[-1] == 'a' and second[0] in 'eiouáéíóúâêîôûãẽĩõũ':
+    if first[-1] == 'a' and second[0] in 'eiouáéíóúâêîôûãẽĩõũy':
         return first[:-1] + second, ''
 
     # Rule 4c
-    if first[-1] == 'u' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũ':
+    if first[-1] == 'u' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
         return first + 'w' + second, ''
 
     # Rule 5c
-    if first[-1] in 'eiouáéíóúâêîôûãẽĩõũ' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũ':
+    if first[-1] in 'eiouáéíóúâêîôûãẽĩõũy' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
         return first + second, ''
 
     return first, second
