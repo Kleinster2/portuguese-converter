@@ -32,7 +32,10 @@ PHONETIC_DICTIONARY = {
     'ela' :'éla',
     'à' : 'a',
     'às' : 'as',
-    'e' : 'y'
+    'e' : 'y',
+    'desculpa' : 'discupa',
+    'por' : 'pur',
+    'vou' : 'vô'
 }
 
 def apply_phonetic_rules(word):
