@@ -1,6 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import re
 import sys
 import traceback
+import io
 
 def apply_phonetic_rules(word):
     """
@@ -199,8 +203,8 @@ def convert_text(text):
     return transform_text(text)
 
 def main():
-    text = "Olá, como você está?"
-    print(convert_text(text))
+    # Set UTF-8 encoding for stdout
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 if __name__ == "__main__":
     main()
