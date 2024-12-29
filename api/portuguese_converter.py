@@ -89,9 +89,11 @@ def preserve_capital(original, transformed):
 def handle_vowel_combination(first, second):
     """
     Handle vowel combinations between words according to Portuguese pronunciation rules.
-    There are 2 main checks:
+    There are 3 main checks:
       1) If the first ends in a vowel and the second starts with the same vowel => merge
       2) If first ends in 'a' or 'o' and second starts with 'e' => merge with 'i'
+      3) If first ends in 'a' and second starts with vowel
+      4) All other vowel combinations - just stitch them together
     """
     if not first or not second:
         return first, second
@@ -109,6 +111,10 @@ def handle_vowel_combination(first, second):
     # Rule 3: If first ends in 'a' and second starts with vowel
     if first[-1] == 'a' and second[0] in 'eiouáéíóúâêîôûãẽĩõũ':
         return first[:-1] + second, ''
+
+    # Rule 4: All other vowel combinations - just stitch them together
+    if first[-1] in 'eiouáéíóúâêîôûãẽĩõũ' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũ':
+        return first + second, ''
 
     return first, second
 
