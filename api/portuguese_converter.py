@@ -67,10 +67,11 @@ def apply_phonetic_rules(word):
     word = re.sub(r'([aeiou])m([pbfv])', r'\1n\2', word)
     
     # Rule 9: Vowel raising in unstressed syllables (if no stressed vowels)
-    if len(word) > 2:
-        if not any(c in word for c in 'áéíóúâêîôûãẽĩõũ'):
-            word = re.sub(r'o([^aeiouáéíóúâêîôûãẽĩõũ]+)', r'u\1', word)
-            word = re.sub(r'e([^aeiouáéíóúâêîôûãẽĩõũ]+)', r'i\1', word)
+    # Commented out to prevent over-transformation
+    # if len(word) > 2:
+    #     if not any(c in word for c in 'áéíóúâêîôûãẽĩõũ'):
+    #         word = re.sub(r'o([^aeiouáéíóúâêîôûãẽĩõũ]+)', r'u\1', word)
+    #         word = re.sub(r'e([^aeiouáéíóúâêîôûãẽĩõũ]+)', r'i\1', word)
     
     return word
 
