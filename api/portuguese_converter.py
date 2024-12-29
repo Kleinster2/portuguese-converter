@@ -6,9 +6,27 @@ import sys
 import traceback
 import io
 
+# Pre-defined phonetic transformations that bypass regular rules
+PHONETIC_DICTIONARY = {
+    'muito': 'muyntu',
+    'mais': 'mayz',
+    'então': 'entãum',
+    'não': 'nãum',
+    'bem': 'beyn',
+    'também': 'tãmbeyn',
+    'quem': 'keyn',
+    'sempre': 'seynpri',
+    'atrás': 'atrayz',
+    'através': 'atravéyz',
+    'com' : 'cum'
+}
+
 def apply_phonetic_rules(word):
     """
     Apply Portuguese phonetic rules to transform a word.
+    First checks a dictionary of pre-defined transformations,
+    if not found, applies the rules in sequence.
+    
     Rules Rule 1p - Rule 9p:
 
     Rule 1p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', etc.)
@@ -26,6 +44,11 @@ def apply_phonetic_rules(word):
         
     word = word.lower()
     
+    # Check dictionary first
+    if word in PHONETIC_DICTIONARY:
+        return PHONETIC_DICTIONARY[word]
+    
+    # If not in dictionary, apply rules in sequence
     # Rule 1p
     if len(word) > 1:
         word = re.sub(r'o$', 'u', word)   # final 'o' => 'u'
