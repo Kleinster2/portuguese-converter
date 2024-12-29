@@ -9,16 +9,20 @@ import io
 # Pre-defined phonetic transformations that bypass regular rules
 PHONETIC_DICTIONARY = {
     'muito': 'muyntu',
-    'mais': 'mayz',
+    'mais': 'máys',
+    'mas': 'máys',
     'então': 'entãum',
     'não': 'nãum',
     'bem': 'beyn',
-    'também': 'tãmbeyn',
-    'quem': 'keyn',
+    'também': 'tãmbêyn',
+    'quem': 'kêyn',
     'sempre': 'seynpri',
-    'atrás': 'atrayz',
-    'através': 'atravéyz',
-    'com' : 'cum'
+    'juntos': 'juntu',
+    'atrás': 'atráyz',
+    'com' : 'cum',
+    'vamos' : 'vam',
+    'eli' : 'êli',
+    'ela' :'éla' 
 }
 
 def apply_phonetic_rules(word):
@@ -31,7 +35,7 @@ def apply_phonetic_rules(word):
 
     Rule 1p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', etc.)
     Rule 2p: Vowel raising in unstressed syllables
-    Rule 3p: 'ão' at the end becomes 'aum'
+    Rule 3p: 'ão' at the end becomes 'ãum'
     Rule 4p: 's' between vowels becomes 'z'
     Rule 5p: 'lh' => 'ly'
     Rule 6p: Final 'l' => 'u'
@@ -87,8 +91,8 @@ def apply_phonetic_rules(word):
     word = re.sub(r'^você', 'cê', word)
     
     # Rule 7p
-    word = re.sub(r'm$', 'n', word)  # final 'm' => 'n'
-    word = re.sub(r'([aeiou])m([pbfv])', r'\1n\2', word)
+    # word = re.sub(r'm$', 'n', word)  # final 'm' => 'n'
+    # word = re.sub(r'([aeiou])m([pbfv])', r'\1n\2', word)
     
     # Rule 2p
     # Commented out to prevent over-transformation
