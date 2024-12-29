@@ -22,7 +22,9 @@ PHONETIC_DICTIONARY = {
     'com' : 'cum',
     'vamos' : 'vam',
     'eli' : 'êli',
-    'ela' :'éla' 
+    'ela' :'éla',
+    'à' : 'a',
+    'às' : 'as'
 }
 
 def apply_phonetic_rules(word):
@@ -96,7 +98,7 @@ def apply_phonetic_rules(word):
         word = word[1:]
     
     # Rule 7p
-    word = re.sub(r'm$', 'n', word)  # final 'm' => 'n'
+    word = re.sub(r'm$', 'ym', word)  # final 'm' => 'n'
     word = re.sub(r'([aeiou])m([pbfv])', r'\1n\2', word)
     
     # Rule 2p
