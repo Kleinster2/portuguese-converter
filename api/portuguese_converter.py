@@ -31,17 +31,18 @@ def apply_phonetic_rules(word):
     First checks a dictionary of pre-defined transformations,
     if not found, applies the rules in sequence.
     
-    Rules Rule 1p - Rule 9p:
+    Rules Rule 1p - Rule 10p:
 
     Rule 1p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', etc.)
     Rule 2p: Vowel raising in unstressed syllables
-    Rule 3p: 'ão' at the end becomes 'ãum'
+    Rule 3p: 'ão' at the end becomes 'aum'
     Rule 4p: 's' between vowels becomes 'z'
     Rule 5p: 'lh' => 'ly'
     Rule 6p: Final 'l' => 'u'
     Rule 7p: Final 'm' => 'n' (nasalization)
     Rule 8p: Verb endings (ar -> á, er -> ê, ir -> í)
     Rule 9p: Common reductions (está->tá, para->pra, você->cê)
+    Rule 10p: Remove initial 'h' (hoje->oje, homem->omem)
     """
     if not word:
         return word
@@ -90,9 +91,13 @@ def apply_phonetic_rules(word):
     word = re.sub(r'^para', 'pra', word)
     word = re.sub(r'^você', 'cê', word)
     
+    # Rule 10p
+    if word.startswith('h'):
+        word = word[1:]
+    
     # Rule 7p
-    # word = re.sub(r'm$', 'n', word)  # final 'm' => 'n'
-    # word = re.sub(r'([aeiou])m([pbfv])', r'\1n\2', word)
+    word = re.sub(r'm$', 'n', word)  # final 'm' => 'n'
+    word = re.sub(r'([aeiou])m([pbfv])', r'\1n\2', word)
     
     # Rule 2p
     # Commented out to prevent over-transformation
