@@ -35,7 +35,16 @@ PHONETIC_DICTIONARY = {
     'e' : 'y',
     'desculpa' : 'discupa',
     'por' : 'pur',
-    'vou' : 'vô'
+    'vou' : 'vô',
+    'neste' : 'nesse',
+    'nesta' : 'nessa',
+    'nestes' : 'nesses',
+    'nestas' : 'nessas',
+    'empresa' : 'impreza',
+    'algum' : 'augum',
+    'alguns' : 'auguns',
+    'alguma' : 'auguma',
+    'algumas' : 'augumas'
 }
 
 def apply_phonetic_rules(word):
