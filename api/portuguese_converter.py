@@ -41,6 +41,7 @@ PHONETIC_DICTIONARY = {
     'nestes' : 'nesses',
     'nestas' : 'nessas',
     'empresa' : 'impreza',
+    'empresas' : 'imprezas',
     'algum' : 'augum',
     'alguns' : 'auguns',
     'alguma' : 'auguma',
