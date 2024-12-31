@@ -120,7 +120,14 @@ def apply_phonetic_rules(word):
     
     # Rule 7p
     # word = re.sub(r'm$', 'ym', word)  # final 'm' => 'n'
-    word = re.sub(r'([aeiou])m([pbfv])', r'\1ym\2', word)
+    # word = re.sub(r'([aeiou])m([pbfv])', r'\1ym\2', word)
+    
+    # Rule 7p - Nasal vowel combinations
+    word = re.sub(r'am$', 'ãum', word)  # final 'am' -> 'ãum'
+    word = re.sub(r'em$', 'eyn', word)  # final 'em' -> 'eyn'
+    word = re.sub(r'im$', 'in', word)   # final 'im' -> 'in'
+    word = re.sub(r'om$', 'oun', word)  # final 'om' -> 'oun'
+    word = re.sub(r'um$', 'un', word)   # final 'um' -> 'un'
     
     # Rule 2p
     # Commented out to prevent over-transformation
