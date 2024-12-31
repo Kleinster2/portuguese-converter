@@ -22,7 +22,6 @@ PHONETIC_DICTIONARY = {
     'última': 'útima',
     'últimos': 'útimus',
     'últimas': 'útimas',
-    'quem': 'kêyn',
     'sempre': 'seynpri',
     'juntos': 'juntu',
     'atrás': 'atráyz',
@@ -45,7 +44,15 @@ PHONETIC_DICTIONARY = {
     'algum' : 'augum',
     'alguns' : 'auguns',
     'alguma' : 'auguma',
-    'algumas' : 'augumas'
+    'algumas' : 'augumas',
+    'qualquer' : 'kuauké',
+    'quaisquer' : 'kuauké',
+    'porque' : 'purkê',
+    'porquê' : 'purkê',
+    'quem' : 'kêyn',
+    'qual' : 'kuau',
+    'quais' : 'kuais',
+    'que' : 'ki'
 }
 
 def apply_phonetic_rules(word):
@@ -99,9 +106,9 @@ def apply_phonetic_rules(word):
     
     # Rule 6p
     word = re.sub(r'l$', 'u', word)
-    
-    # Transform 'que' to 'ki'
-    word = re.sub(r'que', 'ki', word)
+
+    word = re.sub(r'qui', 'ki', word)
+    word = re.sub(r'que', 'ke', word)
     
     # Rule 7p
     # word = re.sub(r'm$', 'ym', word)  # final 'm' => 'n'
