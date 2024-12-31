@@ -100,23 +100,8 @@ def apply_phonetic_rules(word):
     # Rule 6p
     word = re.sub(r'l$', 'u', word)
     
-    # Rule 8p
-    if len(word) > 2:
-        if word.endswith('ar'):
-            word = word[:-2] + 'á'
-        elif word.endswith('er'):
-            word = word[:-2] + 'ê'
-        elif word.endswith('ir'):
-            word = word[:-2] + 'í'
-            
-    # Rule 9p
-    word = re.sub(r'^está', 'tá', word)
-    word = re.sub(r'^para', 'pra', word)
-    word = re.sub(r'^você', 'cê', word)
-    
-    # Rule 10p
-    if word.startswith('h'):
-        word = word[1:]
+    # Transform 'que' to 'ki'
+    word = re.sub(r'que', 'ki', word)
     
     # Rule 7p
     # word = re.sub(r'm$', 'ym', word)  # final 'm' => 'n'
@@ -135,6 +120,24 @@ def apply_phonetic_rules(word):
     #     if not any(c in word for c in 'áéíóúâêîôûãẽĩõũy'):
     #         word = re.sub(r'o([^aeiouáéíóúâêîôûãẽĩõũy]+)', r'u\1', word)
     #         word = re.sub(r'e([^aeiouáéíóúâêîôûãẽĩõũy]+)', r'i\1', word)
+    
+    # Rule 8p
+    if len(word) > 2:
+        if word.endswith('ar'):
+            word = word[:-2] + 'á'
+        elif word.endswith('er'):
+            word = word[:-2] + 'ê'
+        elif word.endswith('ir'):
+            word = word[:-2] + 'í'
+            
+    # Rule 9p
+    word = re.sub(r'^está', 'tá', word)
+    word = re.sub(r'^para', 'pra', word)
+    word = re.sub(r'^você', 'cê', word)
+    
+    # Rule 10p
+    if word.startswith('h'):
+        word = word[1:]
     
     return word
 
