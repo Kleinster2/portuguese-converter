@@ -52,7 +52,11 @@ PHONETIC_DICTIONARY = {
     'quem' : 'kêyn',
     'qual' : 'kuau',
     'quais' : 'kuais',
-    'que' : 'ki'
+    'que' : 'ki',
+    'teatro' : 'tiatru',
+    'teatros' : 'tiatrus',
+    'facebook' : 'faicibuki',
+    'depois' : 'dipois'
 }
 
 def apply_phonetic_rules(word):
@@ -81,77 +85,80 @@ def apply_phonetic_rules(word):
     original = word
     word = word.lower()
     
+    print(f"Checking dictionary for: '{word}'")  
     # Check dictionary with lowercase word
     if word in PHONETIC_DICTIONARY:
+        print(f"Found in dictionary: '{word}' -> '{PHONETIC_DICTIONARY[word]}'")  
         transformed = PHONETIC_DICTIONARY[word]
         # Preserve original capitalization
         return preserve_capital(original, transformed)
-    
-    # If not in dictionary, apply rules in sequence
-    # Rule 1p
-    word = re.sub(r'o$', 'u', word)   # final 'o' => 'u'
-    if len(word) > 1:  # Only check length for plural endings
-        word = re.sub(r'os$', 'us', word) # final 'os' => 'us'
-        word = re.sub(r'e$', 'i', word)   # final 'e' => 'i'
-        word = re.sub(r'es$', 'is', word) # final 'es' => 'is'
-    
-    # Rule 4p
-    word = re.sub(
-        r'([aeiouáéíóúâêîôûãẽĩõũy])s([aeiouáéíóúâêîôûãẽĩõũy])', 
-        r'\1z\2', 
-        word
-    )
-    
-    # Rule 3p
-    word = re.sub(r'ão$', 'aum', word)
-    
-    # Rule 5p
-    word = word.replace('lh', 'ly')
-    
-    # Rule 6p
-    word = re.sub(r'l$', 'u', word)
+    else:
+        print(f"Not found in dictionary: '{word}'")  
+        # If not in dictionary, apply rules in sequence
+        # Rule 1p
+        word = re.sub(r'o$', 'u', word)   # final 'o' => 'u'
+        if len(word) > 1:  # Only check length for plural endings
+            word = re.sub(r'os$', 'us', word) # final 'os' => 'us'
+            word = re.sub(r'e$', 'i', word)   # final 'e' => 'i'
+            word = re.sub(r'es$', 'is', word) # final 'es' => 'is'
+        
+        # Rule 4p
+        word = re.sub(
+            r'([aeiouáéíóúâêîôûãẽĩõũy])s([aeiouáéíóúâêîôûãẽĩõũy])', 
+            r'\1z\2', 
+            word
+        )
+        
+        # Rule 3p
+        word = re.sub(r'ão$', 'aum', word)
+        
+        # Rule 5p
+        word = word.replace('lh', 'ly')
+        
+        # Rule 6p
+        word = re.sub(r'l$', 'u', word)
 
-    word = re.sub(r'qui', 'ki', word)
-    word = re.sub(r'que', 'ke', word)
-    
-    # Rule 7p
-    # word = re.sub(r'm$', 'ym', word)  # final 'm' => 'n'
-    # word = re.sub(r'([aeiou])m([pbfv])', r'\1ym\2', word)
-    
-    # Rule 7p - Nasal vowel combinations
-    word = re.sub(r'am$', 'ãum', word)  # final 'am' -> 'ãum'
-    word = re.sub(r'em$', 'eyn', word)  # final 'em' -> 'eyn'
-    word = re.sub(r'im$', 'in', word)   # final 'im' -> 'in'
-    word = re.sub(r'om$', 'oun', word)  # final 'om' -> 'oun'
-    word = re.sub(r'um$', 'un', word)   # final 'um' -> 'un'
-    
-    # Rule 2p
-    # Commented out to prevent over-transformation
-    # if len(word) > 2:
-    #     if not any(c in word for c in 'áéíóúâêîôûãẽĩõũy'):
-    #         word = re.sub(r'o([^aeiouáéíóúâêîôûãẽĩõũy]+)', r'u\1', word)
-    #         word = re.sub(r'e([^aeiouáéíóúâêîôûãẽĩõũy]+)', r'i\1', word)
-    
-    # Rule 8p
-    if len(word) > 2:
-        if word.endswith('ar'):
-            word = word[:-2] + 'á'
-        elif word.endswith('er'):
-            word = word[:-2] + 'ê'
-        elif word.endswith('ir'):
-            word = word[:-2] + 'í'
-            
-    # Rule 9p
-    word = re.sub(r'^está', 'tá', word)
-    word = re.sub(r'^para', 'pra', word)
-    word = re.sub(r'^você', 'cê', word)
-    
-    # Rule 10p
-    if word.startswith('h'):
-        word = word[1:]
-    
-    # Preserve original capitalization
-    return preserve_capital(original, word)
+        word = re.sub(r'qui', 'ki', word)
+        word = re.sub(r'que', 'ke', word)
+        
+        # Rule 7p
+        # word = re.sub(r'm$', 'ym', word)  # final 'm' => 'n'
+        # word = re.sub(r'([aeiou])m([pbfv])', r'\1ym\2', word)
+        
+        # Rule 7p - Nasal vowel combinations
+        word = re.sub(r'am$', 'ãum', word)  # final 'am' -> 'ãum'
+        word = re.sub(r'em$', 'eyn', word)  # final 'em' -> 'eyn'
+        word = re.sub(r'im$', 'in', word)   # final 'im' -> 'in'
+        word = re.sub(r'om$', 'oun', word)  # final 'om' -> 'oun'
+        word = re.sub(r'um$', 'un', word)   # final 'um' -> 'un'
+        
+        # Rule 2p
+        # Commented out to prevent over-transformation
+        # if len(word) > 2:
+        #     if not any(c in word for c in 'áéíóúâêîôûãẽĩõũy'):
+        #         word = re.sub(r'o([^aeiouáéíóúâêîôûãẽĩõũy]+)', r'u\1', word)
+        #         word = re.sub(r'e([^aeiouáéíóúâêîôûãẽĩõũy]+)', r'i\1', word)
+        
+        # Rule 8p
+        if len(word) > 2:
+            if word.endswith('ar'):
+                word = word[:-2] + 'á'
+            elif word.endswith('er'):
+                word = word[:-2] + 'ê'
+            elif word.endswith('ir'):
+                word = word[:-2] + 'í'
+                
+        # Rule 9p
+        word = re.sub(r'^está', 'tá', word)
+        word = re.sub(r'^para', 'pra', word)
+        word = re.sub(r'^você', 'cê', word)
+        
+        # Rule 10p
+        if word.startswith('h'):
+            word = word[1:]
+        
+        # Preserve original capitalization
+        return preserve_capital(original, word)
 
 def preserve_capital(original, transformed):
     """
