@@ -76,12 +76,16 @@ def apply_phonetic_rules(word):
     """
     if not word:
         return word
-        
+    
+    # Store original word for capitalization check
+    original = word
     word = word.lower()
     
-    # Check dictionary first
+    # Check dictionary with lowercase word
     if word in PHONETIC_DICTIONARY:
-        return PHONETIC_DICTIONARY[word]
+        transformed = PHONETIC_DICTIONARY[word]
+        # Preserve original capitalization
+        return preserve_capital(original, transformed)
     
     # If not in dictionary, apply rules in sequence
     # Rule 1p
@@ -146,7 +150,8 @@ def apply_phonetic_rules(word):
     if word.startswith('h'):
         word = word[1:]
     
-    return word
+    # Preserve original capitalization
+    return preserve_capital(original, word)
 
 def preserve_capital(original, transformed):
     """
@@ -172,6 +177,11 @@ def handle_vowel_combination(first, second):
     Rule 6c: If first ends in 's' or 'z' and second starts with vowel => merge and use 'z'
     """
     if not first or not second:
+        return first, second
+        
+    # Don't combine if result would be too long
+    MAX_COMBINED_LENGTH = 12
+    if len(first) + len(second) > MAX_COMBINED_LENGTH:
         return first, second
     
     # Rule 1c
