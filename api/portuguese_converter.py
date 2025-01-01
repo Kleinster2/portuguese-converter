@@ -204,90 +204,134 @@ def handle_vowel_combination(first, second):
 
 def tokenize_text(text):
     """
-    Split text into a list of (word, punct) pairs via a single pass:
-      - If token is punctuation: ( '', punctuation )
-      - If token is a word: ( word, '' )
-    Regex: ([.,!?;:]) => punctuation 
-           ([A-Za-zÀ-ÖØ-öø-ÿ0-9]+) => word with possible accents/digits
+    Capture words vs. punctuation lumps in a single pass.
+    - ([A-Za-zÀ-ÖØ-öø-ÿ0-9]+): words (including accented or numeric characters).
+    - ([.,!?;:]+): one or more punctuation marks.
+    Returns a list of (word, punct) tuples, e.g.:
+        "Olá, mundo!" => [("Olá", ""), ("", ","), ("mundo", ""), ("", "!")]
     """
-    pattern = r'([.,!?;:])|([A-Za-zÀ-ÖØ-öø-ÿ0-9]+)'
+    pattern = r'([A-Za-zÀ-ÖØ-öø-ÿ0-9]+)|([.,!?;:]+)'
     tokens = []
     
     for match in re.finditer(pattern, text):
-        punct = match.group(1)
-        word  = match.group(2)
-        if punct:  
-            # purely punctuation
-            tokens.append(('', punct))
-        elif word:
-            # purely word
-            tokens.append((word, ''))
+        word = match.group(1)
+        punct = match.group(2)
+        if word:
+            tokens.append((word, ''))     # (word, "")
+        elif punct:
+            tokens.append(('', punct))    # ("", punctuation)
     
     return tokens
 
+def reassemble_tokens_smartly(final_tokens):
+    """
+    Reassemble (word, punct) tokens into a single string without
+    introducing extra spaces before punctuation.
+    
+    Example final_tokens could be: [("Olá", ""), ("", ","), ("mundo", ""), ("", "!")]
+    We want to get: "Olá, mundo!"
+    
+    Logic:
+      - If 'word' is non-empty, append it to output (with a leading space if it's not the first).
+      - If 'punct' is non-empty, append it directly (no leading space).
+    """
+    output = []
+    for (word, punct) in final_tokens:
+        # If there's a word
+        if word:
+            if not output:
+                # First token => add the word as is
+                output.append(word)
+            else:
+                # Not the first => prepend space before the word
+                output.append(" " + word)
+        
+        # If there's punctuation => attach immediately (no space)
+        if punct:
+            output.append(punct)
+    
+    # Join everything into a single string
+    return "".join(output)
+
 def transform_text(text):
     """
-    Transform input text according to Portuguese pronunciation rules.
-    Applies phonetic rules to each word, then handles vowel combinations
-    between words in two passes.
+    Transform the input text using phonetic rules,
+    handle cross-word vowel combinations in multiple passes,
+    then reassemble with no extra spaces around punctuation.
     """
     if not text:
         return text
-
+    
     try:
-        # Split into words
-        words = text.split()
+        # 1) Tokenize => separate words and punctuation
+        tokens = tokenize_text(text)
         
-        # First pass: Apply phonetic rules to each word
-        transformed_words = []
-        for word in words:
-            # Apply phonetic rules
-            transformed = apply_phonetic_rules(word)
+        # 2) Apply phonetic rules to word tokens
+        transformed_tokens = []
+        for (word, punct) in tokens:
+            if word:
+                new_word = apply_phonetic_rules(word)
+                new_word = preserve_capital(word, new_word)
+                transformed_tokens.append((new_word, punct))
+            else:
+                transformed_tokens.append((word, punct))
+        
+        # 3) First pass: handle vowel combos between adjacent words
+        result_tokens = []
+        i = 0
+        while i < len(transformed_tokens):
+            if i == len(transformed_tokens) - 1:
+                result_tokens.append(transformed_tokens[i])
+                break
             
-            # Preserve original capitalization
-            if word and word[0].isupper():
-                transformed = transformed[0].upper() + transformed[1:]
-                
-            transformed_words.append(transformed)
-        
-        # Second pass: Handle vowel combinations between words
-        result_words = []
-        i = 0
-        while i < len(transformed_words):
-            if i == len(transformed_words) - 1:
-                result_words.append(transformed_words[i])
-                break
-                
-            first, second = handle_vowel_combination(transformed_words[i], transformed_words[i + 1])
-            if second:  # No combination occurred
-                result_words.append(first)
+            first_word, first_punct = transformed_tokens[i]
+            second_word, second_punct = transformed_tokens[i + 1]
+            
+            # Only merge if both are real words
+            if first_word and second_word:
+                merged_first, merged_second = handle_vowel_combination(first_word, second_word)
+                if merged_second == '':
+                    # a merge occurred => skip the second token
+                    result_tokens.append((merged_first, second_punct))
+                    i += 2
+                else:
+                    # no merge
+                    result_tokens.append((merged_first, first_punct))
+                    i += 1
+            else:
+                result_tokens.append((first_word, first_punct))
                 i += 1
-            else:  # Combination occurred
-                result_words.append(first)
-                i += 2
-                
-        # Third pass: Handle any new vowel combinations that emerged
-        final_words = []
+        
+        # 4) Second pass: catch merges that might appear after first pass
+        final_tokens = []
         i = 0
-        while i < len(result_words):
-            if i == len(result_words) - 1:
-                final_words.append(result_words[i])
+        while i < len(result_tokens):
+            if i == len(result_tokens) - 1:
+                final_tokens.append(result_tokens[i])
                 break
-                
-            first, second = handle_vowel_combination(result_words[i], result_words[i + 1])
-            if second:  # No combination occurred
-                final_words.append(first)
+            
+            first_word, first_punct = result_tokens[i]
+            second_word, second_punct = result_tokens[i + 1]
+            
+            if first_word and second_word:
+                merged_first, merged_second = handle_vowel_combination(first_word, second_word)
+                if merged_second == '':
+                    final_tokens.append((merged_first, second_punct))
+                    i += 2
+                else:
+                    final_tokens.append((merged_first, first_punct))
+                    i += 1
+            else:
+                final_tokens.append((first_word, first_punct))
                 i += 1
-            else:  # Combination occurred
-                final_words.append(first)
-                i += 2
         
-        return ' '.join(final_words)
-        
+        # 5) Reassemble without extra spaces around punctuation
+        return reassemble_tokens_smartly(final_tokens)
+    
     except Exception as e:
         print(f"Error transforming text: {str(e)}")
         traceback.print_exc(file=sys.stdout)
-        return text  # Return original text on error
+        return text
 
 def convert_text(text):
     """Convert Portuguese text to its phonetic representation."""
