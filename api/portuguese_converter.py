@@ -82,7 +82,7 @@ PHONETIC_DICTIONARY = {
     'mouse': 'mauzi',
     'site': 'sáiti',
     'sites': 'sáitis',
-    'smartphone': 'ysmartefôni',
+    'smartphone': 'ysmartifôni',
     'tablet': 'táblete',
     'tiktok': 'tiquitóqui',
     'twitter': 'tuíter',
@@ -246,7 +246,7 @@ def preserve_capital(original, transformed):
 def handle_vowel_combination(first, second):
     """
     Handle vowel combinations between words according to Portuguese pronunciation rules.
-    Rules Rule 1c - Rule 6c:
+    Rules Rule 1c - Rule 7c:
 
     Rule 1c: If the first ends in a vowel and the second starts with the same vowel => merge
     Rule 2c: If first ends in 'a' or 'o' and second starts with 'e' => merge with 'i'
@@ -254,9 +254,18 @@ def handle_vowel_combination(first, second):
     Rule 4c: If first ends in 'u' and second starts with vowel => add 'w' between
     Rule 5c: All other vowel combinations - just stitch them together
     Rule 6c: If first ends in 's' or 'z' and second starts with vowel => merge and use 'z'
+    Rule 7c: If second word is 'y' (from 'e') and third word starts with 'y' or 'i',
+            and first word ends in a vowel that's not 'y' or 'i',
+            then attach the 'y' to the third word
     """
     if not first or not second:
         return first, second
+        
+    # Special case for 'y' from 'e'
+    if (second == 'y' and  # This is the transformed 'e'
+        first[-1] in 'aáàâãeéèêoóòôuúùû' and  # First word ends in vowel but not y/i
+        len(first) > 0):
+        return first, second  # Keep them separate so 'y' can combine with next word
         
     # Don't combine if result would be too long
     MAX_COMBINED_LENGTH = 12
@@ -285,7 +294,7 @@ def handle_vowel_combination(first, second):
     if first[-1] in 'sz' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
         return first[:-1] + 'z' + second, ''
 
-    # Rule 5c
+    # Rule 5c - moved after other rules
     if first[-1] in 'eiouáéíóúâêîôûãẽĩõũy' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
         return first + second, ''
 
@@ -352,70 +361,72 @@ def transform_text(text):
         return text
     
     try:
-        # 1) Tokenize => separate words and punctuation
+        # First tokenize the text into words and punctuation
         tokens = tokenize_text(text)
         
-        # 2) Apply phonetic rules to word tokens
+        # Transform each word token according to rules
         transformed_tokens = []
-        for (word, punct) in tokens:
+        for word, punct in tokens:
             if word:
-                new_word = apply_phonetic_rules(word)
-                new_word = preserve_capital(word, new_word)
-                transformed_tokens.append((new_word, punct))
+                # Apply dictionary lookup or phonetic rules
+                transformed = apply_phonetic_rules(word)
+                transformed_tokens.append((transformed, punct))
             else:
-                transformed_tokens.append((word, punct))
+                transformed_tokens.append(('', punct))
         
-        # 3) First pass: handle vowel combos between adjacent words
-        result_tokens = []
-        i = 0
-        while i < len(transformed_tokens):
-            if i == len(transformed_tokens) - 1:
-                result_tokens.append(transformed_tokens[i])
-                break
-            
-            first_word, first_punct = transformed_tokens[i]
-            second_word, second_punct = transformed_tokens[i + 1]
-            
-            # Only merge if both are real words
-            if first_word and second_word:
-                merged_first, merged_second = handle_vowel_combination(first_word, second_word)
-                if merged_second == '':
-                    # a merge occurred => skip the second token
-                    result_tokens.append((merged_first, second_punct))
-                    i += 2
-                else:
-                    # no merge
-                    result_tokens.append((merged_first, first_punct))
-                    i += 1
-            else:
-                result_tokens.append((first_word, first_punct))
+        # Now handle vowel combinations between words in multiple passes
+        # Keep going until no more combinations can be made
+        made_combination = True
+        while made_combination:
+            made_combination = False
+            new_tokens = []
+            i = 0
+            while i < len(transformed_tokens):
+                if i < len(transformed_tokens) - 2:  # We have at least 3 tokens to look at
+                    word1, punct1 = transformed_tokens[i]
+                    word2, punct2 = transformed_tokens[i + 1]
+                    word3, punct3 = transformed_tokens[i + 2]
+                    
+                    # Special case for 'y' (from 'e') attraction
+                    if (word2 == 'y' and 
+                        word1 and word1[-1] in 'aáàâãeéèêoóòôuúùû' and
+                        word3 and word3[0] in 'yi'):
+                        # Combine 'y' with the third word, but avoid double y
+                        new_tokens.append((word1, punct1))
+                        new_tokens.append(('', punct2))
+                        if word3[0] == 'y':
+                            new_tokens.append((word3, punct3))  # Don't add another 'y'
+                        else:
+                            new_tokens.append(('y' + word3, punct3))
+                        i += 3
+                        made_combination = True
+                        continue
+                    
+                # If we have at least 2 tokens left
+                if i < len(transformed_tokens) - 1:
+                    word1, punct1 = transformed_tokens[i]
+                    word2, punct2 = transformed_tokens[i + 1]
+                    
+                    # Try to combine the words
+                    combined1, combined2 = handle_vowel_combination(word1, word2)
+                    if combined1 != word1 or combined2 != word2:
+                        made_combination = True
+                        if combined2:
+                            new_tokens.append((combined1, punct1))
+                            new_tokens.append((combined2, punct2))
+                        else:
+                            new_tokens.append((combined1, punct2))  # Use second punct
+                        i += 2
+                        continue
+                
+                # If no combination was made, keep the current token
+                new_tokens.append(transformed_tokens[i])
                 i += 1
+                
+            transformed_tokens = new_tokens
         
-        # 4) Second pass: catch merges that might appear after first pass
-        final_tokens = []
-        i = 0
-        while i < len(result_tokens):
-            if i == len(result_tokens) - 1:
-                final_tokens.append(result_tokens[i])
-                break
-            
-            first_word, first_punct = result_tokens[i]
-            second_word, second_punct = result_tokens[i + 1]
-            
-            if first_word and second_word:
-                merged_first, merged_second = handle_vowel_combination(first_word, second_word)
-                if merged_second == '':
-                    final_tokens.append((merged_first, second_punct))
-                    i += 2
-                else:
-                    final_tokens.append((merged_first, first_punct))
-                    i += 1
-            else:
-                final_tokens.append((first_word, first_punct))
-                i += 1
-        
-        # 5) Reassemble without extra spaces around punctuation
-        return reassemble_tokens_smartly(final_tokens)
+        # Finally, reassemble the tokens into a single string
+        return reassemble_tokens_smartly(transformed_tokens)
     
     except Exception as e:
         print(f"Error transforming text: {str(e)}")
