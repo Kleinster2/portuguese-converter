@@ -139,7 +139,7 @@ IRREGULAR_VERBS = {
     "fazer": "fazê", "faco": "fassu", "faço": "fassu", "faz": "fays", "fazemos": "fazêmu", "fazem": "fázeym", "fiz": "fis", "fez": "fêz", "fizemos": "fizemu", "fizeram": "fizéraum", "fazia": "fazia", "faziamos": "faziamu", "faziam": "faziaum",
     "ir": "ih", "vou": "vô", "vai": "vai", "vamos": "vam", "vão": "vãum",
     "vir": "vi", "venho": "venhu", "vem": "veym", "vimos": "vimu", "vêm": "veym",
-    "dizer": "dizê", "digo": "digu", "diz": "dis", "dizemos": "dizemu", "dizem": "dizeym", "disse": "dissi", "dissemos": "dissemu", "disseram": "disseraum",
+    "dizer": "dizê", "digo": "digu", "diz": "dis", "dizemos": "dizemu", "dizem": "dizeym", "disse": "dissi", "dissemos": "dissemu", "disseram": "disseraum", "diria": "diria", "diriamos": "diriamus", "diriam": "diriaum", "dizia": "dizia", "diziamos": "diziamus", "diziam": "diziaum", "diga": "diga", "digamos": "digamus", "digam": "digaum",
     "pedir": "pedí", "peço": "pessu", "pedi": "pédi", "pedimos": "pedímu", "pedem": "pédeym",
     "dar": "dá", "dou": "dô", "dá": "dá", "damos": "dãmu", "dão": "dãum", "dei": "dei", "deu": "deu", "demos": "démus", "deram": "déraum",
     "faço": "fassu", "faz": "fays", "fazemos": "fazemu", "fazem": "fazeym", "fiz": "fis", "fizemos": "fizemu", "fizeram": "fizeraum",
@@ -214,6 +214,11 @@ def apply_phonetic_rules(word, next_word=None):
     # First check if it's in our dictionary
     lword = word.lower()
     print(f"Checking dictionary for: '{lword}'")
+
+    # Check if it's an irregular verb
+    if lword in IRREGULAR_VERBS:
+        print(f"Found irregular verb: '{lword}' -> '{IRREGULAR_VERBS[lword]}'")
+        return preserve_capital(word, IRREGULAR_VERBS[lword])
 
     # Special handling for você/vocês and não before verbs
     if next_word and is_verb(next_word):
