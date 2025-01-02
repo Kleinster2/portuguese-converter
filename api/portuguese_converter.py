@@ -46,6 +46,13 @@ PHONETIC_DICTIONARY = {
     'seus': 'teus',
     'sua': 'tua',
     'suas': 'tuas',
+    'te' : 'ti',
+    'me' : 'mi',
+    'lhe' : 'ly',
+    'lhes' : 'lys',
+    'nos' : 'nus',
+    'o' : 'u',
+    'os' : 'us',
 
     # Prepositions and Conjunctions
     'à': 'a',
@@ -404,15 +411,16 @@ def transform_text(text):
         transformed_tokens = []
         for i, (word, punct) in enumerate(tokens):
             if word:
-                # Get next word for verb detection, looking ahead past pronouns
+                # Get next word for verb detection, looking ahead past pronouns and 'não'
                 next_word = None
                 pronouns = {'me', 'te', 'se', 'nos', 'vos', 'lhe', 'lhes', 'o', 'a', 'os', 'as'}
+                skip_words = pronouns | {'não', 'nãum', 'num'}  # Also skip não and its variations
                 
-                # Look ahead up to 2 words to find a verb after pronouns
-                for j in range(1, 3):
+                # Look ahead up to 3 words to find a verb after pronouns/não
+                for j in range(1, 4):  # Increased to 4 to handle more words in between
                     if i + j < len(tokens):
                         next_token = tokens[i + j][0].lower()  # [0] to get word part of tuple
-                        if next_token in pronouns:
+                        if next_token in skip_words:
                             continue
                         next_word = next_token
                         break
