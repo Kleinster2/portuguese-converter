@@ -83,7 +83,7 @@ PHONETIC_DICTIONARY = {
     'site': 'sáiti',
     'sites': 'sáitis',
     'smartphone': 'ysmartifôni',
-    'tablet': 'táblete',
+    'tablet': 'tábleti',
     'tiktok': 'tiquitóqui',
     'twitter': 'tuíter',
     'whatsapp': 'uatzápi',
@@ -128,109 +128,149 @@ PHONETIC_DICTIONARY = {
     'últimos': 'útimus'
 }
 
-def apply_phonetic_rules(word):
+# Verb identification constants
+IRREGULAR_VERBS = {
+    "estar": "está", "estou": "tô", "estás": "tá", "está": "tá", "estamos": "tamu", "estão": "tãum",
+    "ser": "sê", "sou": "sô", "é": "éh", "somos": "somu", "são": "sãum",
+    "ter": "tê", "tenho": "tenhu", "tem": "teym", "temos": "temu", "têm": "teym", "tive": "tivi", "teve": "tevi", "tivemos": "tivemu", "tiveram": "tiveraum", "tinha": "tinha", "tinhamos": "tinhamu", "tinham": "tinhaum",
+    "fazer": "fazê", "faco": "fassu", "faço": "fassu", "faz": "fays", "fazemos": "fazêmu", "fazem": "fázeym", "fiz": "fis", "fez": "fêz", "fizemos": "fizemu", "fizeram": "fizéraum", "fazia": "fazia", "faziamos": "faziamu", "faziam": "faziaum",
+    "ir": "ih", "vou": "vô", "vai": "vai", "vamos": "vam", "vão": "vãum",
+    "vir": "vi", "venho": "venhu", "vem": "veym", "vimos": "vimu", "vêm": "veym",
+    "dizer": "dizê", "digo": "digu", "diz": "dis", "dizemos": "dizemu", "dizem": "dizeym", "disse": "dissi", "dissemos": "dissemu", "disseram": "disseraum",
+    "pedir": "pedí", "peço": "pessu", "pedi": "pédi", "pedimos": "pedímu", "pedem": "pédeym",
+    "dar": "dá", "dou": "dô", "dá": "dá", "damos": "dãmu", "dão": "dãum", "dei": "dei", "deu": "deu", "demos": "démus", "deram": "déraum",
+    "faço": "fassu", "faz": "fays", "fazemos": "fazemu", "fazem": "fazeym", "fiz": "fis", "fizemos": "fizemu", "fizeram": "fizeraum",
+    "querer": "kerê", "quero": "kéru", "quer": "ké", "queremos": "kerêmu", "querem": "kéreym", "quis": "kis", "quisemos": "kizemu", "quiseram": "kizeraum",
+    "poder": "podê", "posso": "póssu", "pode": "pódi", "podemos": "podêmu", "podem": "pódeym", "pude": "pudi", "pudemos": "pudemu", "puderam": "puderaum",
+}
+
+ALL_ROOTS = {
+    "acab", "ach", "ador", "afast", "ajud", "alug", "am", "ampli", "and", "anot",
+    "apag", "apanh", "apresent", "arm", "arrast", "arrum", "assin", "atravess", "avis", "bail", "baix",
+    "beij", "brinc", "caç", "calç", "cant", "carreg", "cham", "cheg", "chut", "colet",
+    "com", "começ", "coment", "compar", "compr", "concord", "cont", "contrat", "convers", "cort", "cozinh", "curt",
+    "danc", "danç", "deix", "demor", "desej", "desenh", "desist", "dobr", "empreg", "empurr",
+    "encontr", "enfeit", "entr", "escut", "esper", "estud", "evit", "exib", "explic",
+    "explor", "expuls", "extrai", "fal", "fech", "fic", "finaliz", "flert", "gost", "grit", "guard", "imag", "inform", "jant", "jog",
+    "lav", "lembr", "lig", "limp", "lut", "mand", "mex", "mor", "mostr", "mud", "nad", "observ",
+    "ocup", "organ", "pag", "peg", "pens", "plant", "pratic", "prepar", "procur", "pux",
+    "quebr", "reclam", "relax", "reserv", "resolv", "retir", "sa", "salt", "salv", "samb",
+    "suj", "tir", "toc", "torc", "trabalh", "transform", "troc", "us", "viaj", "vir", "visit",
+    "volt", "vot", "acontec", "aprend", "atend", "beb", "corr", "depend", "entend", "mord",
+    "oferec", "prend", "receb", "respond", "tem", "vend", "viv", "ced", "defend",
+    "escolh", "lê", "perd", "promet", "proteg", "venc", "ver", "colh", "correspond",
+    "acend", "bat", "decid", "entreg", "esquec", "met", "pretend", "surprend",
+    "val", "perceb", "comet", "permit", "interromp", "remov", "romp", "conhec", "respond",
+    "abr", "admit", "assist", "assum", "atra", "cumpr", "defin", "descobr", "divid", "engol", "exib",
+    "insist", "part", "permit", "reag", "reduz", "reflet", "serv", "un", "vest", "agred",
+    "instru", "constru", "fer", "omit", "pressent", "traduz", "sub", "substitu",
+    "dorm", "prefer", "sorr", "sent", "dirig", "expand", "imped", "discut",
+    "corrig", "desist", "consent", "ouv", "preench", "restit", "progred",
+    "segu","faz", "fiz", "quer", "quis", "sab", "soub", "tenh", "tiv",
+}
+
+ALL_ENDINGS = [
+    "a", "am", "amos", "ando", "ar", "ara", "ará", "aram", "arao", "arão", "aras", "arás",
+    "arei", "arem", "aremos", "ares", "aria", "ariamos", "aríamos", "armos", "asse", "assem", "assemos", "ássemos", "asses",
+    "aste", "ava", "avam", "avamos", "ávamos", "avas", "e", "ei", "em", "emos", "endo", "er",
+    "era", "erá", "eram", "erao", "erão", "eras", "erás", "erei", "erem", "eremos",
+    "eres", "eria", "eríamos", "eriamos", "es", "esse", "este", "eu", "i", "ia", "iam", "iamos", "íamos", "imas", "imos", "indo",
+    "ir", "irá", "ira", "irão", "irao", "iras", "irás", "irei", "irem", "iremos",
+    "ires", "iria", "iríamos", "iriamos", "irmos", "isse", "issem", "isses", "issemos", "iste", "iu", "o", "ou",
+    "u", "íssemos"
+]
+
+def is_verb(word):
+    """
+    Check if a word is a verb by:
+    1. Checking if it's in the irregular verbs dictionary
+    2. Checking if it has a valid verb root and ending
+    """
+    if not word:
+        return False
+    lw = word.lower()
+    if lw in IRREGULAR_VERBS or lw in IRREGULAR_VERBS.values():
+        return True
+    for end in ALL_ENDINGS:
+        if lw.endswith(end):
+            root = lw[:-len(end)]
+            if root in ALL_ROOTS:
+                return True
+    return False
+
+def apply_phonetic_rules(word, next_word=None):
     """
     Apply Portuguese phonetic rules to transform a word.
     First checks a dictionary of pre-defined transformations,
     if not found, applies the rules in sequence.
     
-    Rules Rule 1p - Rule 10p:
-
-    Rule 1p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', etc.)
-    Rule 2p: Vowel raising in unstressed syllables
-    Rule 3p: 'ão' at the end becomes 'aum'
-    Rule 4p: 's' between vowels becomes 'z'
-    Rule 5p: 'lh' => 'ly'
-    Rule 6p: Final 'l' => 'u'
-    Rule 7p: Final 'm' => 'n' (nasalization)
-    Rule 8p: Verb endings (ar -> á, er -> ê, ir -> í)
-    Rule 9p: Common reductions (está->tá, para->pra, você->cê)
-    Rule 10p: Remove initial 'h' (hoje->oje, homem->omem)
+    Args:
+        word: The word to transform
+        next_word: The next word in the sequence (optional), used for verb detection
     """
-    if not word:
-        return word
-    
-    # Store original word for capitalization check
-    original = word
-    word = word.lower()
-    
-    print(f"Checking dictionary for: '{word}'")  
-    sys.stdout.flush()
-    # Check dictionary with lowercase word
-    if word in PHONETIC_DICTIONARY:
-        print(f"Found in dictionary: '{word}' -> '{PHONETIC_DICTIONARY[word]}'")  
-        sys.stdout.flush()
-        transformed = PHONETIC_DICTIONARY[word]
-        # Preserve original capitalization
-        return preserve_capital(original, transformed)
-    else:
-        print(f"Not found in dictionary: '{word}'")  
-        sys.stdout.flush()
-        # If not in dictionary, apply rules in sequence
-        # Rule 1p
-        word = re.sub(r'o$', 'u', word)   # final 'o' => 'u'
-        if len(word) > 1:  # Only check length for plural endings
-            word = re.sub(r'os$', 'us', word) # final 'os' => 'us'
-            word = re.sub(r'e$', 'i', word)   # final 'e' => 'i'
-            word = re.sub(r'es$', 'is', word) # final 'es' => 'is'
-        
-        # Rule 4p
-        word = re.sub(
-            r'([aeiouáéíóúâêîôûãẽĩõũy])s([aeiouáéíóúâêîôûãẽĩõũy])', 
-            r'\1z\2', 
-            word
-        )
-        
-        # Rule 3p
-        word = re.sub(r'ão$', 'aum', word)
-        
-        # Rule 5p
-        word = word.replace('lh', 'ly')
-        
-        # Rule 6p
-        word = re.sub(r'l$', 'u', word)
+    # First check if it's in our dictionary
+    lword = word.lower()
+    print(f"Checking dictionary for: '{lword}'")
 
-        word = re.sub(r'qui', 'ki', word)
-        word = re.sub(r'que', 'ke', word)
+    # Special handling for você/vocês and não before verbs
+    if next_word and is_verb(next_word):
+        if lword == "você":
+            print(f"Found 'você' before verb '{next_word}', using 'cê'")
+            return preserve_capital(word, "cê")
+        elif lword == "vocês":
+            print(f"Found 'vocês' before verb '{next_word}', using 'cês'")
+            return preserve_capital(word, "cês")
+        elif lword == "não":
+            print(f"Found 'não' before verb '{next_word}', using 'num'")
+            return preserve_capital(word, "num")
+
+    # Check dictionary
+    if lword in PHONETIC_DICTIONARY:
+        print(f"Found in dictionary: '{lword}' -> '{PHONETIC_DICTIONARY[lword]}'")
+        return preserve_capital(word, PHONETIC_DICTIONARY[lword])
+
+    # If not in dictionary, apply rules
+    transformed = word
+    
+    # Apply each rule in sequence
+    # Rule 1p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', etc.)
+    if transformed.lower().endswith('o'):
+        transformed = transformed[:-1] + 'u'
+    elif transformed.lower().endswith('os'):
+        transformed = transformed[:-2] + 'us'
         
-        # Rule 7p
-        # word = re.sub(r'm$', 'ym', word)  # final 'm' => 'n'
-        # word = re.sub(r'([aeiou])m([pbfv])', r'\1ym\2', word)
+    # Rule 2p: Vowel raising in unstressed syllables
+    # TODO: Implement more complex vowel raising rules
+    
+    # Rule 3p: 'ão' at the end becomes 'aum'
+    if transformed.lower().endswith('ão'):
+        transformed = transformed[:-2] + 'aum'
         
-        # Rule 7p - Nasal vowel combinations
-        word = re.sub(r'am$', 'ãum', word)  # final 'am' -> 'ãum'
-        word = re.sub(r'em$', 'eyn', word)  # final 'em' -> 'eyn'
-        word = re.sub(r'im$', 'in', word)   # final 'im' -> 'in'
-        word = re.sub(r'om$', 'oun', word)  # final 'om' -> 'oun'
-        word = re.sub(r'um$', 'un', word)   # final 'um' -> 'un'
+    # Rule 4p: 's' between vowels becomes 'z'
+    transformed = re.sub(r'([aeiouáéíóúâêîôûãẽĩõũ])s([aeiouáéíóúâêîôûãẽĩõũ])', r'\1z\2', transformed, flags=re.IGNORECASE)
+    
+    # Rule 5p: 'lh' => 'ly'
+    transformed = transformed.replace('lh', 'ly').replace('Lh', 'Ly').replace('LH', 'LY')
+    
+    # Rule 6p: Final 'l' => 'u'
+    if transformed.lower().endswith('l'):
+        transformed = transformed[:-1] + 'u'
         
-        # Rule 2p
-        # Commented out to prevent over-transformation
-        # if len(word) > 2:
-        #     if not any(c in word for c in 'áéíóúâêîôûãẽĩõũy'):
-        #         word = re.sub(r'o([^aeiouáéíóúâêîôûãẽĩõũy]+)', r'u\1', word)
-        #         word = re.sub(r'e([^aeiouáéíóúâêîôûãẽĩõũy]+)', r'i\1', word)
+    # Rule 7p: Final 'm' => 'n' (nasalization)
+    if transformed.lower().endswith('m'):
+        transformed = transformed[:-1] + 'n'
         
-        # Rule 8p
-        if len(word) > 2:
-            if word.endswith('ar'):
-                word = word[:-2] + 'á'
-            elif word.endswith('er'):
-                word = word[:-2] + 'ê'
-            elif word.endswith('ir'):
-                word = word[:-2] + 'í'
-                
-        # Rule 9p
-        word = re.sub(r'^está', 'tá', word)
-        word = re.sub(r'^para', 'pra', word)
-        word = re.sub(r'^você', 'cê', word)
-        
-        # Rule 10p
-        if word.startswith('h'):
-            word = word[1:]
-        
-        # Preserve original capitalization
-        return preserve_capital(original, word)
+    # Rule 8p: Verb endings (ar -> á, er -> ê, ir -> í)
+    # TODO: Add more verb ending transformations
+    
+    # Rule 9p: Common reductions (está->tá, para->pra, você->cê)
+    # Handled by dictionary lookups
+    
+    # Rule 10p: Remove initial 'h' (hoje->oje, homem->omem)
+    if transformed.lower().startswith('h'):
+        transformed = transformed[1:]
+    
+    return preserve_capital(word, transformed)
 
 def preserve_capital(original, transformed):
     """
@@ -366,10 +406,15 @@ def transform_text(text):
         
         # Transform each word token according to rules
         transformed_tokens = []
-        for word, punct in tokens:
+        for i, (word, punct) in enumerate(tokens):
             if word:
+                # Get next word for verb detection
+                next_word = None
+                if i + 1 < len(tokens):
+                    next_word = tokens[i + 1][0]  # [0] to get word part of tuple
+                
                 # Apply dictionary lookup or phonetic rules
-                transformed = apply_phonetic_rules(word)
+                transformed = apply_phonetic_rules(word, next_word)
                 transformed_tokens.append((transformed, punct))
             else:
                 transformed_tokens.append(('', punct))
