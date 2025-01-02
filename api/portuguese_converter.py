@@ -46,10 +46,6 @@ PHONETIC_DICTIONARY = {
     'seus': 'teus',
     'sua': 'tua',
     'suas': 'tuas',
-    'voce': 'cê',
-    'você': 'cê',
-    'voces': 'cês',
-    'vocês': 'cês',
 
     # Prepositions and Conjunctions
     'à': 'a',
