@@ -32,12 +32,18 @@ PHONETIC_DICTIONARY = {
     'à' : 'a',
     'às' : 'as',
     'e' : 'y',
+    'seu' : 'teu',
+    'seus' : 'teus',
+    'sua' : 'tua',
+    'suas' : 'tuas',
     'desculpa' : 'discupa',
+    'desculpas' : 'discupas',
+    'depois' : 'dipois',
     'por' : 'pur',
     'vou' : 'vô',
-    'neste' : 'nesse',
+    'neste' : 'nessi',
     'nesta' : 'nessa',
-    'nestes' : 'nesses',
+    'nestes' : 'nessis',
     'nestas' : 'nessas',
     'empresa' : 'impreza',
     'empresas' : 'imprezas',
@@ -56,7 +62,9 @@ PHONETIC_DICTIONARY = {
     'teatro' : 'tiatru',
     'teatros' : 'tiatrus',
     'facebook' : 'faicibuki',
-    'depois' : 'dipois'
+    'internet' : 'interneti',
+    'app' : 'épi',
+    'apps' : 'épis'
 }
 
 def apply_phonetic_rules(word):
