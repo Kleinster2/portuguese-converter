@@ -218,11 +218,11 @@ def merge_word_pairs(tokens):
         word1, punct1 = tokens[i]
         if i + 1 < len(tokens):
             word2, punct2 = tokens[i + 1]
-            pair = (word1.lower(), word2.lower())
+            word_pair = f"{word1} {word2}".lower()
             if (word1 and word2 and not punct1 and 
-                f"{word1} {word2}".lower() in WORD_PAIRS):
+                word_pair in WORD_PAIRS):
                 # Merge them
-                merged = WORD_PAIRS[f"{word1} {word2}".lower()]
+                merged = preserve_capital(word1, WORD_PAIRS[word_pair])
                 # Add as a single token (word, punct)
                 new_tokens.append((merged, punct2))
                 i += 2
