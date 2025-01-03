@@ -149,7 +149,7 @@ IRREGULAR_VERBS = {
 }
 
 ALL_ROOTS = {
-    "abr", "acab", "acend", "ach", "acontec", "ador", "afast", "agred", "ajud", "alug", "am", "ampli", 
+    "abr", "acab", "acend", "ach", "acontec", "ador", "admit", "afast", "agred", "ajud", "alug", "am", "ampli", 
     "and", "anot", "apag", "apanh", "aprend", "apresent", "arm", "arrast", "arrum", "assin", "assist", 
     "assum", "atend", "atra", "atravess", "avis", "bail", "baix", "bat", "beb", "beij", "brinc", "caç", 
     "calç", "cant", "carreg", "ced", "cham", "cheg", "chut", "colet", "colh", "com", "começ", "coment", 
@@ -159,12 +159,14 @@ ALL_ROOTS = {
     "divid", "dobr", "dorm", "empreg", "empurr", "encontr", "enfeit", "engol", "entend", "entr", "entreg", 
     "escolh", "escut", "esper", "esquec", "esqueç", "estud", "evit", "expand", "exib", "explic", "explor", 
     "expuls", "extrai", "fal", "fech", "fer", "fic", "finaliz", "flert", "gost", "grit", "guard", "imag", 
-    "imped", "inform", "insist", "instru", "interromp", "jant", "jog", "lav", "lembr", "lig", "limp", "lut", 
-    "mand", "met", "mex", "mor", "mord", "mostr", "mud", "nad", "observ", "oferec", "omit", "ouv", "part", 
-    "pass", "perceb", "perd", "permit", "persist", "plant", "prefer", "preench", "prend", "pressent", "pretend", 
-    "promet", "proteg", "reag", "reaj", "receb", "reduz", "reflet", "remov", "respond", "restit", "romp", 
-    "sai", "salt", "sent", "serv", "sorr", "sub", "substitu", "surprend", "tem", "toc", "tom", "traduz", "un", 
-    "val", "venc", "vend", "ver", "vest", "viv", "volt", "vot"
+    "imped", "inform", "insist", "instru", "interromp", "jant", "jog", "lav", "lê", "lembr", "lig", "limp", "lut", 
+    "mand", "met", "mex", "mor", "mord", "mostr", "mud", "nad", "observ", "ocup", "oferec", "omit", "organ", 
+    "ouv", "pag", "part", "pass", "peg", "pens", "perceb", "perd", "permit", "persist", "plant", "pratic", 
+    "prefer", "preench", "prepar", "prend", "pressent", "pretend", "procur", "progred", "promet", "proteg", 
+    "pux", "quebr", "reag", "reaj", "receb", "reclam", "reduz", "reflet", "relax", "remov", "reserv", "resolv", 
+    "respond", "restit", "retir", "romp", "sa", "sai", "salt", "salv", "samb", "segu", "sent", "serv", "sorr", "sub", 
+    "substitu", "suj", "surprend", "tem", "tir", "toc", "tom", "torc", "trabalh", "traduz", "transform", 
+    "troc", "un", "us", "val", "venc", "vend", "ver", "vest", "viaj", "vir", "visit", "viv", "volt", "vot"
 }
 
 ALL_ENDINGS = [
@@ -236,11 +238,15 @@ def apply_phonetic_rules(word, next_word=None):
     transformed = word
     
     # Apply each rule in sequence
-    # Rule 1p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', etc.)
+    # Rule 1p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', 'e'->'i', 'es'->'is')
     if transformed.lower().endswith('o'):
         transformed = transformed[:-1] + 'u'
     elif transformed.lower().endswith('os'):
         transformed = transformed[:-2] + 'us'
+    elif transformed.lower().endswith('e'):
+        transformed = transformed[:-1] + 'i'
+    elif transformed.lower().endswith('es'):
+        transformed = transformed[:-2] + 'is'
         
     # Rule 2p: Vowel raising in unstressed syllables
     # TODO: Implement more complex vowel raising rules
