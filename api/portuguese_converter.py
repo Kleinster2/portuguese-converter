@@ -15,8 +15,8 @@ PHONETIC_DICTIONARY = {
     'alguns': 'auguns',
     'ela': 'éla',
     'elas': 'élas',
-    'ele': 'éli',
-    'eles': 'élis',
+    'ele': 'êli',
+    'eles': 'êlis',
     'eli': 'êli',
     'essa': 'essa',
     'essas': 'essas',
@@ -228,6 +228,15 @@ def apply_phonetic_rules(word, next_word=None):
         elif lword == "não":
             print(f"Found 'não' before verb '{next_word}', using 'num'")
             return preserve_capital(word, "num")
+
+    # Special handling for você/vocês before que/quem
+    if next_word and (next_word.startswith('que') or next_word.startswith('quem')):
+        if lword == "você":
+            print(f"Found 'você' before que/quem, using 'cê'")
+            return preserve_capital(word, "cê")
+        elif lword == "vocês":
+            print(f"Found 'vocês' before que/quem, using 'cês'")
+            return preserve_capital(word, "cês")
 
     # Check dictionary
     if lword in PHONETIC_DICTIONARY:
