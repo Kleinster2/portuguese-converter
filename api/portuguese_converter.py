@@ -227,9 +227,13 @@ def apply_phonetic_rules(word, next_word=None):
     # Check if this forms a word pair with the next word
     if next_word:
         word_pair = f"{word} {next_word}".lower()
+        print(f"Checking word pair: '{word_pair}'")
+        print(f"Available word pairs: {WORD_PAIRS}")
         if word_pair in WORD_PAIRS:
             print(f"Found word pair: '{word_pair}' -> '{WORD_PAIRS[word_pair]}'")
             return WORD_PAIRS[word_pair], ''
+        else:
+            print(f"Word pair not found: '{word_pair}'")
 
     # Check irregular verbs first
     if lword in IRREGULAR_VERBS:
@@ -442,20 +446,11 @@ def transform_text(text):
         transformed_tokens = []
         for i, (word, punct) in enumerate(tokens):
             if word:
-                # Get next word for verb detection, looking ahead past pronouns and 'não'
-                next_word = None
-                pronouns = {'me', 'te', 'se', 'nos', 'vos', 'lhe', 'lhes', 'o', 'a', 'os', 'as'}
-                skip_words = pronouns | {'não', 'nãum', 'num'}  # Also skip não and its variations
-                
-                # Look ahead up to 3 words to find a verb after pronouns/não
-                for j in range(1, 4):  # Increased to 4 to handle more words in between
-                    if i + j < len(tokens):
-                        next_token = tokens[i + j][0].lower()  # [0] to get word part of tuple
-                        if next_token in skip_words:
-                            continue
-                        next_word = next_token
-                        break
-                
+                # Get next word for verb detection
+                if i + 1 < len(tokens):
+                    next_word = tokens[i + 1][0]  # Get the actual next word
+                else:
+                    next_word = None
                 # Apply dictionary lookup or phonetic rules
                 transformed = apply_phonetic_rules(word, next_word)
                 transformed_tokens.append((transformed, punct))
