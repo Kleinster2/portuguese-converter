@@ -201,9 +201,9 @@ BASIC_VERB_ROOTS = {
 ACTION_VERB_ROOTS = {
     "abus", "acab", "aceit", "acess", "acompanh", "acord", "afast", "ajud", "alug", "apag", "apanh", 
     "aproveit", "arm", "arrast", "arrum", "assin", "atend", "atra", "atravess", "aument", "avis", "bail", 
-    "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "colet", "colh", "começ", 
+    "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "colet", "colid", "colh", "começ", 
     "compr", "comunic", "control", "convid", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
-    "danç", "descans", "edit", "empreg", "empurr", "encontr", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
+    "danç", "descans", "destac", "edit", "empreg", "empurr", "encontr", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
     "flert", "form", "grit", "guard", "imprim", "jog", "junt", "lav", "levant", "lig", "limp", "lut", "marc", 
     "met", "mex", "mord", "mostr", "mud", "olh", "peg", "reform", "remov", "repet", "retir", "reun", "salt", 
     "salv", "samb", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
@@ -547,7 +547,7 @@ def transform_text(text):
                     word3, punct3 = transformed_tokens[i + 2]
                     
                     # Special case for 'y' (from 'e') attraction
-                    if (word2 == 'y' and 
+                    if (word2 == 'y' and  # This is the transformed 'e'
                         word1 and word1[-1] in 'aáàâãeéèêoóòôuúùû' and
                         word3 and word3[0] in 'yi'):
                         # Combine 'y' with the third word, but avoid double y
