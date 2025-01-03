@@ -132,7 +132,10 @@ PHONETIC_DICTIONARY = {
     'última': 'útima',
     'últimas': 'útimas',
     'último': 'útimu',
-    'últimos': 'útimus'
+    'últimos': 'útimus',
+    'dormir': 'durmí',
+    'dormiu': 'durmíu',
+    'dormiram': 'durmíram'
 }
 
 # Word pairs that need special handling (not covered by regular rules)
@@ -405,7 +408,7 @@ def handle_vowel_combination(first, second):
         return first, second  # Keep them separate so 'y' can combine with next word
         
     # Don't combine if result would be too long
-    MAX_COMBINED_LENGTH = 12
+    MAX_COMBINED_LENGTH = 15
     if len(first) + len(second) > MAX_COMBINED_LENGTH:
         return first, second
     
