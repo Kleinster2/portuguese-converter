@@ -224,7 +224,14 @@ def apply_phonetic_rules(word, next_word=None):
     lword = word.lower()
     print(f"Checking dictionary for: '{lword}'")
 
-    # Check if it's an irregular verb
+    # Check if this forms a word pair with the next word
+    if next_word:
+        word_pair = f"{word} {next_word}".lower()
+        if word_pair in WORD_PAIRS:
+            print(f"Found word pair: '{word_pair}' -> '{WORD_PAIRS[word_pair]}'")
+            return WORD_PAIRS[word_pair], ''
+
+    # Check irregular verbs first
     if lword in IRREGULAR_VERBS:
         print(f"Found irregular verb: '{lword}' -> '{IRREGULAR_VERBS[lword]}'")
         return preserve_capital(word, IRREGULAR_VERBS[lword])
@@ -239,13 +246,6 @@ def apply_phonetic_rules(word, next_word=None):
     if lword in PHONETIC_DICTIONARY:
         print(f"Found in dictionary: '{lword}' -> '{PHONETIC_DICTIONARY[lword]}'")
         return preserve_capital(word, PHONETIC_DICTIONARY[lword])
-
-    # Check if this forms a word pair with the next word
-    if next_word:
-        word_pair = f"{word} {next_word}".lower()
-        if word_pair in WORD_PAIRS:
-            print(f"Found word pair: '{word_pair}' -> '{WORD_PAIRS[word_pair]}'")
-            return WORD_PAIRS[word_pair], ''
 
     # If not in dictionary, apply rules
     transformed = word
