@@ -333,6 +333,11 @@ def handle_vowel_combination(first, second):
     
     # Rule 3c
     if first[-1] == 'a' and second[0] in 'eiouáéíóúâêîôûãẽĩõũy':
+        if second[0] in 'ie':  # Handle both 'i' and 'e'
+            if first.endswith('ga'):
+                return first[:-2] + 'gu' + second, ''  # Will handle both 'gui' and 'gue'
+            elif first.endswith('ca'):
+                return first[:-2] + 'k' + second, ''   # Will handle both 'ki' and 'ke'
         return first[:-1] + second, ''
 
     # Rule 4c
