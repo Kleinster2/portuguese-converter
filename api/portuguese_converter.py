@@ -321,11 +321,12 @@ def handle_vowel_combination(first, second):
     if len(first) + len(second) > MAX_COMBINED_LENGTH:
         return first, second
     
-    # Rule 1c
-    if (first[-1] in 'aeiouáéíóúâêîôûãẽĩõũy'
-        and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy'
+    vowels = 'aeiouáéíóúâêîôûãẽĩõũy'
+    if (first[-1].lower() in vowels
+        and second[0].lower() in vowels
         and first[-1].lower() == second[0].lower()):
-        return first + second[1:], ''
+        # Preserve case of second word's first letter
+        return first[:-1] + second[0] + second[1:], ''
     
     # Rule 2c
     # if first[-1] in 'ao' and second.startswith('e'):
@@ -475,8 +476,10 @@ def transform_text(text):
                     word1, punct1 = transformed_tokens[i]
                     word2, punct2 = transformed_tokens[i + 1]
                     
+                    print(f"Trying to combine: {word1=} {word2=}")
                     # Try to combine the words
                     combined1, combined2 = handle_vowel_combination(word1, word2)
+                    print(f"Result: {combined1=} {combined2=}")
                     if combined1 != word1 or combined2 != word2:
                         made_combination = True
                         if combined2:
