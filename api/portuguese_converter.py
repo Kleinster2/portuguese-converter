@@ -62,6 +62,7 @@ PHONETIC_DICTIONARY = {
     'à': 'a',
     'às': 'as',
     'com': 'cum',
+    'sem': 'seyn',
     'e': 'y',
     'em': 'ein',
     'mas': 'máys',
@@ -197,7 +198,7 @@ ACTION_VERB_ROOTS = {
     "aproveit", "arm", "arrast", "arrum", "assin", "atend", "atra", "atravess", "aument", "avis", "bail", 
     "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "colet", "colh", "começ", 
     "compr", "comunic", "control", "convid", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
-    "danç", "edit", "empreg", "empurr", "encontr", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
+    "danç", "descans", "edit", "empreg", "empurr", "encontr", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
     "flert", "form", "grit", "guard", "imprim", "jog", "junt", "lav", "levant", "lig", "limp", "lut", "marc", 
     "met", "mex", "mord", "mostr", "mud", "olh", "peg", "reform", "remov", "repet", "retir", "reun", "salt", 
     "salv", "samb", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
