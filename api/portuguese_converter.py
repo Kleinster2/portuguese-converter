@@ -210,6 +210,28 @@ def is_verb(word):
                 return True
     return False
 
+def merge_word_pairs(tokens):
+    """Merge word pairs that need special handling before individual word transformations."""
+    new_tokens = []
+    i = 0
+    while i < len(tokens):
+        word1, punct1 = tokens[i]
+        if i + 1 < len(tokens):
+            word2, punct2 = tokens[i + 1]
+            pair = (word1.lower(), word2.lower())
+            if (word1 and word2 and not punct1 and 
+                f"{word1} {word2}".lower() in WORD_PAIRS):
+                # Merge them
+                merged = WORD_PAIRS[f"{word1} {word2}".lower()]
+                # Add as a single token (word, punct)
+                new_tokens.append((merged, punct2))
+                i += 2
+                continue
+        # No merge, just append the current
+        new_tokens.append((word1, punct1))
+        i += 1
+    return new_tokens
+
 def apply_phonetic_rules(word, next_word=None):
     """
     Apply Portuguese phonetic rules to transform a word.
@@ -223,17 +245,6 @@ def apply_phonetic_rules(word, next_word=None):
     # First check if it's in our dictionary
     lword = word.lower()
     print(f"Checking dictionary for: '{lword}'")
-
-    # Check if this forms a word pair with the next word
-    if next_word:
-        word_pair = f"{word} {next_word}".lower()
-        print(f"Checking word pair: '{word_pair}'")
-        print(f"Available word pairs: {WORD_PAIRS}")
-        if word_pair in WORD_PAIRS:
-            print(f"Found word pair: '{word_pair}' -> '{WORD_PAIRS[word_pair]}'")
-            return WORD_PAIRS[word_pair], ''
-        else:
-            print(f"Word pair not found: '{word_pair}'")
 
     # Check irregular verbs first
     if lword in IRREGULAR_VERBS:
@@ -441,6 +452,9 @@ def transform_text(text):
     try:
         # First tokenize the text into words and punctuation
         tokens = tokenize_text(text)
+        
+        # Merge word pairs that need special handling
+        tokens = merge_word_pairs(tokens)
         
         # Transform each word token according to rules
         transformed_tokens = []
