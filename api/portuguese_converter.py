@@ -71,7 +71,6 @@ PHONETIC_DICTIONARY = {
     'pelo': 'pelu',
     'pelos': 'pelus',
     'por': 'pur',
-    'por que': 'pur ke',
     'porque': 'purkê',
     'porquê': 'purkê',
 
@@ -121,6 +120,7 @@ PHONETIC_DICTIONARY = {
     'muita': 'muynta',
     'muitas': 'muyntas',
     'muitos': 'muyntus',
+    'nao': 'nãum',
     'não': 'nãum',
     'obrigada': 'brigada',
     'obrigado': 'brigadu',
@@ -295,6 +295,7 @@ def handle_vowel_combination(first, second):
     Handle vowel combinations between words according to Portuguese pronunciation rules.
     Rules Rule 1c - Rule 7c:
 
+    Rule 0c: If word ends in 'r' and next word starts with vowel => merge without the 'r'
     Rule 1c: If the first ends in a vowel and the second starts with the same vowel => merge
     Rule 2c: If first ends in 'a' or 'o' and second starts with 'e' => merge with 'i'
     Rule 3c: If first ends in 'a' and second starts with vowel
@@ -320,6 +321,11 @@ def handle_vowel_combination(first, second):
         return first, second
     
     vowels = 'aeiouáéíóúâêîôûãẽĩõũy'
+    
+    # Rule 0c: If word ends in 'r' and next word starts with vowel => merge without the 'r'
+    if first.endswith('r') and second[0].lower() in vowels:
+        return first[:-1] + second, ''
+        
     if (first[-1].lower() in vowels
         and second[0].lower() in vowels
         and first[-1].lower() == second[0].lower()):
