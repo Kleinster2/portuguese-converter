@@ -101,7 +101,6 @@ PHONETIC_DICTIONARY = {
     'vou': 'vô',
 
     # Common Words and Expressions
-    'agora': 'gora',
     'aí': 'aí',
     'ali': 'ali',
     'aqui': 'aki',
@@ -137,10 +136,34 @@ PHONETIC_DICTIONARY = {
 
 # Word pairs that need special handling (not covered by regular rules)
 WORD_PAIRS = {
+    'a gente': 'agênti',
     'por que': 'purkê',
     'por quê': 'purkê',
     'para que': 'prakê',
-    'para quê': 'prakê'
+    'para quê': 'prakê',
+    'vamos embora': 'vambora',
+    'vamo embora': 'vambora',
+    'para você': 'prucê',
+    'pra você': 'prucê',
+    'para vocês': 'prucês',
+    'pra vocês': 'prucês',
+    'com você': 'cumcê',
+    'com vocês': 'cumcêys',
+    'sem você': 'seym ucê',
+    'sem vocés': 'seym ucêys',
+    'para voce': 'prucê',
+    'para voces': 'prucêys',
+    'pra voce': 'prucê',
+    'pra voces': 'prucêys',
+    'com voce': 'cumcê',
+    'com voces': 'cumcêys',
+    'sem voce': 'seym ucê',
+    'sem voces': 'seym ucêys',
+    'o que': 'ukê',
+    'com um': 'cum',
+    'com uma': 'cuma',
+    'com umas': 'cumas',
+    'com uns': 'cuns'
 }
 
 # Verb identification constants
@@ -165,7 +188,7 @@ ALL_ROOTS = {
     "and", "anot", "apag", "apanh", "aprend", "apresent", "arm", "arrast", "arrum", "assin", "assist", 
     "assum", "atend", "atra", "atravess", "avis", "bail", "baix", "bat", "beb", "beij", "brinc", "caç", 
     "calç", "cant", "carreg", "ced", "cham", "cheg", "chut", "colet", "colh", "com", "começ", "coment", 
-    "comet", "compar", "compr", "concord", "conhec", "consent", "constru", "cont", "contrat", "convers", 
+    "comet", "compar", "compr", "concord", "conhec", "consegu", "consider", "consist", "consent", "constru", "cont", "contrat", "convers", 
     "correspond", "corr", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", "danç", "decid", "defend", 
     "defin", "deix", "demor", "depend", "deposit", "desej", "desenh", "descobr", "desist", "dirig", "discut", 
     "divid", "dobr", "dorm", "empreg", "empurr", "encontr", "enfeit", "engol", "entend", "entr", "entreg", 
@@ -178,7 +201,8 @@ ALL_ROOTS = {
     "pux", "quebr", "reag", "reaj", "receb", "reclam", "reduz", "reflet", "relax", "remov", "reserv", "resolv", 
     "respond", "restit", "retir", "romp", "sa", "sai", "salt", "salv", "samb", "segu", "sent", "serv", "sorr", "sub", 
     "substitu", "suj", "surprend", "tem", "tir", "toc", "tom", "torc", "trabalh", "traduz", "transform", 
-    "troc", "un", "us", "val", "venc", "vend", "ver", "vest", "viaj", "vir", "visit", "viv", "volt", "vot"
+    "troc", "un", "us", "val", "venc", "vend", "ver", "vest", "viaj", "vir", "visit", "viv", "volt", "vot",
+    
 }
 
 ALL_ENDINGS = [
@@ -312,6 +336,10 @@ def apply_phonetic_rules(word, next_word=None):
     # Rule 10p: Remove initial 'h' (hoje->oje, homem->omem)
     if transformed.lower().startswith('h'):
         transformed = transformed[1:]
+    
+    # Rule 11p: Initial 'ex' becomes 'ez'
+    if transformed.lower().startswith('ex'):
+        transformed = 'ez' + transformed[2:]
     
     return preserve_capital(word, transformed)
 
