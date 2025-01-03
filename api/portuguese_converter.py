@@ -137,10 +137,10 @@ PHONETIC_DICTIONARY = {
 
 # Word pairs that need special handling (not covered by regular rules)
 WORD_PAIRS = {
-    'por que': 'pur ke',
-    'por quê': 'pur kê',
-    'para que': 'pra ke',
-    'para quê': 'pra kê'
+    'por que': 'purkê',
+    'por quê': 'purkê',
+    'para que': 'prakê',
+    'para quê': 'prakê'
 }
 
 # Verb identification constants
@@ -298,7 +298,13 @@ def apply_phonetic_rules(word, next_word=None):
         transformed = transformed[:-1] + 'n'
         
     # Rule 8p: Verb endings (ar -> á, er -> ê, ir -> í)
-    # TODO: Add more verb ending transformations
+    if is_verb(word):
+        if transformed.lower().endswith('ar'):
+            transformed = transformed[:-2] + 'á'
+        elif transformed.lower().endswith('er'):
+            transformed = transformed[:-2] + 'ê'
+        elif transformed.lower().endswith('ir'):
+            transformed = transformed[:-2] + 'í'
     
     # Rule 9p: Common reductions (está->tá, para->pra, você->cê)
     # Handled by dictionary lookups
