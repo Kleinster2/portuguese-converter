@@ -53,6 +53,10 @@ PHONETIC_DICTIONARY = {
     'nos' : 'nus',
     'o' : 'u',
     'os' : 'us',
+    'voce' : 'cê',
+    'você' : 'cê',
+    'voces' : 'cêys',
+    'vocês' : 'cêys',
 
     # Prepositions and Conjunctions
     'à': 'a',
@@ -217,26 +221,11 @@ def apply_phonetic_rules(word, next_word=None):
         print(f"Found irregular verb: '{lword}' -> '{IRREGULAR_VERBS[lword]}'")
         return preserve_capital(word, IRREGULAR_VERBS[lword])
 
-    # Special handling for você/vocês and não before verbs
+    # Special handling for não before verbs
     if next_word and is_verb(next_word):
-        if lword == "você":
-            print(f"Found 'você' before verb '{next_word}', using 'cê'")
-            return preserve_capital(word, "cê")
-        elif lword == "vocês":
-            print(f"Found 'vocês' before verb '{next_word}', using 'cês'")
-            return preserve_capital(word, "cês")
-        elif lword == "não":
+        if lword == "não":
             print(f"Found 'não' before verb '{next_word}', using 'num'")
             return preserve_capital(word, "num")
-
-    # Special handling for você/vocês before que/quem
-    if next_word and (next_word.startswith('que') or next_word.startswith('quem')):
-        if lword == "você":
-            print(f"Found 'você' before que/quem, using 'cê'")
-            return preserve_capital(word, "cê")
-        elif lword == "vocês":
-            print(f"Found 'vocês' before que/quem, using 'cês'")
-            return preserve_capital(word, "cês")
 
     # Check dictionary
     if lword in PHONETIC_DICTIONARY:
