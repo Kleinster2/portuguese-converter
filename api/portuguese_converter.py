@@ -183,28 +183,50 @@ IRREGULAR_VERBS = {
     "ver": "vê", "vejo": "veju", "vê": "vê","ve": "vê", "vemos": "vemu", "veêm": "vem", "vi": "vi", "viu": "viu", "vimos": "vimu", "viram": "viraum",
 }
 
-ALL_ROOTS = {
-    "abr", "acab", "acend", "ach", "acontec", "ador", "admit", "afast", "agred", "ajud", "alug", "am", "ampli", 
-    "and", "anot", "apag", "apanh", "aprend", "apresent", "arm", "arrast", "arrum", "assin", "assist", 
-    "assum", "atend", "atra", "atravess", "avis", "bail", "baix", "bat", "beb", "beij", "brinc", "caç", 
-    "calç", "cant", "carreg", "ced", "cham", "cheg", "chut", "colet", "colh", "com", "começ", "coment", 
-    "comet", "compar", "compr", "concord", "conhec", "consegu", "consider", "consist", "consent", "constru", "cont", "contrat", "convers", 
-    "correspond", "corr", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", "danç", "decid", "defend", 
-    "defin", "deix", "demor", "depend", "deposit", "desej", "desenh", "descobr", "desist", "dirig", "discut", 
-    "divid", "dobr", "dorm", "empreg", "empurr", "encontr", "enfeit", "engol", "entend", "entr", "entreg", 
-    "escolh", "escut", "esper", "esquec", "esqueç", "estud", "evit", "expand", "exib", "explic", "explor", 
-    "expuls", "extrai", "fal", "fech", "fer", "fic", "finaliz", "flert", "gost", "grit", "guard", "imag", 
-    "imped", "inform", "insist", "instru", "interromp", "jant", "jog", "lav", "lê", "lembr", "lig", "limp", "lut", 
-    "mand", "met", "mex", "mor", "mord", "mostr", "mud", "nad", "observ", "ocup", "oferec", "omit", "organ", 
-    "ouv", "pag", "part", "pass", "peg", "pens", "perceb", "perd", "permit", "persist", "plant", "pratic", 
-    "prefer", "preench", "prepar", "prend", "pressent", "pretend", "procur", "progred", "promet", "proteg", 
-    "pux", "quebr", "reag", "reaj", "receb", "reclam", "reduz", "reflet", "relax", "remov", "reserv", "resolv", 
-    "respond", "restit", "retir", "romp", "sa", "sai", "salt", "salv", "samb", "segu", "sent", "serv", "sorr", "sub", 
-    "substitu", "suj", "surprend", "tem", "tir", "toc", "tom", "torc", "trabalh", "traduz", "transform", 
-    "troc", "un", "us", "val", "venc", "vend", "ver", "vest", "viaj", "vir", "visit", "viv", "volt", "vot",
-    
+# Basic/Essential Verbs
+BASIC_VERB_ROOTS = {
+    "abr", "and", "bat", "beb", "cai", "cant", "ced", "cheg", "com", "corr", "cri", "deix", "dorm", "dur", 
+    "entr", "exist", "fal", "faz", "fech", "fic", "ir", "lê", "mor", "nad", "nasc", "ouv", "par", "part", 
+    "pass", "perd", "sa", "sai", "sent", "ser", "tem", "ter", "tir", "toc", "val", "venc", "vend", "ver", 
+    "vir", "viv", "volt"
 }
 
+# Common Action Verbs
+ACTION_VERB_ROOTS = {
+    "abus", "acab", "aceit", "acess", "acompanh", "acord", "afast", "ajud", "alug", "apag", "apanh", 
+    "aproveit", "arm", "arrast", "arrum", "assin", "atend", "atra", "atravess", "aument", "avis", "bail", 
+    "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "colet", "colh", "começ", 
+    "compr", "comunic", "control", "convid", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
+    "danç", "edit", "empreg", "empurr", "encontr", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
+    "flert", "form", "grit", "guard", "imprim", "jog", "junt", "lav", "levant", "lig", "limp", "lut", "marc", 
+    "met", "mex", "mord", "mostr", "mud", "olh", "peg", "reform", "remov", "repet", "retir", "reun", "salt", 
+    "salv", "samb", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
+}
+
+# Cognitive/Mental Verbs
+COGNITIVE_VERB_ROOTS = {
+    "ador", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "anot", "aprend", "apresent", 
+    "assist", "assum", "coment", "comet", "compar", "concord", "conhec", "consegu", "consider", "consist", 
+    "consent", "cont", "convers", "decid", "defend", "defin", "demor", "depend", "desej", "desenh", "desenvolv", 
+    "descobr", "desist", "dirig", "discut", "divid", "entend", "esper", "esquec", "esqueç", "estud", "evit", 
+    "gost", "imag", "import", "indic", "inform", "inici", "insist", "instru", "lembr", "not", "observ", "opin", 
+    "particip", "pens", "perceb", "pergunt", "permit", "persist", "preocup", "prepar", "pretend", "precis", 
+    "procur", "promet", "signific", "tent", "termin", "verific", "visit"
+}
+
+# Complex/Process Verbs
+PROCESS_VERB_ROOTS = {
+    "constru", "contrat", "correspond", "deposit", "dobr", "expand", "exib", "experiment", "explic", "explor", 
+    "expuls", "extrai", "finaliz", "imped", "inclu", "interromp", "ocup", "oferec", "omit", "organ", "produz", 
+    "quebr", "reag", "reaj", "realiz", "receb", "reclam", "reduz", "reflet", "relax", "represent", "reserv", 
+    "resolv", "respond", "restit", "romp", "segu", "serv", "sorr", "sub", "substitu", "suj", "surprend", 
+    "traduz", "transform", "un", "us"
+}
+
+# Combined set of all verb roots
+ALL_ROOTS = BASIC_VERB_ROOTS | ACTION_VERB_ROOTS | COGNITIVE_VERB_ROOTS | PROCESS_VERB_ROOTS
+
+# Verb endings
 ALL_ENDINGS = [
     "a", "am", "amos", "ando", "ar", "ara", "ará", "aram", "arao", "arão", "aras", "arás",
     "arei", "arem", "aremos", "ares", "aria", "ariamos", "aríamos", "armos", "asse", "assem", "assemos", "ássemos", "asses",
