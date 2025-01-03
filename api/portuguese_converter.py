@@ -135,6 +135,14 @@ PHONETIC_DICTIONARY = {
     'últimos': 'útimus'
 }
 
+# Word pairs that need special handling (not covered by regular rules)
+WORD_PAIRS = {
+    'por que': 'pur ke',
+    'por quê': 'pur kê',
+    'para que': 'pra ke',
+    'para quê': 'pra kê'
+}
+
 # Verb identification constants
 IRREGULAR_VERBS = {
     "estar": "está", "estou": "tô", "estás": "tá", "está": "tá", "estamos": "tamu", "estão": "tãum",
@@ -231,6 +239,13 @@ def apply_phonetic_rules(word, next_word=None):
     if lword in PHONETIC_DICTIONARY:
         print(f"Found in dictionary: '{lword}' -> '{PHONETIC_DICTIONARY[lword]}'")
         return preserve_capital(word, PHONETIC_DICTIONARY[lword])
+
+    # Check if this forms a word pair with the next word
+    if next_word:
+        word_pair = f"{word} {next_word}".lower()
+        if word_pair in WORD_PAIRS:
+            print(f"Found word pair: '{word_pair}' -> '{WORD_PAIRS[word_pair]}'")
+            return WORD_PAIRS[word_pair], ''
 
     # If not in dictionary, apply rules
     transformed = word
