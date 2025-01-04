@@ -384,6 +384,10 @@ def apply_phonetic_rules(word, next_word=None):
     # Rule 11p: Initial 'ex' becomes 'ez'
     if transformed.lower().startswith('ex'):
         transformed = 'ez' + transformed[2:]
+
+    # Rule 12p: Final 'ou' becomes 'ô'
+    if transformed.lower().endswith('ou'):
+        transformed = transformed[:-2] + 'ô'
     
     return preserve_capital(word, transformed)
 
