@@ -399,7 +399,19 @@ def apply_phonetic_rules(word, next_word=None):
     if any(p in transformed.lower() for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç']):
         for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç']:
             transformed = re.sub(f'{p}', f'{p[0]}i{p[1]}', transformed.lower())
-    
+
+    # Rule 15p: Append 'i' to words ending in specific consonants
+    if transformed.lower().endswith(('d', 't', 'b', 'f', 'j', 'k', 'p', 't', 'v')):
+        transformed = transformed + 'i'
+
+    # Rule 16p: Replace final 'c' with 'ki'
+    if transformed.lower().endswith('c'):
+        transformed = transformed[:-1] + 'ki'
+
+    # Rule 17p: Append 'ui' to words ending in 'g'
+    if transformed.lower().endswith('g'):
+        transformed = transformed + 'ui'
+
     return preserve_capital(word, transformed)
 
 def preserve_capital(original, transformed):
