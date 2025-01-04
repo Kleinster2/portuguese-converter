@@ -173,7 +173,8 @@ WORD_PAIRS = {
     'com a': 'cua',
     'com as': 'cuas',
     'com o': 'cuo',
-    'com os': 'cuos'
+    'com os': 'cuos',
+    'que é': 'ké'
 }
 
 # Verb identification constants
