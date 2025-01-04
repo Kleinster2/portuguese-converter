@@ -58,6 +58,9 @@ PHONETIC_DICTIONARY = {
     'voces' : 'cêys',
     'vocês' : 'cêys',
 
+    # Adverbs
+    'demais': 'dimais',
+
     # Prepositions and Conjunctions
     'à': 'a',
     'às': 'as',
@@ -96,6 +99,7 @@ PHONETIC_DICTIONARY = {
     'whatsapp': 'uatzápi',
     'wifi': 'uaifai',
     'youtube': 'iutiúbi',
+    'chat': 'chati',
 
     # Common Verbs
     'vamos': 'vam',
@@ -103,8 +107,8 @@ PHONETIC_DICTIONARY = {
 
     # Common Words and Expressions
     'aí': 'aí',
-    'ali': 'ali',
-    'aqui': 'aki',
+    'ali': 'alí',
+    'aqui': 'akí',
     'atrás': 'atráyz',
     'bem': 'beyn',
     'depois': 'dipois',
@@ -149,8 +153,8 @@ WORD_PAIRS = {
     'vamo embora': 'vambora',
     'para você': 'prucê',
     'pra você': 'prucê',
-    'para vocês': 'prucês',
-    'pra vocês': 'prucês',
+    'para vocês': 'prucêys',
+    'pra vocês': 'prucêys',
     'com você': 'cumcê',
     'com vocês': 'cumcêys',
     'sem você': 'sêyn ucê',
@@ -174,7 +178,14 @@ WORD_PAIRS = {
     'com as': 'cuas',
     'com o': 'cuo',
     'com os': 'cuos',
-    'que é': 'ké'
+    'com ele': 'cuêli',
+    'com eles': 'cuêlis',
+    'com ela': 'cuéla',
+    'com elas': 'cuélas',
+    'que eu': 'keu',
+    'que é': 'ké',
+    'esse é': 'êssé',
+    'essa é': 'éssé',
 }
 
 # Verb identification constants
