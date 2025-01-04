@@ -169,7 +169,11 @@ WORD_PAIRS = {
     'com um': 'cum',
     'com uma': 'cuma',
     'com umas': 'cumas',
-    'com uns': 'cuns'
+    'com uns': 'cuns',
+    'com a': 'cua',
+    'com as': 'cuas',
+    'com o': 'cuo',
+    'com os': 'cuos'
 }
 
 # Verb identification constants
