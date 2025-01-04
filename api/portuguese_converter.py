@@ -18,25 +18,24 @@ PHONETIC_DICTIONARY = {
     'ele': 'êli',
     'eles': 'êlis',
     'eli': 'êli',
-    'essa': 'essa',
-    'essas': 'essas',
-    'esse': 'essi',
-    'esses': 'essis',
-    'esta': 'esta',
-    'estas': 'estas',
-    'este': 'esti',
-    'estes': 'estis',
-    'eu': 'eu',
-    'meu': 'meu',
-    'minha': 'minya',
-    'nesta': 'nessa',
-    'nestas': 'nessas',
-    'neste': 'nessi',
-    'nestes': 'nessis',
-    'nossa': 'nossa',
-    'nossas': 'nossas',
-    'nosso': 'nossu',
-    'nossos': 'nossus',
+    'essa': 'éssa',
+    'essas': 'éssas',
+    'esse': 'êssi',
+    'esses': 'êssis',
+    'esta': 'ésta',
+    'estas': 'éstas',
+    'este': 'êsti',
+    'estes': 'êstis',
+    'eu': 'êu',
+    'meu': 'mêu',
+    'nesta': 'néssa',
+    'nestas': 'néssas',
+    'neste': 'nêssi',
+    'nestes': 'nêssis',
+    'nossa': 'nóssa',
+    'nossas': 'nóssas',
+    'nosso': 'nóssu',
+    'nossos': 'nóssus',
     'quais': 'kuais',
     'quaisquer': 'kuauké',
     'qual': 'kuau',
@@ -168,8 +167,10 @@ WORD_PAIRS = {
     'pra voces': 'prucêys',
     'com voce': 'cumcê',
     'com voces': 'cumcêys',
-    'sem voce': 'seyn ucê',
-    'sem voces': 'seyn ucêys',
+    'de voce': 'ducê',
+    'de voces': 'ducêys',
+    'de você': 'ducê',
+    'de vocês': 'ducêys',
     'o que': 'ukê',
     'com um': 'cum',
     'com uma': 'cuma',
@@ -357,10 +358,10 @@ def apply_phonetic_rules(word, next_word=None):
     
     # Rule 5p: 'lh' => 'ly'
     transformed = transformed.replace('lh', 'ly').replace('Lh', 'Ly').replace('LH', 'LY')
-    
-    # Rule 6p: Final 'l' => 'u'
-    if transformed.lower().endswith('l'):
-        transformed = transformed[:-1] + 'u'
+
+    # Rule 6p: Final 'ou' becomes 'ô'
+    if transformed.lower().endswith('ou'):
+        transformed = transformed[:-2] + 'ô'
         
     # Rule 7p: Final 'm' => 'n' (nasalization)
     if transformed.lower().endswith('m'):
@@ -386,9 +387,9 @@ def apply_phonetic_rules(word, next_word=None):
     if transformed.lower().startswith('ex'):
         transformed = 'ez' + transformed[2:]
 
-    # Rule 12p: Final 'ou' becomes 'ô'
-    if transformed.lower().endswith('ou'):
-        transformed = transformed[:-2] + 'ô'
+    # Rule 12p: Final 'l' => 'u'
+    if transformed.lower().endswith('l'):
+        transformed = transformed[:-1] + 'u'
 
     # Rule 13: Insert 'i' between specific consonant pairs
     if any(p in transformed.lower() for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç']):
