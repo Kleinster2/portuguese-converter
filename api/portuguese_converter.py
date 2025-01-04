@@ -387,11 +387,15 @@ def apply_phonetic_rules(word, next_word=None):
     if transformed.lower().startswith('ex'):
         transformed = 'ez' + transformed[2:]
 
-    # Rule 12p: Final 'l' => 'u'
+    # Rule 12p: Final 'ol' => 'óu'
+    if transformed.lower().endswith('ol'):
+        transformed = transformed[:-2] + 'óu'
+
+    # Rule 13p: Final 'l' => 'u'
     if transformed.lower().endswith('l'):
         transformed = transformed[:-1] + 'u'
 
-    # Rule 13: Insert 'i' between specific consonant pairs
+    # Rule 14p: Insert 'i' between specific consonant pairs
     if any(p in transformed.lower() for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç']):
         for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç']:
             transformed = re.sub(f'{p}', f'{p[0]}i{p[1]}', transformed.lower())
