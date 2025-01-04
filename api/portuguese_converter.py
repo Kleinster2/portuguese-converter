@@ -60,6 +60,7 @@ PHONETIC_DICTIONARY = {
 
     # Adverbs
     'demais': 'dimais',
+    'devagar': 'divagá',
 
     # Prepositions and Conjunctions
     'à': 'a',
@@ -168,7 +169,7 @@ WORD_PAIRS = {
     'com voce': 'cumcê',
     'com voces': 'cumcêys',
     'sem voce': 'seyn ucê',
-    'sem voces': 'sey ucêys',
+    'sem voces': 'seyn ucêys',
     'o que': 'ukê',
     'com um': 'cum',
     'com uma': 'cuma',
@@ -388,6 +389,11 @@ def apply_phonetic_rules(word, next_word=None):
     # Rule 12p: Final 'ou' becomes 'ô'
     if transformed.lower().endswith('ou'):
         transformed = transformed[:-2] + 'ô'
+
+    # Rule 13: Insert 'i' between specific consonant pairs
+    if any(p in transformed.lower() for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç']):
+        for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç']:
+            transformed = re.sub(f'{p}', f'{p[0]}i{p[1]}', transformed.lower())
     
     return preserve_capital(word, transformed)
 
