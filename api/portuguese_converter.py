@@ -188,6 +188,21 @@ WORD_PAIRS = {
     'que é': 'ké',
     'esse é': 'êssé',
     'essa é': 'éssé',
+    'está você': 'cê tá',
+    'está voce': 'cê tá',
+    'esta você': 'cê tá',
+    'ta voce': 'cê tá',
+    'tá você': 'cê tá',
+    'tá voce': 'cê tá',
+    'ta você': 'cê tá',
+    'estão vocês': 'cêys tãum',
+    'estão voces': 'cêys tãum',
+    'estao vocês': 'cêys tãum',
+    'estao voces': 'cêys tãum',
+    'tão vocês': 'cêys tãum',
+    'tão voces': 'cêys tãum',
+    'tao voces': 'cêys tãum',
+    'tao vocês': 'cêys tãum'
 }
 
 # Verb identification constants
@@ -411,6 +426,10 @@ def apply_phonetic_rules(word, next_word=None):
     # Rule 17p: Append 'ui' to words ending in 'g'
     if transformed.lower().endswith('g'):
         transformed = transformed + 'ui'
+
+    # Rule 18p: Transform 'eir' to 'er'
+    if 'eir' in transformed.lower():
+        transformed = transformed.lower().replace('eir', 'êr')
 
     return preserve_capital(word, transformed)
 
