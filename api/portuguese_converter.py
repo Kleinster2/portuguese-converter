@@ -40,6 +40,7 @@ PHONETIC_DICTIONARY = {
     'quaisquer': 'kuauké',
     'qual': 'kuau',
     'qualquer': 'kuauké',
+    'quando': 'cuandu',
     'quem': 'kêyn',
     'seu': 'teu',
     'seus': 'teus',
@@ -139,7 +140,11 @@ PHONETIC_DICTIONARY = {
     'últimos': 'útimus',
     'dormir': 'durmí',
     'dormiu': 'durmíu',
-    'dormiram': 'durmíram'
+    'dormiram': 'durmíram',
+    'atual': 'atuau',
+    'atualmente': 'atuaumêinti',
+    'agora': 'agóra',
+    'hoje': 'ôji'
 }
 
 # Word pairs that need special handling (not covered by regular rules)
@@ -233,13 +238,13 @@ BASIC_VERB_ROOTS = {
 # Common Action Verbs
 ACTION_VERB_ROOTS = {
     "abus", "acab", "aceit", "acess", "acompanh", "acord", "afast", "ajud", "alug", "apag", "apanh", 
-    "aproveit", "arm", "arrast", "arrum", "assin", "atend", "atra", "atravess", "aument", "avis", "bail", 
+    "aproveit", "arm", "arrast", "arrum", "assin", "atend", "atra", "atravess", "atualiz", "aument", "avis", "bail", 
     "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "coç", "colet", "colid", "colh", "começ", 
     "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
-    "danç", "descans", "destac", "destru", "edit", "empreg", "empurr", "encontr", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
+    "danç", "descans", "destac", "destru", "edit", "empreg", "empurr", "encontr", "encost", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
     "flert", "form", "grit", "guard", "imprim", "jog", "junt", "lav", "levant", "lig", "limp", "lut", "marc", 
-    "met", "mex", "mord", "mostr", "mud", "olh", "peg", "reform", "remov", "repet", "resist", "retir", "reun", "salt", 
-    "salv", "samb", "soletr", "som", "solt", "sorri", "sub", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
+    "met", "mex", "molh", "mord", "mostr", "mud", "olh", "peg", "reform", "remov", "repet", "resist", "retir", "reun", "salt", 
+    "salv", "samb", "soletr", "som", "solt", "sorri", "sub", "suport", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
 }
 
 # Cognitive/Mental Verbs
@@ -248,15 +253,15 @@ COGNITIVE_VERB_ROOTS = {
     "assist", "assum", "coment", "comet", "compar", "concord", "conhec", "consegu", "consig", "consig", "consider", "consist", 
     "consent", "cont", "convers", "decid", "defend", "defin", "demor", "depend", "desej", "desenh", "desenvolv", 
     "descobr", "desist", "dirig", "discut", "divid", "entend", "esper", "esquec", "esqueç", "estud", "evit", 
-    "foc", "gost", "imag", "import", "indic", "inform", "inici", "insist", "instru", "lembr", "not", "observ", "opin", 
+    "foc", "gost", "imag", "import", "indic", "inform", "inici", "insist", "instru", "lembr", "ment", "mint", "not", "observ", "opin", 
     "particip", "pens", "perceb", "pergunt", "permit", "persist", "preocup", "prepar", "pretend", "precis", 
-    "procur", "promet", "signific", "tent", "termin", "verific", "visit"
+    "procur", "promet", "signific", "tent", "termin", "top", "verific", "visit"
 }
 
 # Complex/Process Verbs
 PROCESS_VERB_ROOTS = {
     "acumul", "convert", "constru", "contrat", "correspond", "deposit", "dobr", "expand", "exib", "experiment", "explic", "explor", 
-    "expuls", "extrai", "finaliz", "imped", "inclu", "interromp", "ocup", "oferec", "omit", "organ", "produz", 
+    "expuls", "extrai", "finaliz", "fortalec", "imped", "inclu", "interromp", "ocup", "oferec", "omit", "organ", "produz", 
     "quebr", "reag", "reaj", "realiz", "receb", "reclam", "reduz", "reflet", "relax", "represent", "reserv", 
     "resolv", "respond", "restit", "romp", "segu", "serv", "sorr", "sub", "substitu", "suj", "surprend", 
     "traduz", "transform", "un", "us"

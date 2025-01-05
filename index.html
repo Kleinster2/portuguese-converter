@@ -123,6 +123,15 @@
             const input = document.getElementById('input').value;
             if (!input.trim()) return;
             
+            // Track conversion event
+            if (window.va) {
+                window.va.track('text_conversion', {
+                    input_text: input,
+                    input_length: input.length,
+                    contains_special_chars: /[áéíóúâêîôûãõñç]/i.test(input)
+                });
+            }
+            
             const btn = document.getElementById('convertBtn');
             const loading = document.getElementById('loading');
             const result = document.getElementById('result');
