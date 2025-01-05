@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from portuguese_converter import convert_text
+from . import convert_text
 import sys
 import os
 import traceback
@@ -61,7 +61,7 @@ def convert():
             }), 400
         
         # Convert the text
-        result = convert_text(text)
+        result = convert_text.convert_text(text)
         logger.info(f"Successfully converted text: {text[:50]}...")
         
         return jsonify({
