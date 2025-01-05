@@ -377,8 +377,10 @@ def apply_phonetic_rules(word, next_word=None):
             transformed = transformed.lower().replace('olh', 'ôly')
 
     # Rule 6p: 'lh' => 'ly'
-    if not is_verb(word):
-        transformed = transformed.replace('lh', 'ly').replace('Lh', 'Ly').replace('LH', 'LY')
+    #if not is_verb(word):
+    if 'lh' in transformed.lower():
+        transformed = transformed.lower().replace('lh', 'ly')
+    #    transformed = transformed.replace('lh', 'ly').replace('Lh', 'Ly').replace('LH', 'LY')
 
     # Rule 7p: Final 'ou' becomes 'ô'
     if transformed.lower().endswith('ou'):
