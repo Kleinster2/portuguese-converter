@@ -234,12 +234,12 @@ BASIC_VERB_ROOTS = {
 ACTION_VERB_ROOTS = {
     "abus", "acab", "aceit", "acess", "acompanh", "acord", "afast", "ajud", "alug", "apag", "apanh", 
     "aproveit", "arm", "arrast", "arrum", "assin", "atend", "atra", "atravess", "aument", "avis", "bail", 
-    "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "colet", "colid", "colh", "começ", 
-    "compr", "comunic", "control", "convid", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
-    "danç", "descans", "destac", "edit", "empreg", "empurr", "encontr", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
+    "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "coç", "colet", "colid", "colh", "começ", 
+    "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
+    "danç", "descans", "destac", "destru", "edit", "empreg", "empurr", "encontr", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
     "flert", "form", "grit", "guard", "imprim", "jog", "junt", "lav", "levant", "lig", "limp", "lut", "marc", 
-    "met", "mex", "mord", "mostr", "mud", "olh", "peg", "reform", "remov", "repet", "retir", "reun", "salt", 
-    "salv", "samb", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
+    "met", "mex", "mord", "mostr", "mud", "olh", "peg", "reform", "remov", "repet", "resist", "retir", "reun", "salt", 
+    "salv", "samb", "soletr", "som", "solt", "sorri", "sub", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
 }
 
 # Cognitive/Mental Verbs
@@ -248,14 +248,14 @@ COGNITIVE_VERB_ROOTS = {
     "assist", "assum", "coment", "comet", "compar", "concord", "conhec", "consegu", "consig", "consig", "consider", "consist", 
     "consent", "cont", "convers", "decid", "defend", "defin", "demor", "depend", "desej", "desenh", "desenvolv", 
     "descobr", "desist", "dirig", "discut", "divid", "entend", "esper", "esquec", "esqueç", "estud", "evit", 
-    "gost", "imag", "import", "indic", "inform", "inici", "insist", "instru", "lembr", "not", "observ", "opin", 
+    "foc", "gost", "imag", "import", "indic", "inform", "inici", "insist", "instru", "lembr", "not", "observ", "opin", 
     "particip", "pens", "perceb", "pergunt", "permit", "persist", "preocup", "prepar", "pretend", "precis", 
     "procur", "promet", "signific", "tent", "termin", "verific", "visit"
 }
 
 # Complex/Process Verbs
 PROCESS_VERB_ROOTS = {
-    "constru", "contrat", "correspond", "deposit", "dobr", "expand", "exib", "experiment", "explic", "explor", 
+    "acumul", "convert", "constru", "contrat", "correspond", "deposit", "dobr", "expand", "exib", "experiment", "explic", "explor", 
     "expuls", "extrai", "finaliz", "imped", "inclu", "interromp", "ocup", "oferec", "omit", "organ", "produz", 
     "quebr", "reag", "reaj", "realiz", "receb", "reclam", "reduz", "reflet", "relax", "represent", "reserv", 
     "resolv", "respond", "restit", "romp", "segu", "serv", "sorr", "sub", "substitu", "suj", "surprend", 
@@ -406,28 +406,32 @@ def apply_phonetic_rules(word, next_word=None):
     if transformed.lower().endswith('ol'):
         transformed = transformed[:-2] + 'óu'
 
-    # Rule 13p: Final 'l' => 'u'
+    # Rule 13p: Transform 'olh' to 'ôlh'
+    if 'olh' in transformed.lower():
+        transformed = transformed.lower().replace('olh', 'ôlh')
+
+    # Rule 14p: Final 'l' => 'u'
     if transformed.lower().endswith('l'):
         transformed = transformed[:-1] + 'u'
 
-    # Rule 14p: Insert 'i' between specific consonant pairs
+    # Rule 15p: Insert 'i' between specific consonant pairs
     if any(p in transformed.lower() for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç']):
         for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç']:
             transformed = re.sub(f'{p}', f'{p[0]}i{p[1]}', transformed.lower())
 
-    # Rule 15p: Append 'i' to words ending in specific consonants
+    # Rule 16p: Append 'i' to words ending in specific consonants
     if transformed.lower().endswith(('d', 't', 'b', 'f', 'j', 'k', 'p', 't', 'v')):
         transformed = transformed + 'i'
 
-    # Rule 16p: Replace final 'c' with 'ki'
+    # Rule 17p: Replace final 'c' with 'ki'
     if transformed.lower().endswith('c'):
         transformed = transformed[:-1] + 'ki'
 
-    # Rule 17p: Append 'ui' to words ending in 'g'
+    # Rule 18p: Append 'ui' to words ending in 'g'
     if transformed.lower().endswith('g'):
         transformed = transformed + 'ui'
 
-    # Rule 18p: Transform 'eir' to 'er'
+    # Rule 19p: Transform 'eir' to 'er'
     if 'eir' in transformed.lower():
         transformed = transformed.lower().replace('eir', 'êr')
 
