@@ -141,6 +141,11 @@
         // Initialize voices
         function loadVoices() {
             voices = window.speechSynthesis.getVoices();
+            // Debug: List all available voices
+            console.log('Available voices:');
+            voices.forEach(voice => {
+                console.log(`- ${voice.name} (${voice.lang})${voice.localService ? ' [local]' : ''}`);
+            });
         }
 
         // Load voices when they become available
@@ -197,23 +202,34 @@
             }
 
             try {
-                // Try to find a female Brazilian Portuguese voice
+                // Try different approaches to find a Portuguese voice
                 const brVoice = voices.find(voice => 
-                    voice.lang.startsWith('pt') && 
+                    // First try: exact match for Brazilian Portuguese female
+                    (voice.lang === 'pt-BR' && voice.name.toLowerCase().includes('female'))
+                ) || voices.find(voice =>
+                    // Second try: any Brazilian Portuguese
+                    voice.lang === 'pt-BR'
+                ) || voices.find(voice =>
+                    // Third try: any Portuguese female
+                    (voice.lang.startsWith('pt') && voice.name.toLowerCase().includes('female'))
+                ) || voices.find(voice =>
+                    // Fourth try: any Portuguese
+                    voice.lang.startsWith('pt')
+                ) || voices.find(voice =>
+                    // Fifth try: any female voice
                     voice.name.toLowerCase().includes('female')
-                ) || voices.find(voice => 
-                    voice.lang.startsWith('pt')  // Fallback to any Portuguese voice
                 );
 
                 currentUtterance = new SpeechSynthesisUtterance(text);
                 currentUtterance.lang = 'pt-BR';
                 currentUtterance.rate = 0.9;  // Slightly slower for clearer pronunciation
+                currentUtterance.pitch = 1.2; // Slightly higher pitch for more feminine voice
                 
                 if (brVoice) {
                     currentUtterance.voice = brVoice;
-                    console.log('Using voice:', brVoice.name);
+                    console.log('Selected voice:', brVoice.name, brVoice.lang);
                 } else {
-                    console.log('No Portuguese voice found, using default');
+                    console.log('No suitable voice found, using default');
                 }
                 
                 currentUtterance.onend = () => {
