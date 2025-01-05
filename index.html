@@ -134,6 +134,7 @@
 
     <script>
         let speaking = false;
+        let currentUtterance = null;
         
         function speakText() {
             const text = document.getElementById('output').textContent;
@@ -147,25 +148,42 @@
                 return;
             }
 
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'pt-BR';
-            utterance.rate = 0.9;  // Slightly slower for clearer pronunciation
-            
-            utterance.onend = () => {
+            try {
+                currentUtterance = new SpeechSynthesisUtterance(text);
+                currentUtterance.lang = 'pt-BR';
+                currentUtterance.rate = 0.9;  // Slightly slower for clearer pronunciation
+                
+                currentUtterance.onend = () => {
+                    speaking = false;
+                    buttonText.textContent = '🔊 Speak';
+                };
+                
+                currentUtterance.onerror = (event) => {
+                    console.error('Speech error:', event.error);
+                    speaking = false;
+                    buttonText.textContent = '🔊 Speak';
+                };
+                
+                speaking = true;
+                buttonText.textContent = '🔇 Stop';
+                
+                // Track speech event safely
+                try {
+                    if (window.va) {
+                        window.va.track('text_to_speech', {
+                            spoken_text: text,
+                            text_length: text.length
+                        });
+                    }
+                } catch (e) {
+                    console.log('Analytics error:', e);
+                }
+                
+                window.speechSynthesis.speak(currentUtterance);
+            } catch (error) {
+                console.error('Speech synthesis error:', error);
                 speaking = false;
                 buttonText.textContent = '🔊 Speak';
-            };
-            
-            speaking = true;
-            buttonText.textContent = '🔇 Stop';
-            window.speechSynthesis.speak(utterance);
-
-            // Track speech event
-            if (window.va) {
-                window.va.track('text_to_speech', {
-                    spoken_text: text,
-                    text_length: text.length
-                });
             }
         }
         
@@ -182,13 +200,17 @@
             const input = document.getElementById('input').value;
             if (!input.trim()) return;
             
-            // Track conversion event
-            if (window.va) {
-                window.va.track('text_conversion', {
-                    input_text: input,
-                    input_length: input.length,
-                    contains_special_chars: /[áéíóúâêîôûãõñç]/i.test(input)
-                });
+            // Track conversion event safely
+            try {
+                if (window.va) {
+                    window.va.track('text_conversion', {
+                        input_text: input,
+                        input_length: input.length,
+                        contains_special_chars: /[áéíóúâêîôûãõñç]/i.test(input)
+                    });
+                }
+            } catch (e) {
+                console.log('Analytics error:', e);
             }
             
             const btn = document.getElementById('convertBtn');
@@ -210,6 +232,10 @@
                     },
                     body: JSON.stringify({ text: input })
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
                 const data = await response.json();
                 result.style.display = 'block';
