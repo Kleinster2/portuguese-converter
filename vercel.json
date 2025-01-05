@@ -2,12 +2,12 @@
     "version": 2,
     "builds": [
         {
-            "src": "api/portuguese_converter.py",
+            "src": "api/app.py",
             "use": "@vercel/python",
             "config": {
                 "runtime": "python3.9",
                 "maxLambdaSize": "15mb",
-                "handler": "portuguese_converter.py"
+                "handler": "app.py"
             }
         },
         {
@@ -18,7 +18,7 @@
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "api/portuguese_converter.py"
+            "dest": "api/app.py"
         },
         {
             "src": "/(.*)",
