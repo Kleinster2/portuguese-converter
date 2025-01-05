@@ -370,19 +370,25 @@ def apply_phonetic_rules(word, next_word=None):
         
     # Rule 4p: 's' between vowels becomes 'z'
     transformed = re.sub(r'([aeiouáéíóúâêîôûãẽĩõũ])s([aeiouáéíóúâêîôûãẽĩõũ])', r'\1z\2', transformed, flags=re.IGNORECASE)
-    
-    # Rule 5p: 'lh' => 'ly'
-    transformed = transformed.replace('lh', 'ly').replace('Lh', 'Ly').replace('LH', 'LY')
 
-    # Rule 6p: Final 'ou' becomes 'ô'
+    # Rule 5p: Transform 'olh' to 'ôly'
+    if not is_verb(word):
+        if 'olh' in transformed.lower():
+            transformed = transformed.lower().replace('olh', 'ôly')
+
+    # Rule 6p: 'lh' => 'ly'
+    if not is_verb(word):
+        transformed = transformed.replace('lh', 'ly').replace('Lh', 'Ly').replace('LH', 'LY')
+
+    # Rule 7p: Final 'ou' becomes 'ô'
     if transformed.lower().endswith('ou'):
         transformed = transformed[:-2] + 'ô'
         
-    # Rule 7p: Final 'm' => 'n' (nasalization)
+    # Rule 8p: Final 'm' => 'n' (nasalization)
     if transformed.lower().endswith('m'):
         transformed = transformed[:-1] + 'n'
         
-    # Rule 8p: Verb endings (ar -> á, er -> ê, ir -> í)
+    # Rule 9p: Verb endings (ar -> á, er ->ê, ir -> í)
     if is_verb(word):
         if transformed.lower().endswith('ar'):
             transformed = transformed[:-2] + 'á'
@@ -390,9 +396,6 @@ def apply_phonetic_rules(word, next_word=None):
             transformed = transformed[:-2] + 'ê'
         elif transformed.lower().endswith('ir'):
             transformed = transformed[:-2] + 'í'
-    
-    # Rule 9p: Common reductions (está->tá, para->pra, você->cê)
-    # Handled by dictionary lookups
     
     # Rule 10p: Remove initial 'h' (hoje->oje, homem->omem)
     if transformed.lower().startswith('h'):
@@ -405,10 +408,6 @@ def apply_phonetic_rules(word, next_word=None):
     # Rule 12p: Final 'ol' => 'óu'
     if transformed.lower().endswith('ol'):
         transformed = transformed[:-2] + 'óu'
-
-    # Rule 13p: Transform 'olh' to 'ôlh'
-    if 'olh' in transformed.lower():
-        transformed = transformed.lower().replace('olh', 'ôlh')
 
     # Rule 14p: Final 'l' => 'u'
     if transformed.lower().endswith('l'):
