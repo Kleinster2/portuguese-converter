@@ -135,6 +135,54 @@
     <script>
         let speaking = false;
         let currentUtterance = null;
+        let va = null;
+        let voices = [];
+
+        // Initialize voices
+        function loadVoices() {
+            voices = window.speechSynthesis.getVoices();
+        }
+
+        // Load voices when they become available
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+        
+        // Initial load of voices
+        loadVoices();
+
+        // Wait for Vercel Analytics to load
+        async function waitForVA() {
+            return new Promise((resolve) => {
+                if (window.va) {
+                    resolve(window.va);
+                    return;
+                }
+                
+                const observer = new MutationObserver((mutations, obs) => {
+                    if (window.va) {
+                        obs.disconnect();
+                        resolve(window.va);
+                    }
+                });
+
+                observer.observe(document, {
+                    childList: true,
+                    subtree: true
+                });
+                
+                // Timeout after 5 seconds
+                setTimeout(() => {
+                    observer.disconnect();
+                    resolve(null);
+                }, 5000);
+            });
+        }
+        
+        // Initialize analytics when page loads
+        window.addEventListener('load', async () => {
+            va = await waitForVA();
+        });
         
         function speakText() {
             const text = document.getElementById('output').textContent;
@@ -149,9 +197,24 @@
             }
 
             try {
+                // Try to find a female Brazilian Portuguese voice
+                const brVoice = voices.find(voice => 
+                    voice.lang.startsWith('pt') && 
+                    voice.name.toLowerCase().includes('female')
+                ) || voices.find(voice => 
+                    voice.lang.startsWith('pt')  // Fallback to any Portuguese voice
+                );
+
                 currentUtterance = new SpeechSynthesisUtterance(text);
                 currentUtterance.lang = 'pt-BR';
                 currentUtterance.rate = 0.9;  // Slightly slower for clearer pronunciation
+                
+                if (brVoice) {
+                    currentUtterance.voice = brVoice;
+                    console.log('Using voice:', brVoice.name);
+                } else {
+                    console.log('No Portuguese voice found, using default');
+                }
                 
                 currentUtterance.onend = () => {
                     speaking = false;
@@ -169,8 +232,8 @@
                 
                 // Track speech event safely
                 try {
-                    if (window.va) {
-                        window.va.track('text_to_speech', {
+                    if (va) {
+                        va.track('text_to_speech', {
                             spoken_text: text,
                             text_length: text.length
                         });
@@ -202,8 +265,8 @@
             
             // Track conversion event safely
             try {
-                if (window.va) {
-                    window.va.track('text_conversion', {
+                if (va) {
+                    va.track('text_conversion', {
                         input_text: input,
                         input_length: input.length,
                         contains_special_chars: /[áéíóúâêîôûãõñç]/i.test(input)
