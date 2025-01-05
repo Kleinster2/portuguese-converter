@@ -26,7 +26,7 @@ PHONETIC_DICTIONARY = {
     'estas': 'éstas',
     'este': 'êsti',
     'estes': 'êstis',
-    'eu': 'êu',
+    'eu': 'eu',
     'meu': 'mêu',
     'nesta': 'néssa',
     'nestas': 'néssas',
@@ -103,7 +103,7 @@ PHONETIC_DICTIONARY = {
     'chat': 'chati',
 
     # Common Verbs
-    'vamos': 'vam',
+    'vamos': 'vãm',
     'vou': 'vô',
 
     # Common Words and Expressions
