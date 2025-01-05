@@ -244,7 +244,7 @@ ACTION_VERB_ROOTS = {
 
 # Cognitive/Mental Verbs
 COGNITIVE_VERB_ROOTS = {
-    "ador", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "anot", "aprend", "apresent", 
+    "adivinh", "ador", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "anot", "aprend", "apresent", 
     "assist", "assum", "coment", "comet", "compar", "concord", "conhec", "consegu", "consig", "consig", "consider", "consist", 
     "consent", "cont", "convers", "decid", "defend", "defin", "demor", "depend", "desej", "desenh", "desenvolv", 
     "descobr", "desist", "dirig", "discut", "divid", "entend", "esper", "esquec", "esqueç", "estud", "evit", 
@@ -333,12 +333,12 @@ def apply_phonetic_rules(word, next_word=None):
 
     # Check irregular verbs first
     if lword in IRREGULAR_VERBS:
-        print(f"Found irregular verb: '{lword}' -> '{IRREGULAR_VERBS[lword]}'")
+    #    print(f"Found irregular verb: '{lword}' -> '{IRREGULAR_VERBS[lword]}'")
         return preserve_capital(word, IRREGULAR_VERBS[lword])
 
     # Special handling for não before verbs
     if next_word and is_verb(next_word):
-        if lword == "não":
+        if lword in ["não", "nao"]:
             print(f"Found 'não' before verb '{next_word}', using 'num'")
             return preserve_capital(word, "num")
 
