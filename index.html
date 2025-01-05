@@ -70,6 +70,24 @@
             margin: 15px 0;
             color: #666;
         }
+        #speakBtn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            display: none;
+        }
+        #speakBtn:hover {
+            background-color: #45a049;
+        }
+        #speakBtn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
         
         /* Mobile-specific styles */
         @media (max-width: 600px) {
@@ -106,10 +124,49 @@
         
         <div id="result" class="result" style="display: none;">
             <strong>Result:</strong> <span id="output"></span>
+            <button id="speakBtn" onclick="speakText()">
+                <span class="button-text">🔊 Speak</span>
+            </button>
         </div>
     </div>
 
     <script>
+        let speaking = false;
+        
+        function speakText() {
+            const text = document.getElementById('output').textContent;
+            const speakBtn = document.getElementById('speakBtn');
+            const buttonText = speakBtn.querySelector('.button-text');
+            
+            if (speaking) {
+                window.speechSynthesis.cancel();
+                speaking = false;
+                buttonText.textContent = '🔊 Speak';
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'pt-BR';
+            utterance.rate = 0.9;  // Slightly slower for clearer pronunciation
+            
+            utterance.onend = () => {
+                speaking = false;
+                buttonText.textContent = '🔊 Speak';
+            };
+            
+            speaking = true;
+            buttonText.textContent = '🔇 Stop';
+            window.speechSynthesis.speak(utterance);
+
+            // Track speech event
+            if (window.va) {
+                window.va.track('text_to_speech', {
+                    spoken_text: text,
+                    text_length: text.length
+                });
+            }
+        }
+        
         // Add touch feedback
         const btn = document.getElementById('convertBtn');
         btn.addEventListener('touchstart', function() {
@@ -161,6 +218,8 @@
                 } else {
                     document.getElementById('output').textContent = 'Error: Invalid response from server';
                 }
+                
+                document.getElementById('speakBtn').style.display = 'inline-block';  // Show speak button
             } catch (error) {
                 result.style.display = 'block';
                 document.getElementById('output').textContent = 'Error: ' + (error.message || 'Failed to convert text');
