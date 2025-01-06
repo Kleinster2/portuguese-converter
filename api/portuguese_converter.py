@@ -251,7 +251,7 @@ ACTION_VERB_ROOTS = {
 # Cognitive/Mental Verbs
 COGNITIVE_VERB_ROOTS = {
     "adivinh", "ador", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "anot", "aprend", "apresent", 
-    "assist", "assum", "coment", "comet", "compar", "concord", "conhec", "consegu", "consig", "consig", "consider", "consist", 
+    "assist", "assum", "chec", "coment", "comet", "compar", "concord", "conhec", "consegu", "consig", "consig", "consider", "consist", 
     "consent", "cont", "convers", "decid", "defend", "defin", "demor", "depend", "desej", "desenh", "desenvolv", 
     "descobr", "desist", "dirig", "discut", "divid", "entend", "esper", "esquec", "esqueç", "estud", "evit", 
     "foc", "gost", "imag", "import", "indic", "inform", "inici", "insist", "instru", "lembr", "ment", "mint", "not", "observ", "opin", 
@@ -511,8 +511,8 @@ def handle_vowel_combination(first, second):
         return first[:-1] + second, ''
 
     # Rule 4c
-    if first[-1] == 'u' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-        return first + 'w' + second, ''
+    # if first[-1] == 'u' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
+    #     return first + 'w' + second, ''
 
     # Rule 6c
     if first[-1] in 'sz' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
