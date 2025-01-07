@@ -52,7 +52,7 @@ PHONETIC_DICTIONARY = {
     'lhes' : 'lys',
     'nos' : 'nus',
     'o' : 'u',
-    'os' : 'us',
+    # 'os' : 'us',
     'voce' : 'cê',
     'você' : 'cê',
     'voces' : 'cêys',
@@ -135,10 +135,10 @@ PHONETIC_DICTIONARY = {
     'também': 'tãmbêyn',
     'teatro': 'tiatru',
     'teatros': 'tiatrus',
-    'última': 'útima',
-    'últimas': 'útimas',
-    'último': 'útimu',
-    'últimos': 'útimus',
+    'última': 'úutima',
+    'últimas': 'úutimas',
+    'último': 'úutimu',
+    'últimos': 'úutimus',
     'dormir': 'durmí',
     'dormiu': 'durmíu',
     'dormiram': 'durmíram',
@@ -364,10 +364,10 @@ def apply_phonetic_rules(word, next_word=None):
     #     transformed = transformed[:-1] + 'u'
     # elif transformed.lower().endswith('os'):
     #     transformed = transformed[:-2] + 'us'
-    if transformed.lower().endswith('e'):
-        transformed = transformed[:-1] + 'i'
-    elif transformed.lower().endswith('es'):
-        transformed = transformed[:-2] + 'is'
+    # if transformed.lower().endswith('e'):
+    #     transformed = transformed[:-1] + 'i'
+    # elif transformed.lower().endswith('es'):
+    #     transformed = transformed[:-2] + 'is'
         
     # Rule 2p: Initial 'es' becomes 'is'
     if transformed.lower().startswith('es'):
