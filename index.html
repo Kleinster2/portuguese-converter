@@ -124,11 +124,13 @@
         
         <div id="result" class="result" style="display: none;">
             <strong>Result:</strong> <span id="output"></span>
+            <!-- Audio feature temporarily disabled
             <div style="margin-top: 10px;">
                 <button id="speakBtn" onclick="speakText()" style="width: auto; display: none;">
                     <span class="button-text">🔊 Speak</span>
                 </button>
             </div>
+            -->
         </div>
     </div>
 
@@ -189,6 +191,8 @@
             va = await waitForVA();
         });
         
+        // Audio feature temporarily disabled
+        /*
         function speakText() {
             const text = document.getElementById('output').textContent;
             const speakBtn = document.getElementById('speakBtn');
@@ -265,6 +269,7 @@
                 buttonText.textContent = '🔊 Speak';
             }
         }
+        */
         
         // Add touch feedback
         const btn = document.getElementById('convertBtn');
@@ -295,12 +300,12 @@
             const btn = document.getElementById('convertBtn');
             const loading = document.getElementById('loading');
             const result = document.getElementById('result');
-            const speakBtn = document.getElementById('speakBtn');
+            //const speakBtn = document.getElementById('speakBtn');
             
             btn.disabled = true;
             loading.style.display = 'block';
             result.style.display = 'none';
-            speakBtn.style.display = 'none';
+            //speakBtn.style.display = 'none';
             
             try {
                 const response = await fetch('/api/portuguese_converter', {
@@ -325,7 +330,7 @@
                     console.error('API Error:', errorMessage);
                 } else if (data.result) {
                     document.getElementById('output').textContent = data.result;
-                    speakBtn.style.display = 'inline-block';  // Only show speak button on success
+                    //speakBtn.style.display = 'inline-block';  // Only show speak button on success
                 } else {
                     document.getElementById('output').textContent = 'Error: Invalid response from server';
                     console.error('Invalid API response:', data);
