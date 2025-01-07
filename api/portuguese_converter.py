@@ -67,7 +67,7 @@ PHONETIC_DICTIONARY = {
     'às': 'as',
     'com': 'cum',
     'sem': 'sêyn',
-    'e': 'y',
+    'e': 'i',
     'em': 'ein',
     'mas': 'máys',
     'para': 'pra',
@@ -208,7 +208,8 @@ WORD_PAIRS = {
     'tão vocês': 'cêys tãum',
     'tão voces': 'cêys tãum',
     'tao voces': 'cêys tãum',
-    'tao vocês': 'cêys tãum'
+    'tao vocês': 'cêys tãum',
+    'e você': 'iucê'
 }
 
 # Verb identification constants
