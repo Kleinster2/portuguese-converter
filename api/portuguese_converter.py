@@ -359,11 +359,11 @@ def apply_phonetic_rules(word, next_word=None):
     
     # Apply each rule in sequence
     # Rule 1p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', 'e'->'i', 'es'->'is')
-    if transformed.lower().endswith('o'):
-        transformed = transformed[:-1] + 'u'
-    elif transformed.lower().endswith('os'):
-        transformed = transformed[:-2] + 'us'
-    elif transformed.lower().endswith('e'):
+    # if transformed.lower().endswith('o'):
+    #     transformed = transformed[:-1] + 'u'
+    # elif transformed.lower().endswith('os'):
+    #     transformed = transformed[:-2] + 'us'
+    if transformed.lower().endswith('e'):
         transformed = transformed[:-1] + 'i'
     elif transformed.lower().endswith('es'):
         transformed = transformed[:-2] + 'is'
