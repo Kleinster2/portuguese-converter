@@ -369,9 +369,10 @@ def apply_phonetic_rules(word, next_word=None):
     elif transformed.lower().endswith('es'):
         transformed = transformed[:-2] + 'is'
         
-    # Rule 2p: Vowel raising in unstressed syllables
-    # TODO: Implement more complex vowel raising rules
-    
+    # Rule 2p: Initial 'es' becomes 'is'
+    if transformed.lower().startswith('es'):
+        transformed = 'is' + transformed[2:]
+        
     # Rule 3p: 'ão' at the end becomes 'aum'
     if transformed.lower().endswith('ão'):
         transformed = transformed[:-2] + 'aum'
