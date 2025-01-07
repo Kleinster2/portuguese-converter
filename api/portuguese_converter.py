@@ -215,7 +215,7 @@ WORD_PAIRS = {
 IRREGULAR_VERBS = {
     "estar": "está", "estou": "tô", "estás": "tá", "está": "tá", "estamos": "tamu", "estão": "tãum",
     "ser": "sê", "sou": "sô", "é": "éh", "somos": "somu", "são": "sãum",
-    "ter": "tê", "tenho": "tenhu", "tem": "teym", "temos": "temu", "têm": "teym", "tive": "tivi", "teve": "tevi", "tivemos": "tivemu", "tiveram": "tiveraum", "tinha": "tinha", "tinhamos": "tinhamu", "tinham": "tinhaum",
+    "ter": "tê", "tenho": "tenhu", "tem": "teim", "temos": "temu", "têm": "teim", "tive": "tivi", "teve": "tevi", "tivemos": "tivemu", "tiveram": "tiveraum", "tinha": "tinha", "tinhamos": "tinhamu", "tinham": "tinhaum",
     "fazer": "fazê", "faco": "fassu", "faço": "fassu", "faz": "fays", "fazemos": "fazêmu", "fazem": "fázeym", "fiz": "fis", "fez": "fêz", "fizemos": "fizemu", "fizeram": "fizéraum", "fazia": "fazia", "faziamos": "faziamu", "faziam": "faziaum",
     "ir": "ih", "vou": "vô", "vai": "vai", "vamos": "vam", "vão": "vãum",
     "vir": "vi", "venho": "venhu", "vem": "veym", "vimos": "vimu", "vêm": "veym",
@@ -226,6 +226,7 @@ IRREGULAR_VERBS = {
     "querer": "kerê", "quero": "kéru", "quer": "ké", "queremos": "kerêmu", "querem": "kéreym", "quis": "kis", "quisemos": "kizemu", "quiseram": "kizeraum",
     "poder": "podê", "posso": "póssu", "pode": "pódi", "podemos": "podêmu", "podem": "pódeym", "pude": "pudi", "pudemos": "pudemu", "puderam": "puderaum",
     "ver": "vê", "vejo": "veju", "vê": "vê","ve": "vê", "vemos": "vemu", "veêm": "vem", "vi": "vi", "viu": "viu", "vimos": "vimu", "viram": "viraum",
+    "saber": "sabê", "sei": "sei",
 }
 
 # Basic/Essential Verbs
@@ -250,13 +251,13 @@ ACTION_VERB_ROOTS = {
 
 # Cognitive/Mental Verbs
 COGNITIVE_VERB_ROOTS = {
-    "adivinh", "ador", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "anot", "aprend", "apresent", 
+    "ach", "adivinh", "ador", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "anot", "aprend", "apresent", 
     "assist", "assum", "chec", "coment", "comet", "compar", "concord", "conhec", "consegu", "consig", "consig", "consider", "consist", 
     "consent", "cont", "convers", "decid", "defend", "defin", "demor", "depend", "desej", "desenh", "desenvolv", 
     "descobr", "desist", "dirig", "discut", "divid", "entend", "esper", "esquec", "esqueç", "estud", "evit", 
-    "foc", "gost", "imag", "import", "indic", "inform", "inici", "insist", "instru", "lembr", "ment", "mint", "not", "observ", "opin", 
+    "foc", "gost", "imagin", "import", "indic", "inform", "inici", "insist", "instru", "lembr", "ment", "mint", "not", "observ", "opin", 
     "particip", "pens", "perceb", "pergunt", "permit", "persist", "preocup", "prepar", "pretend", "precis", 
-    "procur", "promet", "signific", "tent", "termin", "top", "verific", "visit"
+    "procur", "promet", "sab", "soub", "signific", "tent", "termin", "top", "verific", "visit"
 }
 
 # Complex/Process Verbs
@@ -358,11 +359,11 @@ def apply_phonetic_rules(word, next_word=None):
     
     # Apply each rule in sequence
     # Rule 1p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', 'e'->'i', 'es'->'is')
-    if transformed.lower().endswith('o'):
-        transformed = transformed[:-1] + 'u'
-    elif transformed.lower().endswith('os'):
-        transformed = transformed[:-2] + 'us'
-    elif transformed.lower().endswith('e'):
+    # if transformed.lower().endswith('o'):
+    #     transformed = transformed[:-1] + 'u'
+    # elif transformed.lower().endswith('os'):
+    #     transformed = transformed[:-2] + 'us'
+    if transformed.lower().endswith('e'):
         transformed = transformed[:-1] + 'i'
     elif transformed.lower().endswith('es'):
         transformed = transformed[:-2] + 'is'
