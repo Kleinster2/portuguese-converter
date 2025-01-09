@@ -521,16 +521,16 @@ def handle_vowel_combination(first, second):
         return first[:-1] + second, ''
 
     # Rule 4c
-    # if first[-1] == 'u' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-    #     return first + 'w' + second, ''
+    if first[-1] == 'u' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
+        return first + 'w' + second, ''
 
     # Rule 6c
     if first[-1] in 'sz' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
         return first[:-1] + 'z' + second, ''
 
     # Rule 5c - moved after other rules
-    # if first[-1] in 'eiouáéíóúâêîôûãẽĩõũy' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-    #     return first + second, ''
+    if first[-1] in 'eiouáéíóúâêîôûãẽĩõũy' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
+        return first + second, ''
 
     return first, second
 
