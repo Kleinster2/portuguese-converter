@@ -194,7 +194,7 @@ WORD_PAIRS = {
     'com a': 'cua',
     'com as': 'cuas',
     'com o': 'cuo',
-    'com os': 'cuos',
+    'com os': 'cus',
     'com ele': 'cuêli',
     'com eles': 'cuêlis',
     'com ela': 'cuéla',
@@ -544,7 +544,7 @@ def tokenize_text(text):
     Returns a list of (word, punct) tuples, e.g.:
         "Olá, mundo!" => [("Olá", ""), ("", ","), ("mundo", ""), ("", "!")]
     """
-    pattern = r'([A-Za-zÀ-ÖØ-öø-ÿ0-9]+)|([.,!?;:]+)'
+    pattern = r'([A-Za-zÀ-ÖØ-öø-ÿ0-9]+)|([.,!?;:()\[\]{}]+)'
     tokens = []
     
     for match in re.finditer(pattern, text):
