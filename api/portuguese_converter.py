@@ -152,7 +152,9 @@ PHONETIC_DICTIONARY = {
     'atual': 'atuau',
     'atualmente': 'atuaumêinti',
     'agora': 'agóra',
-    'hoje': 'ôji'
+    'hoje': 'ôji',
+    'mes': 'mêys',
+    'meses': 'mêzis'
 }
 
 # Word pairs that need special handling (not covered by regular rules)
@@ -251,7 +253,7 @@ ACTION_VERB_ROOTS = {
     "aproveit", "arm", "arrast", "arrum", "assin", "atend", "atra", "atravess", "atualiz", "aument", "avis", "bail", 
     "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "coç", "colet", "colid", "colh", "começ", 
     "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
-    "danç", "descans", "destac", "destru", "edit", "empreg", "empurr", "encontr", "encost", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
+    "danç", "descans", "destac", "destru", "dit", "edit", "empreg", "empurr", "encontr", "encost", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
     "flert", "form", "grit", "guard", "imprim", "jog", "junt", "lav", "levant", "lig", "limp", "lut", "marc", 
     "met", "mex", "molh", "mord", "mostr", "mud", "olh", "peg", "reform", "remov", "repet", "resist", "retir", "reun", "salt", 
     "salv", "samb", "soletr", "som", "solt", "sorri", "sub", "suport", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
@@ -265,13 +267,13 @@ COGNITIVE_VERB_ROOTS = {
     "descobr", "desist", "dirig", "discut", "divid", "entend", "esper", "esquec", "esqueç", "estud", "evit", 
     "foc", "gost", "imagin", "import", "indic", "inform", "inici", "insist", "instru", "lembr", "ment", "mint", "not", "observ", "opin", 
     "particip", "pens", "perceb", "pergunt", "permit", "persist", "preocup", "prepar", "pretend", "precis", 
-    "procur", "promet", "sab", "soub", "signific", "tent", "termin", "top", "verific", "visit"
+    "procur", "promet", "sab", "sofr", "soub", "signific", "tent", "termin", "top", "verific", "visit"
 }
 
 # Complex/Process Verbs
 PROCESS_VERB_ROOTS = {
     "acumul", "convert", "constru", "contrat", "correspond", "deposit", "dobr", "expand", "exib", "experiment", "explic", "explor", 
-    "expuls", "extrai", "finaliz", "fortalec", "imped", "inclu", "interromp", "ocup", "oferec", "omit", "organ", "produz", 
+    "expuls", "extrai", "finaliz", "fortalec", "imped", "inclu", "interromp", "morr", "ocup", "oferec", "omit", "organ", "produz", 
     "quebr", "reag", "reaj", "realiz", "receb", "reclam", "reduz", "reflet", "relax", "represent", "reserv", 
     "resolv", "respond", "restit", "romp", "segu", "serv", "sorr", "sub", "substitu", "suj", "surprend", 
     "traduz", "transform", "un", "us"
