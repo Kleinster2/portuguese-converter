@@ -13,6 +13,11 @@ PHONETIC_DICTIONARY = {
     'alguma': 'auguma',
     'algumas': 'augumas',
     'alguns': 'auguns',
+    'aquilo': 'akilu',
+    'aquele': 'akêli',
+    'aqueles': 'akêlis',
+    'aquelela': 'akéla',
+    'aquelelas': 'akélas',
     'ela': 'éla',
     'elas': 'élas',
     'ele': 'êli',
@@ -224,7 +229,7 @@ WORD_PAIRS = {
 # Verb identification constants
 IRREGULAR_VERBS = {
     "estar": "está", "estou": "tô", "estás": "tá", "está": "tá", "estamos": "tamu", "estão": "tãum",
-    "ser": "sê", "sou": "sô", "é": "éh", "somos": "somu", "são": "sãum",
+    "ser": "sê", "sou": "sô", "é": "é", "somos": "somu", "são": "sãum",
     "ter": "tê", "tenho": "tenhu", "tem": "teim", "temos": "temu", "têm": "teim", "tive": "tivi", "teve": "tevi", "tivemos": "tivemu", "tiveram": "tiveraum", "tinha": "tinha", "tinhamos": "tinhamu", "tinham": "tinhaum",
     "fazer": "fazê", "faco": "fassu", "faço": "fassu", "faz": "fays", "fazemos": "fazêmu", "fazem": "fázeym", "fiz": "fis", "fez": "fêz", "fizemos": "fizemu", "fizeram": "fizéraum", "fazia": "fazia", "faziamos": "faziamu", "faziam": "faziaum",
     "ir": "ih", "vou": "vô", "vai": "vai", "vamos": "vam", "vão": "vãum",
@@ -261,7 +266,7 @@ ACTION_VERB_ROOTS = {
 
 # Cognitive/Mental Verbs
 COGNITIVE_VERB_ROOTS = {
-    "ach", "adivinh", "ador", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "anot", "aprend", "apresent", 
+    "ach", "adivinh", "ador", "admir", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "anot", "aprend", "apresent", 
     "assist", "assum", "chec", "coment", "comet", "compar", "concord", "conhec", "consegu", "consig", "consig", "consider", "consist", 
     "consent", "cont", "convers", "decid", "defend", "defin", "demor", "depend", "desej", "desenh", "desenvolv", 
     "descobr", "desist", "dirig", "discut", "divid", "entend", "esper", "esquec", "esqueç", "estud", "evit", 
@@ -425,32 +430,40 @@ def apply_phonetic_rules(word, next_word=None):
     if transformed.lower().startswith('ex'):
         transformed = 'ez' + transformed[2:]
 
-    # Rule 12p: Final 'ol' => 'óu'
+    # Rule 12p: Initial 'pol' becomes 'pul'
+    if transformed.lower().startswith('pol'):
+        transformed = 'pul' + transformed[3:]
+
+    # Rule 13p: Initial 'volt' becomes 'vout'   
+    if transformed.lower().startswith('volt'):
+        transformed = 'vout' + transformed[4:]
+
+    # Rule 14p: Final 'ol' => 'óu'
     if transformed.lower().endswith('ol'):
         transformed = transformed[:-2] + 'óu'
 
-    # Rule 14p: Final 'l' => 'u'
+    # Rule 15p: Final 'l' => 'u'
     if transformed.lower().endswith('l'):
-        transformed = transformed[:-1] + 'u'
+        transformed = transformed[:-1] + 'u'    
 
-    # Rule 15p: Insert 'i' between specific consonant pairs
-    if any(p in transformed.lower() for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç']):
-        for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç']:
+    # Rule 16p: Insert 'i' between specific consonant pairs
+    if any(p in transformed.lower() for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç', 'dm', 'gn', 'tm', 'tn']):
+        for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç', 'dm', 'gn', 'tm', 'tn']:
             transformed = re.sub(f'{p}', f'{p[0]}i{p[1]}', transformed.lower())
 
-    # Rule 16p: Append 'i' to words ending in specific consonants
+    # Rule 17p: Append 'i' to words ending in specific consonants
     if transformed.lower().endswith(('d', 't', 'b', 'f', 'j', 'k', 'p', 't', 'v')):
-        transformed = transformed + 'i'
+        transformed = transformed + 'i' 
 
-    # Rule 17p: Replace final 'c' with 'ki'
+    # Rule 18p: Replace final 'c' with 'ki'
     if transformed.lower().endswith('c'):
         transformed = transformed[:-1] + 'ki'
 
-    # Rule 18p: Append 'ui' to words ending in 'g'
+    # Rule 19p: Append 'ui' to words ending in 'g'
     if transformed.lower().endswith('g'):
         transformed = transformed + 'ui'
 
-    # Rule 19p: Transform 'eir' to 'er'
+    # Rule 20p: Transform 'eir' to 'er'
     if 'eir' in transformed.lower():
         transformed = transformed.lower().replace('eir', 'êr')
 
