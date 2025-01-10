@@ -233,7 +233,7 @@ IRREGULAR_VERBS = {
     "ter": "tê", "tenho": "tenhu", "tem": "teim", "temos": "temu", "têm": "teim", "tive": "tivi", "teve": "tevi", "tivemos": "tivemu", "tiveram": "tiveraum", "tinha": "tinha", "tinhamos": "tinhamu", "tinham": "tinhaum",
     "fazer": "fazê", "faco": "fassu", "faço": "fassu", "faz": "fays", "fazemos": "fazêmu", "fazem": "fázeym", "fiz": "fis", "fez": "fêz", "fizemos": "fizemu", "fizeram": "fizéraum", "fazia": "fazia", "faziamos": "faziamu", "faziam": "faziaum",
     "ir": "ih", "vou": "vô", "vai": "vai", "vamos": "vam", "vão": "vãum",
-    "vir": "vi", "venho": "venhu", "vem": "veym", "vimos": "vimu", "vêm": "veym",
+    "vir": "vim", "venho": "venhu", "vem": "veym", "vimos": "vimu", "vêm": "veym",
     "dizer": "dizê", "digo": "digu", "diz": "dis", "dizemos": "dizemu", "dizem": "dizeym", "disse": "dissi", "dissemos": "dissemu", "disseram": "disseraum", "diria": "diria", "diriamos": "diriamus", "diriam": "diriaum", "dizia": "dizia", "diziamos": "diziamus", "diziam": "diziaum", "diga": "diga", "digamos": "digamus", "digam": "digaum",
     "pedir": "pedí", "peço": "pessu", "pedi": "pédi", "pedimos": "pedímu", "pedem": "pédeym",
     "dar": "dá", "dou": "dô", "dá": "dá", "damos": "dãmu", "dão": "dãum", "dei": "dei", "deu": "deu", "demos": "démus", "deram": "déraum",
@@ -254,8 +254,8 @@ BASIC_VERB_ROOTS = {
 
 # Common Action Verbs
 ACTION_VERB_ROOTS = {
-    "abus", "acab", "aceit", "acess", "acompanh", "acord", "afast", "ajud", "alug", "apag", "apanh", 
-    "aproveit", "arm", "arrast", "arrum", "assin", "atend", "atra", "atravess", "atualiz", "aument", "avis", "bail", 
+    "abus", "acab", "aceit", "acess", "acompanh", "acord", "adiant", "afast", "ajud", "alug", "apag", "avanç", "apanh", 
+    "aproveit", "arm", "arrast", "arrum", "assin", "atend", "atra", "atras", "atravess", "atualiz", "aument", "avis", "bail", 
     "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "coç", "colet", "colid", "colh", "começ", 
     "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
     "danç", "descans", "destac", "destru", "dit", "edit", "empreg", "empurr", "encontr", "encost", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
@@ -515,6 +515,10 @@ def handle_vowel_combination(first, second):
     # Rule 0c: If word ends in 'r' and next word starts with vowel => merge keeping the 'r'
     if first.endswith('r') and second[0].lower() in vowels:
         return first + second, ''
+
+    # Special case: 'á' followed by 'a' becomes just 'á'
+    if first.endswith('á') and second.startswith('a'):
+        return first, second[1:]
         
     if (first[-1].lower() in vowels
         and second[0].lower() in vowels
