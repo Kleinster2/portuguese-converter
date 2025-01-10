@@ -518,7 +518,7 @@ def handle_vowel_combination(first, second):
 
     # Special case: 'á' followed by 'a' becomes just 'á'
     if first.endswith('á') and second.startswith('a'):
-        return first, second[1:]
+        return first[:-1] + second, ''
         
     if (first[-1].lower() in vowels
         and second[0].lower() in vowels
