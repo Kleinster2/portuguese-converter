@@ -138,8 +138,8 @@ PHONETIC_DICTIONARY = {
     'muita': 'muynta',
     'muitas': 'muyntas',
     'muitos': 'muyntus',
-    'nao': 'nãum',
-    'não': 'nãum',
+    'nao': 'nãu',
+    'não': 'nãu',
     'obrigada': 'brigada',
     'obrigado': 'brigadu',
     'que': 'ki',
@@ -515,6 +515,10 @@ def handle_vowel_combination(first, second):
     # Rule 0c: If word ends in 'r' and next word starts with vowel => merge keeping the 'r'
     if first.endswith('r') and second[0].lower() in vowels:
         return first + second, ''
+
+    # Special case: Double 'm' between words becomes single 'm'
+    if first.endswith('m') and second.startswith('m'):
+        return first[:-1] + second, ''
 
     # Special case: 'á' followed by 'a' becomes just 'á'
     if first.endswith('á') and second.startswith('a'):
