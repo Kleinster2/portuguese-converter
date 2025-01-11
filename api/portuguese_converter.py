@@ -355,7 +355,7 @@ def merge_word_pairs(tokens):
         i += 1
     return new_tokens
 
-def apply_phonetic_rules(word, next_word=None):
+def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     """
     Apply Portuguese phonetic rules to transform a word.
     First checks a dictionary of pre-defined transformations,
@@ -380,10 +380,8 @@ def apply_phonetic_rules(word, next_word=None):
             # Check if the next word is a pronoun
             pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas"]
             if next_word.lower() in pronouns:
-                # Look ahead one more word to check if it's a verb
-                if i + 2 < len(tokens):
-                    next_next_word = tokens[i + 2][0]
-                if is_verb(next_next_word):
+                # Check if the word after pronoun is a verb
+                if next_next_word and is_verb(next_next_word):
                     return preserve_capital(word, "num")
             elif is_verb(next_word):
                 return preserve_capital(word, "num")
