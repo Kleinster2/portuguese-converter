@@ -386,7 +386,6 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             elif is_verb(next_word):
                 return preserve_capital(word, "num")
 
-
     # Check dictionary
     if lword in PHONETIC_DICTIONARY:
         print(f"Found in dictionary: '{lword}' -> '{PHONETIC_DICTIONARY[lword]}'")
