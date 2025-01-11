@@ -212,10 +212,10 @@ WORD_PAIRS = {
     'com eles': 'cuêlis',
     'com ela': 'cuéla',
     'com elas': 'cuélas',
-    'como você': 'comucê',
-    'como vocês': 'comucêys',
-    'como voce': 'comucê',
-    'como voces': 'comucêys',
+    'como você': 'comcê',
+    'como vocês': 'comcêys',
+    'como voce': 'comcê',
+    'como voces': 'comcêys',
     'que eu': 'keu',
     'que é': 'ké',
     'esse é': 'êssé',
@@ -235,7 +235,11 @@ WORD_PAIRS = {
     'tão voces': 'cêys tãum',
     'tao voces': 'cêys tãum',
     'tao vocês': 'cêys tãum',
-    'e você': 'iucê'
+    'e você': 'iucê',
+    'onde você': 'ond\'cê',
+    'onde vocês': 'ond\'cêys',
+    'onde voce': 'ond\'cê',
+    'onde voces': 'ond\'cêys'
 }
 
 # Verb identification constants
@@ -371,10 +375,19 @@ def apply_phonetic_rules(word, next_word=None):
         return preserve_capital(word, IRREGULAR_VERBS[lword])
 
     # Special handling for não before verbs
-    if next_word and is_verb(next_word):
-        if lword in ["não", "nao"]:
-            print(f"Found 'não' before verb '{next_word}', using 'num'")
-            return preserve_capital(word, "num")
+    if lword in ["não", "nao"]:
+        if next_word:
+            # Check if the next word is a pronoun
+            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas"]
+            if next_word.lower() in pronouns:
+                # Look ahead one more word to check if it's a verb
+                if i + 2 < len(tokens):
+                    next_next_word = tokens[i + 2][0]
+                if is_verb(next_next_word):
+                    return preserve_capital(word, "num")
+            elif is_verb(next_word):
+                return preserve_capital(word, "num")
+
 
     # Check dictionary
     if lword in PHONETIC_DICTIONARY:
