@@ -145,6 +145,7 @@ PHONETIC_DICTIONARY = {
     'que': 'ki',
     'sempre': 'seynpri',
     'também': 'tãmbêyn',
+    'tambem': 'tãmbêyn',
     'teatro': 'tiatru',
     'teatros': 'tiatrus',
     'última': 'útima',
@@ -159,7 +160,14 @@ PHONETIC_DICTIONARY = {
     'agora': 'agóra',
     'hoje': 'ôji',
     'mes': 'mêys',
-    'meses': 'mêzis'
+    'meses': 'mêzis',
+    'menos': 'menus',
+    'menor': 'menor',
+    'menores': 'menoris',
+    'pouco': 'pôcu',
+    'poucos': 'pôcus',
+    'pouca': 'pôca',
+    'poucas': 'pôcas'
 }
 
 # Word pairs that need special handling (not covered by regular rules)
@@ -185,8 +193,8 @@ WORD_PAIRS = {
     'para voces': 'prucêys',
     'pra voce': 'prucê',
     'pra voces': 'prucêys',
-    'com voce': 'cumcê',
-    'com voces': 'cumcêys',
+    'com voce': 'cucê',
+    'com voces': 'cucêys',
     'de voce': 'ducê',
     'de voces': 'ducêys',
     'de você': 'ducê',
@@ -204,6 +212,10 @@ WORD_PAIRS = {
     'com eles': 'cuêlis',
     'com ela': 'cuéla',
     'com elas': 'cuélas',
+    'como você': 'comucê',
+    'como vocês': 'comucêys',
+    'como voce': 'comucê',
+    'como voces': 'comucêys',
     'que eu': 'keu',
     'que é': 'ké',
     'esse é': 'êssé',
