@@ -650,13 +650,15 @@ def transform_text(text):
         transformed_tokens = []
         for i, (word, punct) in enumerate(tokens):
             if word:
-                # Get next word for verb detection
+                # Get next word and word after that for verb/pronoun detection
+                next_word = None
+                next_next_word = None
                 if i + 1 < len(tokens):
                     next_word = tokens[i + 1][0]  # Get the actual next word
-                else:
-                    next_word = None
+                    if i + 2 < len(tokens):
+                        next_next_word = tokens[i + 2][0]  # Get the word after next
                 # Apply dictionary lookup or phonetic rules
-                transformed = apply_phonetic_rules(word, next_word)
+                transformed = apply_phonetic_rules(word, next_word, next_next_word)
                 transformed_tokens.append((transformed, punct))
             else:
                 transformed_tokens.append(('', punct))
