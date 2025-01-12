@@ -135,49 +135,17 @@
     </div>
 
     <script>
-        let va = null;  // Declare va variable
-        
-        // Wait for Vercel Analytics to load
-        async function waitForVA() {
-            return new Promise((resolve) => {
-                if (window.va) {
-                    resolve(window.va);
-                    return;
-                }
-                
-                const observer = new MutationObserver((mutations, obs) => {
-                    if (window.va) {
-                        obs.disconnect();
-                        resolve(window.va);
-                    }
-                });
-
-                observer.observe(document, {
-                    childList: true,
-                    subtree: true
-                });
-                
-                // Timeout after 5 seconds
-                setTimeout(() => {
-                    observer.disconnect();
-                    resolve(null);
-                }, 5000);
-            });
-        }
-        
-        // Initialize analytics when page loads
-        window.addEventListener('load', async () => {
-            va = await waitForVA();
-        });
+        // Initialize Vercel Analytics
+        let va = window.va || null;
 
         async function convertText() {
             const input = document.getElementById('input').value;
             if (!input.trim()) return;
             
-            // Track conversion event safely
+            // Track conversion event safely - only if analytics is available
             try {
-                if (va) {
-                    va.track('text_conversion', {
+                if (typeof window.va?.track === 'function') {
+                    window.va.track('text_conversion', {
                         input_length: input.length,
                         contains_special_chars: /[áéíóúâêîôûãõñç]/i.test(input)
                     });
