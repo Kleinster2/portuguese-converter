@@ -733,7 +733,7 @@ def transform_text(text):
 def convert_text(text):
     """Convert Portuguese text to its phonetic representation."""
     before, after = transform_text(text)
-    return before, after
+    return {'before': before, 'after': after}
 
 def main():
     # Set UTF-8 encoding for stdout
