@@ -751,9 +751,9 @@ def main():
     before, after = convert_text(input_text)
     
     # Display the outputs on separate lines
-    print(before)
-    print()
-    print(after)
+    print(before, end='')
+    print('\n', end='')
+    print(after, end='')
 
 if __name__ == "__main__":
     main()
