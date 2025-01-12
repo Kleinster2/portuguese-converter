@@ -728,7 +728,7 @@ def transform_text(text):
     except Exception as e:
         print(f"Error transforming text: {str(e)}")
         traceback.print_exc(file=sys.stdout)
-        return text, text
+        return {'before': before, 'after': after}
 
 def convert_text(text):
     """Convert Portuguese text to its phonetic representation."""
@@ -753,10 +753,10 @@ def main():
         lines = ['']
     
     # Convert and display each line
-    for i, line in enumerate(lines):
-        before, after = convert_text(line)
-        print(before)
-        print(after)
+    for line in lines:
+        result = convert_text(line)
+        print(result['before'])
+        print(result['after'])
 
 if __name__ == "__main__":
     main()
