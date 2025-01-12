@@ -271,8 +271,8 @@ BASIC_VERB_ROOTS = {
 
 # Common Action Verbs
 ACTION_VERB_ROOTS = {
-    "abus", "acab", "aceit", "acess", "acompanh", "acord", "adiant", "afast", "ajud", "alug", "amarr", "amol", "apag", "avanç", "apanh", 
-    "aproveit", "arm", "arrast", "arrum", "assin", "atend", "atra", "atras", "atravess", "atualiz", "aument", "avis", "bail", 
+    "abus", "acab", "aceit", "acess", "acompanh", "acord", "adiant", "afast", "ajud", "alug", "amarr", "amol", "apag", "avanç", "apanh", "apront", "apress",
+    "aproveit", "arm", "arrast", "arremess", "arrum", "assin", "atend", "atra", "atras", "atravess", "atualiz", "aument", "avis", "bail", 
     "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "coç", "colet", "colid", "colh", "começ", 
     "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
     "danç", "descans", "destac", "destru", "dit", "edit", "empreg", "empurr", "encontr", "encost", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
@@ -750,10 +750,8 @@ def main():
     # Convert the text
     before, after = convert_text(input_text)
     
-    # Display the outputs
-    print("\n--- Before Combination ---")
+    # Display the outputs on separate lines
     print(before)
-    print("\n--- After Combination ---")
     print(after)
 
 if __name__ == "__main__":
