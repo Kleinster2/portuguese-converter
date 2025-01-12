@@ -747,13 +747,20 @@ def main():
         print("Enter the text to convert (Ctrl+D to end):")
         input_text = sys.stdin.read()
     
-    # Convert the text
-    before, after = convert_text(input_text)
+    # Process each line separately
+    lines = input_text.splitlines()
+    if not lines:
+        lines = ['']
     
-    # Display the outputs on separate lines
-    print(before, end='')
-    print('\n', end='')
-    print(after, end='')
+    # Convert and display each line
+    for i, line in enumerate(lines):
+        before, after = convert_text(line)
+        print(before)
+        if i < len(lines) - 1:  # Don't print extra newline after last line
+            print()
+        print(after)
+        if i < len(lines) - 1:  # Don't print extra newline after last line
+            print()
 
 if __name__ == "__main__":
     main()
