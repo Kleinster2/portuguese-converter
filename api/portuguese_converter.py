@@ -752,6 +752,7 @@ def main():
     
     # Display the outputs on separate lines
     print(before)
+    print()
     print(after)
 
 if __name__ == "__main__":
