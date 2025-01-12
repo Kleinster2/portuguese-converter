@@ -239,7 +239,8 @@ WORD_PAIRS = {
     'onde você': 'ond\'cê',
     'onde vocês': 'ond\'cêys',
     'onde voce': 'ond\'cê',
-    'onde voces': 'ond\'cêys'
+    'onde voces': 'ond\'cêys',
+    'para de': 'para di'
 }
 
 # Verb identification constants
@@ -270,7 +271,7 @@ BASIC_VERB_ROOTS = {
 
 # Common Action Verbs
 ACTION_VERB_ROOTS = {
-    "abus", "acab", "aceit", "acess", "acompanh", "acord", "adiant", "afast", "ajud", "alug", "apag", "avanç", "apanh", 
+    "abus", "acab", "aceit", "acess", "acompanh", "acord", "adiant", "afast", "ajud", "alug", "amarr", "amol", "apag", "avanç", "apanh", 
     "aproveit", "arm", "arrast", "arrum", "assin", "atend", "atra", "atras", "atravess", "atualiz", "aument", "avis", "bail", 
     "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "coç", "colet", "colid", "colh", "começ", 
     "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
@@ -293,7 +294,7 @@ COGNITIVE_VERB_ROOTS = {
 
 # Complex/Process Verbs
 PROCESS_VERB_ROOTS = {
-    "acumul", "convert", "constru", "contrat", "correspond", "deposit", "dobr", "expand", "exib", "experiment", "explic", "explor", 
+    "acumul", "atrapalh", "convert", "constru", "contrat", "correspond", "deposit", "dobr", "expand", "exib", "experiment", "explic", "explor", 
     "expuls", "extrai", "finaliz", "fortalec", "imped", "inclu", "interromp", "morr", "ocup", "oferec", "omit", "organ", "produz", 
     "quebr", "reag", "reaj", "realiz", "receb", "reclam", "reduz", "reflet", "relax", "represent", "reserv", 
     "resolv", "respond", "restit", "romp", "segu", "serv", "sorr", "sub", "substitu", "suj", "surprend", 
