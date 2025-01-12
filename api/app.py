@@ -65,10 +65,15 @@ def convert():
             result = convert_text(text)
             logger.info(f"Successfully converted text: {text[:50]}...")
             
-            return jsonify({
-                'result': result,
-                'original': text
-            })
+            # Return in the format expected by frontend
+            if isinstance(result, dict) and 'before' in result and 'after' in result:
+                return jsonify(result)
+            else:
+                logger.error(f"Unexpected result format from convert_text: {result}")
+                return jsonify({
+                    'error': 'Invalid result format',
+                    'details': 'Internal server error'
+                }), 500
         except Exception as e:
             logger.error(f"Error in convert_text: {str(e)}")
             traceback.print_exc()

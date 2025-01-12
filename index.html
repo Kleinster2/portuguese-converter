@@ -180,13 +180,13 @@
                 result.style.display = 'block';
                 
                 // Log the response for debugging
-                console.log('API Response:', data);
+                console.log('API Response:', JSON.stringify(data, null, 2));
                 
                 if (data.error || data.details) {
                     const errorMessage = data.details || data.error || 'Unknown error occurred';
                     document.getElementById('output').textContent = 'Error: ' + errorMessage;
                     console.error('API Error:', errorMessage);
-                } else if (data && typeof data === 'object' && 'before' in data && 'after' in data) {
+                } else if (data && typeof data.before === 'string' && typeof data.after === 'string') {
                     // Split the text into lines and format each line
                     const beforeLines = data.before.split('\n');
                     const afterLines = data.after.split('\n');
@@ -199,8 +199,9 @@
                     
                     document.getElementById('output').textContent = formattedResult;
                 } else {
-                    document.getElementById('output').textContent = 'Error: Invalid response format from server';
-                    console.error('Invalid API response format:', data);
+                    const errorMessage = 'Invalid response format from server';
+                    document.getElementById('output').textContent = 'Error: ' + errorMessage;
+                    console.error('Invalid API response format:', JSON.stringify(data, null, 2));
                 }
             } catch (error) {
                 result.style.display = 'block';
