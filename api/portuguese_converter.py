@@ -635,9 +635,12 @@ def transform_text(text):
     Transform the input text using phonetic rules,
     handle cross-word vowel combinations in multiple passes,
     then reassemble with no extra spaces around punctuation.
+    Returns two versions:
+        1. Before combination (after merging and initial transformation)
+        2. After combination (final transformed text)
     """
     if not text:
-        return text
+        return text, text
     
     try:
         # First tokenize the text into words and punctuation
@@ -663,8 +666,10 @@ def transform_text(text):
             else:
                 transformed_tokens.append(('', punct))
         
+        # Capture the "Before Combination" output
+        before_combination = reassemble_tokens_smartly(transformed_tokens)
+        
         # Now handle vowel combinations between words in multiple passes
-        # Keep going until no more combinations can be made
         made_combination = True
         while made_combination:
             made_combination = False
@@ -696,10 +701,8 @@ def transform_text(text):
                     word1, punct1 = transformed_tokens[i]
                     word2, punct2 = transformed_tokens[i + 1]
                     
-                    print(f"Trying to combine: {word1=} {word2=}")
                     # Try to combine the words
                     combined1, combined2 = handle_vowel_combination(word1, word2)
-                    print(f"Result: {combined1=} {combined2=}")
                     if combined1 != word1 or combined2 != word2:
                         made_combination = True
                         if combined2:
@@ -716,21 +719,41 @@ def transform_text(text):
                 
             transformed_tokens = new_tokens
         
-        # Finally, reassemble the tokens into a single string
-        return reassemble_tokens_smartly(transformed_tokens)
+        # Capture the "After Combination" output
+        after_combination = reassemble_tokens_smartly(transformed_tokens)
+        
+        return before_combination, after_combination
     
     except Exception as e:
         print(f"Error transforming text: {str(e)}")
         traceback.print_exc(file=sys.stdout)
-        return text
+        return text, text
 
 def convert_text(text):
     """Convert Portuguese text to its phonetic representation."""
-    return transform_text(text)
+    before, after = transform_text(text)
+    return before, after
 
 def main():
     # Set UTF-8 encoding for stdout
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    
+    # Check if text is provided as a command-line argument
+    if len(sys.argv) > 1:
+        input_text = ' '.join(sys.argv[1:])
+    else:
+        # If not, read from standard input
+        print("Enter the text to convert (Ctrl+D to end):")
+        input_text = sys.stdin.read()
+    
+    # Convert the text
+    before, after = convert_text(input_text)
+    
+    # Display the outputs
+    print("\n--- Before Combination ---")
+    print(before)
+    print("\n--- After Combination ---")
+    print(after)
 
 if __name__ == "__main__":
     main()
