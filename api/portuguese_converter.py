@@ -756,11 +756,7 @@ def main():
     for i, line in enumerate(lines):
         before, after = convert_text(line)
         print(before)
-        if i < len(lines) - 1:  # Don't print extra newline after last line
-            print()
         print(after)
-        if i < len(lines) - 1:  # Don't print extra newline after last line
-            print()
 
 if __name__ == "__main__":
     main()
