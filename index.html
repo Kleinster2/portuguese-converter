@@ -328,8 +328,18 @@
                     const errorMessage = data.details || data.error || 'Unknown error occurred';
                     document.getElementById('output').textContent = 'Error: ' + errorMessage;
                     console.error('API Error:', errorMessage);
-                } else if (data.result) {
-                    document.getElementById('output').textContent = data.result;
+                } else if (data.before && data.after) {
+                    // Split the text into lines and format each line
+                    const beforeLines = data.before.split('\n');
+                    const afterLines = data.after.split('\n');
+                    
+                    // Create formatted output with proper line breaks
+                    let formattedResult = 'Original:\n';
+                    formattedResult += beforeLines.join('\n');
+                    formattedResult += '\n\nTransformed:\n';
+                    formattedResult += afterLines.join('\n');
+                    
+                    document.getElementById('output').textContent = formattedResult;
                     //speakBtn.style.display = 'inline-block';  // Only show speak button on success
                 } else {
                     document.getElementById('output').textContent = 'Error: Invalid response from server';
