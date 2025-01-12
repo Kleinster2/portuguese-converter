@@ -179,11 +179,14 @@
                 const data = await response.json();
                 result.style.display = 'block';
                 
+                // Log the response for debugging
+                console.log('API Response:', data);
+                
                 if (data.error || data.details) {
                     const errorMessage = data.details || data.error || 'Unknown error occurred';
                     document.getElementById('output').textContent = 'Error: ' + errorMessage;
                     console.error('API Error:', errorMessage);
-                } else if (data.before && data.after) {
+                } else if (data && typeof data === 'object' && 'before' in data && 'after' in data) {
                     // Split the text into lines and format each line
                     const beforeLines = data.before.split('\n');
                     const afterLines = data.after.split('\n');
@@ -196,8 +199,8 @@
                     
                     document.getElementById('output').textContent = formattedResult;
                 } else {
-                    document.getElementById('output').textContent = 'Error: Invalid response from server';
-                    console.error('Invalid API response:', data);
+                    document.getElementById('output').textContent = 'Error: Invalid response format from server';
+                    console.error('Invalid API response format:', data);
                 }
             } catch (error) {
                 result.style.display = 'block';
