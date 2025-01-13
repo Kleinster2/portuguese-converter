@@ -197,7 +197,8 @@
                     formattedResult += '\n\nTransformation 2:\n\n';
                     formattedResult += afterLines.join('\n');
                     
-                    document.getElementById('output').textContent = formattedResult;
+                    const outputElement = document.getElementById('output');
+                    outputElement.innerHTML = `<pre>${formattedResult}</pre>`;
                 } else {
                     const errorMessage = 'Invalid response format from server';
                     document.getElementById('output').textContent = 'Error: ' + errorMessage;
