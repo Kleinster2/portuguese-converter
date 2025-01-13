@@ -131,7 +131,7 @@
         <div id="loading" class="loading">Converting...</div>
         
         <div id="result" class="result" style="display: none;">
-            <strong>Result:</strong> <span id="output"></span>
+            <span id="output"></span>
             <!-- Audio feature temporarily disabled
             <div style="margin-top: 10px;">
                 <button id="speakBtn" onclick="speakText()" style="width: auto; display: none;">
@@ -200,9 +200,9 @@
                     const afterLines = data.after.split('\n');
                     
                     // Create formatted output with proper line breaks
-                    let formattedResult = '\nTransformation 1:\n';
+                    let formattedResult = '\n<strong>Transformation 1:</strong>\n';
                     formattedResult += beforeLines.join('\n');
-                    formattedResult += '\n\nTransformation 2:\n';
+                    formattedResult += '\n\n<strong>Transformation 2:</strong>\n';
                     formattedResult += afterLines.join('\n');
                     
                     const outputElement = document.getElementById('output');
