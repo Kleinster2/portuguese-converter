@@ -66,6 +66,10 @@ PHONETIC_DICTIONARY = {
     # Adverbs
     'demais': 'dimais',
     'devagar': 'divagá',
+    'outro': 'ôtru',
+    'outros': 'ôtrus',
+    'outra': 'ôtra',
+    'outras': 'ôtras',
 
     # Prepositions and Conjunctions
     'à': 'a',
@@ -114,10 +118,6 @@ PHONETIC_DICTIONARY = {
     'youtube': 'iutiúbi',
     'chat': 'chati',
     'ipad': 'aipédi',
-
-    # Common Verbs
-    'vamos': 'vãm',
-    'vou': 'vô',
 
     # Common Words and Expressions
     'aí': 'aí',
@@ -280,6 +280,15 @@ WORD_PAIRS = {
     'anda você': 'cê ãnda',
     'andam voces': 'cêys andãu',
     'andam vocês': 'cêys andãu',
+    'do outro': 'dôtru',
+    'de outro': 'dôtru',
+    'da outra': 'dôtra',
+    'dos outros': 'dôtrus',
+    'das outras': 'dôtras',
+    'em outro': 'nôtru',
+    'em outra': 'nôtra',
+    'em outros': 'nôtrus',
+    'em outras': 'nôtras'
 }
 
 # Verb identification constants
@@ -316,7 +325,7 @@ ACTION_VERB_ROOTS = {
     "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
     "danç", "descans", "destac", "destru", "dit", "edit", "empreg", "empurr", "encontr", "encost", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
     "flert", "form", "grit", "guard", "imprim", "jog", "junt", "lav", "levant", "lig", "limp", "lut", "marc", 
-    "met", "mex", "molh", "mord", "mostr", "mud", "olh", "peg", "reform", "remov", "repet", "resist", "retir", "reun", "salt", 
+    "met", "mex", "molh", "mord", "mostr", "mud", "olh", "peg", "reform", "remarc", "remov", "repet", "resist", "retir", "reun", "salt", 
     "salv", "samb", "soletr", "som", "solt", "sorri", "sub", "suport", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
 }
 
@@ -324,7 +333,7 @@ ACTION_VERB_ROOTS = {
 COGNITIVE_VERB_ROOTS = {
     "ach", "adivinh", "ador", "admir", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "anot", "aprend", "apresent", 
     "assist", "assum", "chec", "coment", "comet", "compar", "concord", "conhec", "consegu", "consig", "consig", "consider", "consist", 
-    "consent", "cont", "convers", "decid", "defend", "defin", "demor", "depend", "desej", "desenh", "desenvolv", 
+    "consent", "consult", "contempl", "cont", "convers", "decid", "defend", "defin", "demor", "depend", "desej", "desenh", "desenvolv", 
     "descobr", "desist", "dirig", "discut", "divid", "entend", "esper", "esquec", "esqueç", "estud", "evit", 
     "foc", "gost", "imagin", "import", "indic", "inform", "inici", "insist", "instru", "lembr", "ment", "mint", "not", "observ", "opin", 
     "particip", "pens", "perceb", "pergunt", "permit", "persist", "preocup", "prepar", "pretend", "precis", 
@@ -584,6 +593,10 @@ def handle_vowel_combination(first, second):
 
     # Special case: 'á' followed by 'a' becomes just 'á'
     if first.endswith('á') and second.startswith('a'):
+        return first[:-1] + second, ''
+
+    # Special case: 'ê' followed by 'é' becomes just 'é'
+    if first.endswith('ê') and second.startswith('é'):
         return first[:-1] + second, ''
         
     if (first[-1].lower() in vowels
