@@ -588,6 +588,10 @@ def handle_vowel_combination(first, second):
         return first + second, ''
 
     # Special case: Double 'm' between words becomes single 'm'
+    if first.endswith('ia') and second.startswith('i'):
+        return first[:-2] + second, ''
+
+    # Special case: Double 'm' between words becomes single 'm'
     if first.endswith('m') and second.startswith('m'):
         return first[:-1] + second, ''
 
