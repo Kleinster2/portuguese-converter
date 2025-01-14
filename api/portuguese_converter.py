@@ -167,7 +167,11 @@ PHONETIC_DICTIONARY = {
     'pouco': 'pôcu',
     'poucos': 'pôcus',
     'pouca': 'pôca',
-    'poucas': 'pôcas'
+    'poucas': 'pôcas',
+    'bonito': 'bunitu',
+    'bonita': 'bunita',
+    'bonitas': 'bunitas',
+    'bonitos': 'bunitus'
 }
 
 # Word pairs that need special handling (not covered by regular rules)
@@ -200,6 +204,15 @@ WORD_PAIRS = {
     'de você': 'ducê',
     'de vocês': 'ducêys',
     'o que': 'ukê',
+    'em um': 'num',
+    'em uns': 'nuns',
+    'em uma': 'numa',
+    'em umas': 'numas',
+    'em ele': 'nêli',
+    'em eles': 'nêlis',
+    'em ela': 'néla',
+    'em elas': 'nélas',
+    'em eles': 'nêlis',
     'com um': 'cum',
     'com uma': 'cuma',
     'com umas': 'cumas',
@@ -249,10 +262,12 @@ WORD_PAIRS = {
     'vão voces': 'cêys vãu',
     'esta voce': 'cê tá',
     'está voce': 'cê tá',
+    'esta você': 'cê tá',
     'está você': 'cê tá',
     'ta voce': 'cê tá',
     'tá voce': 'cê tá',
     'ta você': 'cê tá',
+    'tá você': 'cê tá',
     'estao voces': 'cêys tãu',
     'estão voces': 'cêys tãu',
     'estao vocês': 'cêys tãu',
@@ -260,7 +275,11 @@ WORD_PAIRS = {
     'tão voces': 'cêys tãu',
     'tão vocês': 'cêys tãu',
     'tao voces': 'cêys tãu',
-    'tao vocês': 'cêys tãu'
+    'tao vocês': 'cêys tãu',
+    'anda voce': 'cê ãnda',
+    'anda você': 'cê ãnda',
+    'andam voces': 'cêys andãu',
+    'andam vocês': 'cêys andãu',
 }
 
 # Verb identification constants
