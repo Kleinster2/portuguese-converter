@@ -602,7 +602,11 @@ def handle_vowel_combination(first, second):
     # Special case: 'ê' followed by 'é' becomes just 'é'
     if first.endswith('ê') and second.startswith('é'):
         return first[:-1] + second, ''
-        
+
+    # Special case: Double 's' between words becomes single 's'
+    if first.endswith('s') and second.startswith('s'):
+        return first[:-1] + second, ''
+
     if (first[-1].lower() in vowels
         and second[0].lower() in vowels
         and first[-1].lower() == second[0].lower()):
