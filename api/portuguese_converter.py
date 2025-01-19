@@ -329,7 +329,7 @@ ACTION_VERB_ROOTS = {
     "flert", "form", "grit", "guard", "imprim", "inund", "jog", "junt", "lav", "levant", "lig", "limp", "lut", "marc", 
     "met", "mex", "molh", "mord", "mostr", "mud", "olh", "peg", "proteg", "provoc", "reform", "remarc", "remov", "repet", "resist", "retir", "reun", "salt", 
     "salv", "samb", "soletr", "som", "solt", "sorri", "soterr", "sub", "substitu", "suj", "surprend", 
-    "traduz", "transform", "un", "us"
+    "traduz", "transform", "un", "us", "suport", "sustent", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
 }
 
 # Cognitive/Mental Verbs
@@ -797,10 +797,10 @@ def transform_text(text):
                         new_tokens.append(('', punct2))
                         if word3[0] == 'y':
                             new_tokens.append((word3, punct3))
-                            combination_explanations.append(f"'y' attraction: {word1} {word2} {word3} → {word1} {word3}")
+                            combination_explanations.append(f"Word combination: {word1} {word2} {word3} → {word1} {word3}")
                         else:
                             new_tokens.append(('y' + word3, punct3))
-                            combination_explanations.append(f"'y' attraction: {word1} {word2} {word3} → {word1} y{word3}")
+                            combination_explanations.append(f"Word combination: {word1} {word2} {word3} → {word1} y{word3}")
                         i += 3
                         made_combination = True
                         continue
@@ -815,11 +815,11 @@ def transform_text(text):
                     if combined1 != word1 or combined2 != word2:
                         made_combination = True
                         if combined2:
-                            combination_explanations.append(f"Vowel combination: {word1} {word2} → {combined1} {combined2}")
+                            combination_explanations.append(f"Word combination: {word1} {word2} → {combined1} {combined2}")
                             new_tokens.append((combined1, punct1))
                             new_tokens.append((combined2, punct2))
                         else:
-                            combination_explanations.append(f"Vowel combination: {word1} {word2} → {combined1}")
+                            combination_explanations.append(f"Word combination: {word1} {word2} → {combined1}")
                             new_tokens.append((combined1, punct2))
                         i += 2
                         continue
