@@ -90,6 +90,28 @@ def convert():
             'details': str(e)
         }), 500
 
+@app.route('/convert', methods=['POST'])
+def convert_new():
+    try:
+        data = request.get_json()
+        if not data or 'text' not in data:
+            return jsonify({'error': 'No text provided'}), 400
+        
+        text = data['text']
+        result = convert_text(text)
+        
+        return jsonify({
+            'original': result['original'],
+            'before': result['before'],
+            'after': result['after'],
+            'explanations': result['explanations'],
+            'combinations': result['combinations']
+        })
+        
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 # Vercel requires the app to be named 'app'
 app.debug = True
 

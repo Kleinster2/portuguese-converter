@@ -118,6 +118,27 @@
                 font-size: 18px;
             }
         }
+        
+        .explanation-section {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f5f5f5;
+        }
+        
+        .explanation-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .explanation-item {
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #fff;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body>
@@ -139,6 +160,16 @@
                 </button>
             </div>
             -->
+        </div>
+        
+        <div class="explanation-section">
+            <div class="explanation-title">Word Transformations:</div>
+            <div id="explanations"></div>
+        </div>
+        
+        <div class="explanation-section">
+            <div class="explanation-title">Vowel Combinations:</div>
+            <div id="combinations"></div>
         </div>
     </div>
 
@@ -207,6 +238,26 @@
                     
                     const outputElement = document.getElementById('output');
                     outputElement.innerHTML = `<pre>${formattedResult}</pre>`;
+                    
+                    // Display explanations
+                    const explanationsDiv = document.getElementById('explanations');
+                    explanationsDiv.innerHTML = '';
+                    data.explanations.forEach(explanation => {
+                        const div = document.createElement('div');
+                        div.className = 'explanation-item';
+                        div.textContent = explanation;
+                        explanationsDiv.appendChild(div);
+                    });
+                    
+                    // Display combinations
+                    const combinationsDiv = document.getElementById('combinations');
+                    combinationsDiv.innerHTML = '';
+                    data.combinations.forEach(combination => {
+                        const div = document.createElement('div');
+                        div.className = 'explanation-item';
+                        div.textContent = combination;
+                        combinationsDiv.appendChild(div);
+                    });
                 } else {
                     const errorMessage = 'Invalid response format from server';
                     document.getElementById('output').textContent = 'Error: ' + errorMessage;

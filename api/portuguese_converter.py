@@ -52,6 +52,8 @@ PHONETIC_DICTIONARY = {
     'sua': 'tua',
     'suas': 'tuas',
     'te' : 'ti',
+    'tao': 'tãu',
+    'ta': 'tá',
     'me' : 'mi',
     'lhe' : 'ly',
     'lhes' : 'lys',
@@ -296,7 +298,7 @@ IRREGULAR_VERBS = {
     "estar": "está", "estou": "tô", "estás": "tá", "está": "tá", "estamos": "tamu", "estão": "tãum",
     "ser": "sê", "sou": "sô", "é": "é", "somos": "somu", "são": "sãum",
     "ter": "tê", "tenho": "tenhu", "tem": "teim", "temos": "temu", "têm": "teim", "tive": "tivi", "teve": "tevi", "tivemos": "tivemu", "tiveram": "tiveraum", "tinha": "tinha", "tinhamos": "tinhamu", "tinham": "tinhaum",
-    "fazer": "fazê", "faco": "fassu", "faço": "fassu", "faz": "fays", "fazemos": "fazêmu", "fazem": "fázeym", "fiz": "fis", "fez": "fêz", "fizemos": "fizemu", "fizeram": "fizérãu", "fazia": "fazia", "faziamos": "faziamu", "faziam": "faziãu", "faria": "fazia", "fariam": "faziãu",
+    "fazer": "fazê", "faco": "fassu", "faço": "fassu", "faz": "fays", "fazemos": "fazêmu", "fazem": "fázeym", "fiz": "fis", "fez": "fêiz", "fizemos": "fizemu", "fizeram": "fizérãu", "fazia": "fazia", "faziamos": "faziamu", "faziam": "faziãu", "faria": "fazia", "fariam": "faziãu",
     "ir": "ih", "vou": "vô", "vai": "vai", "vamos": "vam", "vão": "vãum",
     "vir": "vim", "venho": "venhu", "vem": "veym", "vimos": "vimu", "vêm": "veym",
     "dizer": "dizê", "digo": "digu", "diz": "dis", "dizemos": "dizemu", "dizem": "dizeym", "disse": "dissi", "dissemos": "dissemu", "disseram": "disseraum", "diria": "diria", "diriamos": "diriamus", "diriam": "diriaum", "dizia": "dizia", "diziamos": "diziamus", "diziam": "diziaum", "diga": "diz", "digamos": "digamu", "digam": "digãu",
@@ -319,25 +321,26 @@ BASIC_VERB_ROOTS = {
 
 # Common Action Verbs
 ACTION_VERB_ROOTS = {
-    "abus", "acab", "aceit", "acess", "acompanh", "acord", "adiant", "afast", "ajud", "alug", "amarr", "amol", "apag", "avanç", "apanh", "apront", "apress",
-    "aproveit", "arm", "arrast", "arremess", "arrum", "assin", "atend", "atra", "atras", "atravess", "atualiz", "aument", "avis", "bail", 
-    "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "coç", "colet", "colid", "colh", "começ", 
+    "abus", "acab", "aceit", "acess", "acompanh", "acord", "adiant", "afast", "ajud", "alug", "amarr", "ameaç", "amol", "apag", "avanç", "apanh", "apront", "apress",
+    "aproveit", "arm", "arrast", "arremess", "arrum", "assin", "atend", "atra", "atras", "atravess", "atualiz", "aument", "avanç", "avis", "bail", 
+    "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "coç", "colet", "colid", "colh", "começ",  "comec", 
     "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
-    "danç", "descans", "destac", "destru", "dit", "edit", "empreg", "empurr", "encontr", "encost", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
-    "flert", "form", "grit", "guard", "imprim", "jog", "junt", "lav", "levant", "lig", "limp", "lut", "marc", 
-    "met", "mex", "molh", "mord", "mostr", "mud", "olh", "peg", "reform", "remarc", "remov", "repet", "resist", "retir", "reun", "salt", 
-    "salv", "samb", "soletr", "som", "solt", "sorri", "sub", "suport", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
+    "danç", "descans", "desliz", "destac", "destru", "dit", "edit", "empreg", "empurr", "encontr", "encost", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
+    "flert", "form", "grit", "guard", "imprim", "inund", "jog", "junt", "lav", "levant", "lig", "limp", "lut", "marc", 
+    "met", "mex", "molh", "mord", "mostr", "mud", "olh", "peg", "proteg", "provoc", "reform", "remarc", "remov", "repet", "resist", "retir", "reun", "salt", 
+    "salv", "samb", "soletr", "som", "solt", "sorri", "soterr", "sub", "substitu", "suj", "surprend", 
+    "traduz", "transform", "un", "us"
 }
 
 # Cognitive/Mental Verbs
 COGNITIVE_VERB_ROOTS = {
-    "ach", "adivinh", "ador", "admir", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "anot", "aprend", "apresent", 
+    "ach", "adivinh", "ador", "admir", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "analis", "anot", "aprend", "apresent", 
     "assist", "assum", "chec", "coment", "comet", "compar", "concord", "conhec", "consegu", "consig", "consig", "consider", "consist", 
     "consent", "consult", "contempl", "cont", "convers", "decid", "defend", "defin", "demor", "depend", "desej", "desenh", "desenvolv", 
     "descobr", "desist", "dirig", "discut", "divid", "entend", "esper", "esquec", "esqueç", "estud", "evit", 
     "foc", "gost", "imagin", "import", "indic", "inform", "inici", "insist", "instru", "lembr", "ment", "mint", "not", "observ", "opin", 
     "particip", "pens", "perceb", "pergunt", "permit", "persist", "preocup", "prepar", "pretend", "precis", 
-    "procur", "promet", "sab", "sofr", "soub", "signific", "tent", "termin", "top", "verific", "visit"
+    "procur", "promet", "represent", "sab", "sofr", "soub", "signific", "tent", "termin", "top", "verific", "visit"
 }
 
 # Complex/Process Verbs
@@ -413,15 +416,23 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     Args:
         word: The word to transform
         next_word: The next word in the sequence (optional), used for verb detection
+    
+    Returns:
+        tuple: (transformed_word, explanation)
     """
+    if not word:
+        return '', ''
+    
+    # Initialize explanation list
+    explanations = []
+    
     # First check if it's in our dictionary
     lword = word.lower()
-    print(f"Checking dictionary for: '{lword}'")
-
+    
     # Check irregular verbs first
     if lword in IRREGULAR_VERBS:
-    #    print(f"Found irregular verb: '{lword}' -> '{IRREGULAR_VERBS[lword]}'")
-        return preserve_capital(word, IRREGULAR_VERBS[lword])
+        transformed = preserve_capital(word, IRREGULAR_VERBS[lword])
+        return transformed, f"Irregular verb: {word} → {transformed}"
 
     # Special handling for não before verbs
     if lword in ["não", "nao"]:
@@ -431,114 +442,140 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             if next_word.lower() in pronouns:
                 # Check if the word after pronoun is a verb
                 if next_next_word and is_verb(next_next_word):
-                    return preserve_capital(word, "num")
+                    return preserve_capital(word, "num"), "Negation before pronoun+verb: não → num"
             elif is_verb(next_word):
-                return preserve_capital(word, "num")
+                return preserve_capital(word, "num"), "Negation before verb: não → num"
 
     # Check dictionary
     if lword in PHONETIC_DICTIONARY:
-        print(f"Found in dictionary: '{lword}' -> '{PHONETIC_DICTIONARY[lword]}'")
-        return preserve_capital(word, PHONETIC_DICTIONARY[lword])
+        transformed = preserve_capital(word, PHONETIC_DICTIONARY[lword])
+        return transformed, f"Dictionary: {word} → {transformed}"
 
     # If not in dictionary, apply rules
-    transformed = word
+    transformed = word.lower()  # Start with lowercase for consistent processing
     
-    # Apply each rule in sequence
     # Rule 1p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', 'e'->'i', 'es'->'is')
-    if transformed.lower().endswith('o'):
+    if transformed.endswith('o'):
         transformed = transformed[:-1] + 'u'
-    elif transformed.lower().endswith('os'):
+        explanations.append("Final o → u")
+    elif transformed.endswith('os'):
         transformed = transformed[:-2] + 'us'
-    elif transformed.lower().endswith('e'):
+        explanations.append("Final os → us")
+    elif transformed.endswith('e'):
         transformed = transformed[:-1] + 'i'
-    elif transformed.lower().endswith('es'):
+        explanations.append("Final e → i")
+    elif transformed.endswith('es'):
         transformed = transformed[:-2] + 'is'
-        
-    # Rule 2p: Initial 'es' becomes 'is'
-    if transformed.lower().startswith('es'):
-        transformed = 'is' + transformed[2:]
-        
-    # Rule 3p: 'ão' at the end becomes 'aum'
-    if transformed.lower().endswith('ão'):
-        transformed = transformed[:-2] + 'aum'
-        
-    # Rule 4p: 's' between vowels becomes 'z'
-    transformed = re.sub(r'([aeiouáéíóúâêîôûãẽĩõũ])s([aeiouáéíóúâêîôûãẽĩõũ])', r'\1z\2', transformed, flags=re.IGNORECASE)
-
-    # Rule 5p: Transform 'olh' to 'ôly'
-    if not is_verb(word):
-        if 'olh' in transformed.lower():
-            transformed = transformed.lower().replace('olh', 'ôly')
-
-    # Rule 6p: 'lh' => 'ly'
-    #if not is_verb(word):
-    if 'lh' in transformed.lower():
-        transformed = transformed.lower().replace('lh', 'ly')
-    #    transformed = transformed.replace('lh', 'ly').replace('Lh', 'Ly').replace('LH', 'LY')
-
-    # Rule 7p: Final 'ou' becomes 'ô'
-    if transformed.lower().endswith('ou'):
-        transformed = transformed[:-2] + 'ô'
-        
-    # Rule 8p: Final 'm' => 'n' (nasalization)
-    if transformed.lower().endswith('m'):
-        transformed = transformed[:-1] + 'n'
-        
-    # Rule 9p: Verb endings (ar -> á, er ->ê, ir -> í)
-    if is_verb(word):
-        if transformed.lower().endswith('ar'):
-            transformed = transformed[:-2] + 'á'
-        elif transformed.lower().endswith('er'):
-            transformed = transformed[:-2] + 'ê'
-        elif transformed.lower().endswith('ir'):
-            transformed = transformed[:-2] + 'í'
+        explanations.append("Final es → is")
     
-    # Rule 10p: Remove initial 'h' (hoje->oje, homem->omem)
-    if transformed.lower().startswith('h'):
+    # Rule 2p: Initial 'es' becomes 'is'
+    if transformed.startswith('es'):
+        transformed = 'is' + transformed[2:]
+        explanations.append("Initial es → is")
+    
+    # Rule 3p: 'ão' at the end becomes 'aum'
+    if transformed.endswith('ão'):
+        transformed = transformed[:-2] + 'aum'
+        explanations.append("ão → aum")
+    
+    # Rule 4p: 's' between vowels becomes 'z'
+    if re.search(r'([aeiouáéíóúâêîôûãẽĩõũ])s([aeiouáéíóúâêîôûãẽĩõũ])', transformed, re.IGNORECASE):
+        transformed = re.sub(r'([aeiouáéíóúâêîôûãẽĩõũ])s([aeiouáéíóúâêîôûãẽĩõũ])', r'\1z\2', transformed, flags=re.IGNORECASE)
+        explanations.append("s → z between vowels")
+    
+    # Rule 5p: Transform 'olh' to 'ôly'
+    if not is_verb(word) and 'olh' in transformed:
+        transformed = transformed.replace('olh', 'ôly')
+        explanations.append("olh → ôly")
+    
+    # Rule 6p: 'lh' => 'ly'
+    if 'lh' in transformed:
+        transformed = transformed.replace('lh', 'ly')
+        explanations.append("lh → ly")
+    
+    # Rule 7p: Final 'ou' becomes 'ô'
+    if transformed.endswith('ou'):
+        transformed = transformed[:-2] + 'ô'
+        explanations.append("ou → ô")
+    
+    # Rule 8p: Final 'm' => 'n' (nasalization)
+    if transformed.endswith('m'):
+        transformed = transformed[:-1] + 'n'
+        explanations.append("Final m → n")
+    
+    # Rule 9p: Verb endings
+    if is_verb(word):
+        if transformed.endswith('ar'):
+            transformed = transformed[:-2] + 'á'
+            explanations.append("Verb ending: ar → á")
+        elif transformed.endswith('er'):
+            transformed = transformed[:-2] + 'ê'
+            explanations.append("Verb ending: er → ê")
+        elif transformed.endswith('ir'):
+            transformed = transformed[:-2] + 'í'
+            explanations.append("Verb ending: ir → í")
+    
+    # Rule 10p: Remove initial 'h'
+    if transformed.startswith('h'):
         transformed = transformed[1:]
+        explanations.append("Remove initial h")
     
     # Rule 11p: Initial 'ex' becomes 'ez'
-    if transformed.lower().startswith('ex'):
+    if transformed.startswith('ex'):
         transformed = 'ez' + transformed[2:]
-
+        explanations.append("Initial ex → ez")
+    
     # Rule 12p: Initial 'pol' becomes 'pul'
-    if transformed.lower().startswith('pol'):
+    if transformed.startswith('pol'):
         transformed = 'pul' + transformed[3:]
-
-    # Rule 13p: Initial 'volt' becomes 'vout'   
-    if transformed.lower().startswith('volt'):
+        explanations.append("Initial pol → pul")
+    
+    # Rule 13p: Initial 'volt' becomes 'vout'
+    if transformed.startswith('volt'):
         transformed = 'vout' + transformed[4:]
-
+        explanations.append("Initial volt → vout")
+    
     # Rule 14p: Final 'ol' => 'óu'
-    if transformed.lower().endswith('ol'):
+    if transformed.endswith('ol'):
         transformed = transformed[:-2] + 'óu'
-
+        explanations.append("Final ol → óu")
+    
     # Rule 15p: Final 'l' => 'u'
-    if transformed.lower().endswith('l'):
-        transformed = transformed[:-1] + 'u'    
-
+    if transformed.endswith('l'):
+        transformed = transformed[:-1] + 'u'
+        explanations.append("Final l → u")
+    
     # Rule 16p: Insert 'i' between specific consonant pairs
-    if any(p in transformed.lower() for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç', 'dm', 'gn', 'tm', 'tn']):
-        for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç', 'dm', 'gn', 'tm', 'tn']:
-            transformed = re.sub(f'{p}', f'{p[0]}i{p[1]}', transformed.lower())
-
+    for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç', 'dm', 'gn', 'tm', 'tn']:
+        if p in transformed:
+            transformed = transformed.replace(p, p[0] + 'i' + p[1])
+            explanations.append(f"Insert i: {p} → {p[0]}i{p[1]}")
+    
     # Rule 17p: Append 'i' to words ending in specific consonants
-    if transformed.lower().endswith(('d', 't', 'b', 'f', 'j', 'k', 'p', 't', 'v')):
-        transformed = transformed + 'i' 
-
+    if transformed.endswith(('d', 't', 'b', 'f', 'j', 'k', 'p', 'v')):
+        transformed = transformed + 'i'
+        explanations.append(f"Append i after final consonant")
+    
     # Rule 18p: Replace final 'c' with 'ki'
-    if transformed.lower().endswith('c'):
+    if transformed.endswith('c'):
         transformed = transformed[:-1] + 'ki'
-
+        explanations.append("Final c → ki")
+    
     # Rule 19p: Append 'ui' to words ending in 'g'
-    if transformed.lower().endswith('g'):
+    if transformed.endswith('g'):
         transformed = transformed + 'ui'
-
+        explanations.append("Append ui after final g")
+    
     # Rule 20p: Transform 'eir' to 'er'
-    if 'eir' in transformed.lower():
-        transformed = transformed.lower().replace('eir', 'êr')
-
-    return preserve_capital(word, transformed)
+    if 'eir' in transformed:
+        transformed = transformed.replace('eir', 'êr')
+        explanations.append("eir → êr")
+    
+    # Preserve original capitalization
+    transformed = preserve_capital(word, transformed)
+    
+    explanation = " + ".join(explanations) if explanations else "No changes needed"
+    return transformed, explanation
 
 def preserve_capital(original, transformed):
     """
@@ -696,12 +733,17 @@ def transform_text(text):
     Transform the input text using phonetic rules,
     handle cross-word vowel combinations in multiple passes,
     then reassemble with no extra spaces around punctuation.
-    Returns two versions:
-        1. Before combination (after merging and initial transformation)
-        2. After combination (final transformed text)
+    Returns:
+        dict: Contains original text, transformed versions, and explanations
     """
     if not text:
-        return text, text
+        return {
+            'original': text,
+            'before': text,
+            'after': text,
+            'explanations': [],
+            'combinations': []
+        }
     
     try:
         # First tokenize the text into words and punctuation
@@ -709,6 +751,7 @@ def transform_text(text):
         
         # Merge word pairs that need special handling
         tokens = merge_word_pairs(tokens)
+        explanations = []
         
         # Transform each word token according to rules
         transformed_tokens = []
@@ -718,11 +761,13 @@ def transform_text(text):
                 next_word = None
                 next_next_word = None
                 if i + 1 < len(tokens):
-                    next_word = tokens[i + 1][0]  # Get the actual next word
+                    next_word = tokens[i + 1][0]
                     if i + 2 < len(tokens):
-                        next_next_word = tokens[i + 2][0]  # Get the word after next
+                        next_next_word = tokens[i + 2][0]
                 # Apply dictionary lookup or phonetic rules
-                transformed = apply_phonetic_rules(word, next_word, next_next_word)
+                transformed, explanation = apply_phonetic_rules(word, next_word, next_next_word)
+                if explanation != "No changes needed":
+                    explanations.append(f"{word}: {explanation}")
                 transformed_tokens.append((transformed, punct))
             else:
                 transformed_tokens.append(('', punct))
@@ -732,6 +777,7 @@ def transform_text(text):
         
         # Now handle vowel combinations between words in multiple passes
         made_combination = True
+        combination_explanations = []
         while made_combination:
             made_combination = False
             new_tokens = []
@@ -743,20 +789,22 @@ def transform_text(text):
                     word3, punct3 = transformed_tokens[i + 2]
                     
                     # Special case for 'y' (from 'e') attraction
-                    if (word2 == 'y' and  # This is the transformed 'e'
+                    if (word2 == 'y' and
                         word1 and word1[-1] in 'aáàâãeéèêoóòôuúùû' and
                         word3 and word3[0] in 'yi'):
                         # Combine 'y' with the third word, but avoid double y
                         new_tokens.append((word1, punct1))
                         new_tokens.append(('', punct2))
                         if word3[0] == 'y':
-                            new_tokens.append((word3, punct3))  # Don't add another 'y'
+                            new_tokens.append((word3, punct3))
+                            combination_explanations.append(f"'y' attraction: {word1} {word2} {word3} → {word1} {word3}")
                         else:
                             new_tokens.append(('y' + word3, punct3))
+                            combination_explanations.append(f"'y' attraction: {word1} {word2} {word3} → {word1} y{word3}")
                         i += 3
                         made_combination = True
                         continue
-                    
+                
                 # If we have at least 2 tokens left
                 if i < len(transformed_tokens) - 1:
                     word1, punct1 = transformed_tokens[i]
@@ -767,33 +815,46 @@ def transform_text(text):
                     if combined1 != word1 or combined2 != word2:
                         made_combination = True
                         if combined2:
+                            combination_explanations.append(f"Vowel combination: {word1} {word2} → {combined1} {combined2}")
                             new_tokens.append((combined1, punct1))
                             new_tokens.append((combined2, punct2))
                         else:
-                            new_tokens.append((combined1, punct2))  # Use second punct
+                            combination_explanations.append(f"Vowel combination: {word1} {word2} → {combined1}")
+                            new_tokens.append((combined1, punct2))
                         i += 2
                         continue
                 
                 # If no combination was made, keep the current token
                 new_tokens.append(transformed_tokens[i])
                 i += 1
-                
+            
             transformed_tokens = new_tokens
         
         # Capture the "After Combination" output
         after_combination = reassemble_tokens_smartly(transformed_tokens)
         
-        return before_combination, after_combination
+        return {
+            'original': text,
+            'before': before_combination,
+            'after': after_combination,
+            'explanations': explanations,
+            'combinations': combination_explanations
+        }
     
     except Exception as e:
         print(f"Error transforming text: {str(e)}")
         traceback.print_exc(file=sys.stdout)
-        return {'before': before, 'after': after}
+        return {
+            'original': text,
+            'before': text,
+            'after': text,
+            'explanations': [],
+            'combinations': []
+        }
 
 def convert_text(text):
-    """Convert Portuguese text to its phonetic representation."""
-    before, after = transform_text(text)
-    return {'before': before, 'after': after}
+    """Convert Portuguese text to its phonetic representation with explanations."""
+    return transform_text(text)
 
 def main():
     # Set UTF-8 encoding for stdout
@@ -817,6 +878,12 @@ def main():
         result = convert_text(line)
         print(result['before'])
         print(result['after'])
+        print("Explanations:")
+        for explanation in result['explanations']:
+            print(explanation)
+        print("Combinations:")
+        for combination in result['combinations']:
+            print(combination)
 
 if __name__ == "__main__":
     main()
