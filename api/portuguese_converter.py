@@ -843,7 +843,7 @@ def transform_text(text):
                     word2, punct2 = transformed_tokens[i + 1]
                     
                     # Try to combine the words
-                    combined1, combined2 = handle_vowel_combination(word1, word2)
+                    combined1, combined2 = handle_word_combination(word1, word2)
                     if combined1 != word1 or combined2 != word2:
                         made_combination = True
                         if combined2:
