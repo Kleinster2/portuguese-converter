@@ -196,7 +196,7 @@ PHONETIC_DICTIONARY = {
     'mes': 'mêys',
     'meses': 'mêzis',
     'menos': 'menus',
-    'menor': 'menor',
+    'menor': 'menór',
     'menores': 'menoris',
     'pouco': 'pôcu',
     'poucos': 'pôcus',
@@ -215,11 +215,12 @@ WORD_PAIRS = {
     'por quê': 'purkê',
     'para que': 'prakê',
     'para quê': 'prakê',
-    'vamos embora': 'vambora',
-    'vamo embora': 'vambora',
-
-    'com você': 'cumcê',
-    'com vocês': 'cumcêys',
+    'vamos embora': 'vambóra',
+    'vamo embora': 'vambóra',
+    'com você': 'cucê',
+    'com vocês': 'cucêys',
+    'com voce': 'cucê',
+    'com vocês': 'cucêys',
     'sem você': 'sêyn ucê',
     'sem vocês': 'sêyn ucêys',
     'sem voce': 'sêyn ucê',
@@ -329,19 +330,19 @@ WORD_PAIRS = {
 # Verb identification constants
 IRREGULAR_VERBS = {
     "estar": "está", "estou": "tô", "estás": "tá", "está": "tá", "estamos": "tamu", "estão": "tãum",
-    "ser": "sê", "sou": "sô", "é": "é", "somos": "somu", "são": "sãum",
-    "ter": "tê", "tenho": "tenhu", "tem": "teim", "temos": "temu", "têm": "teim", "tive": "tivi", "teve": "tevi", "tivemos": "tivemu", "tiveram": "tiveraum", "tinha": "tinha", "tinhamos": "tinhamu", "tinham": "tinhaum",
+    "ser": "sê", "sou": "sô", "é": "é", "somos": "somu", "são": "sãun",
+    "ter": "tê", "tenho": "tenhu", "tem": "tein", "temos": "temu", "têm": "teim", "tive": "tivi", "teve": "tevi", "tivemos": "tivemu", "tiveram": "tiveraum", "tinha": "tinha", "tinhamos": "tinhamu", "tinham": "tinhaum",
     "fazer": "fazê", "faco": "fassu", "faço": "fassu", "faz": "fays", "fazemos": "fazêmu", "fazem": "fázeym", "fiz": "fis", "fez": "fêiz", "fizemos": "fizemu", "fizeram": "fizérãu", "fazia": "fazia", "faziamos": "faziamu", "faziam": "faziãu", "faria": "fazia", "fariam": "faziãu",
-    "ir": "ih", "vou": "vô", "vai": "vai", "vamos": "vam", "vão": "vãum",
-    "vir": "vim", "venho": "venhu", "vem": "veym", "vimos": "vimu", "vêm": "veym",
+    "ir": "ih", "vou": "vô", "vai": "vai", "vamos": "vam", "vão": "vãun",
+    "vir": "vim", "venho": "venhu", "vem": "veyn", "vimos": "vimu", "vêm": "veym",
     "dizer": "dizê", "digo": "digu", "diz": "dis", "dizemos": "dizemu", "dizem": "dizeym", "disse": "dissi", "dissemos": "dissemu", "disseram": "disseraum", "diria": "diria", "diríamos": "diriamus", "diriamos": "diriamus", "diriam": "diriaum", "diga": "diz", "digamos": "digamu", "digam": "digãu",
     "pedir": "pedí", "peço": "pessu", "pedi": "pédi", "pedimos": "pedímu", "pedem": "pédeym",
-    "dar": "dá", "dou": "dô", "dá": "dá", "damos": "dãmu", "dão": "dãum", "dei": "dei", "deu": "deu", "demos": "démus", "deram": "déraum",
+    "dar": "dá", "dou": "dô", "dá": "dá", "damos": "dãmu", "dão": "dãun", "dei": "dei", "deu": "deu", "demos": "démus", "deram": "déraum",
     "faço": "fassu", "faz": "fays", "fazemos": "fazemu", "fazem": "fazeym", "fiz": "fis", "fizemos": "fizemu", "fizeram": "fizeraum",
     "querer": "kerê", "quero": "kéru", "quer": "ké", "queremos": "kerêmu", "querem": "kéreym", "quis": "kis", "quisemos": "kizemu", "quiseram": "kizeraum",
     "poder": "podê", "posso": "póssu", "pode": "pódi", "podemos": "podêmu", "podem": "pódeym", "pude": "pudi", "pudemos": "pudemu", "puderam": "puderaum",
-    "ver": "vê", "vejo": "veju", "vê": "vê","ve": "vê", "vemos": "vemu", "veêm": "vem", "vi": "vi", "viu": "viu", "vimos": "vimu", "viram": "viraum",
-    "saber": "sabê", "sei": "sei",
+    "ver": "vê", "vejo": "veju", "vê": "vê", "ve": "vê", "vemos": "vemu", "veem": "veem", "vi": "vi", "viu": "viu", "vimos": "vimu", "viram": "viraum",
+    "saber": "sabê", "sei": "sei"
 }
 
 # Basic/Essential Verbs
