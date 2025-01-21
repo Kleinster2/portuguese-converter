@@ -362,7 +362,7 @@ ACTION_VERB_ROOTS = {
     "danç", "descans", "desliz", "destac", "destru", "dit", "edit", "empreg", "empurr", "encontr", "encost", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
     "flert", "form", "grit", "guard", "imprim", "inund", "jog", "junt", "lav", "levant", "lig", "limp", "lut", "marc", 
     "met", "mex", "molh", "mord", "mostr", "mud", "olh", "peg", "proteg", "provoc", "reform", "remarc", "remov", "repet", "resist", "retir", "reun", "salt", 
-    "salv", "samb", "soletr", "som", "solt", "sorri", "soterr", "sub", "substitu", "suj", "surprend", 
+    "salv", "samb", "soletr", "som", "solt", "sorr", "soterr", "sub", "substitu", "suj", "surprend", 
     "traduz", "transform", "un", "us", "suport", "sustent", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
 }
 
@@ -619,7 +619,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             explanations.append(f"Insert i: {p} → {p[0]}i{p[1]}")
     
     # Rule 23p: Append 'i' to words ending in specific consonants
-    if transformed.endswith(['d', 't', 'b', 'f', 'j', 'k', 'p', 'v']):
+    if transformed.endswith(('d', 't', 'b', 'f', 'j', 'k', 'p', 'v')):
         transformed = transformed + 'i'
         explanations.append(f"Append i after final consonant")
     
@@ -927,9 +927,10 @@ def main():
     # Set UTF-8 encoding for stdout
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     
-    # Check if text is provided as a command-line argument
+    # Check if file is provided as a command-line argument
     if len(sys.argv) > 1:
-        input_text = ' '.join(sys.argv[1:])
+        with open(sys.argv[1], 'r', encoding='utf-8') as f:
+            input_text = f.read()
     else:
         # If not, read from standard input
         print("Enter the text to convert (Ctrl+D to end):")
