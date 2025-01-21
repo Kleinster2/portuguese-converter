@@ -6,6 +6,24 @@ import sys
 import traceback
 import io
 
+# Words ending in 'l' that have special accent patterns
+ACCENTED_L_SUFFIXES = {
+    'avel': 'ável',  # amável, notável, etc.
+    'ável': 'ável',  # For words that already have the accent
+    'ivel': 'ível',  # possível, visível, etc.
+    'ível': 'ível',  # For words that already have the accent
+    'ovel': 'óvel',  # móvel, imóvel, etc.
+    'óvel': 'óvel',  # For words that already have the accent
+}
+
+# Words ending in 'l' that have unique accent patterns
+ACCENTED_L_WORDS = {
+    'ágil', 'útil', 'fácil', 'fútil', 'hábil', 'débil', 'dócil', 
+    'fértil', 'fóssil', 'frágil', 'hífen', 'hóstil', 'húmil', 
+    'lábil', 'míssil', 'pénsil', 'réptil', 'têxtil', 'tátil', 
+    'túnel', 'dúctil', 'cônsul', 'níquel', 'álcool'
+}
+
 # Pre-defined phonetic transformations that bypass regular rules
 PHONETIC_DICTIONARY = {
     # Pronouns and Articles
@@ -16,8 +34,8 @@ PHONETIC_DICTIONARY = {
     'aquilo': 'akilu',
     'aquele': 'akêli',
     'aqueles': 'akêlis',
-    'aquelela': 'akéla',
-    'aquelelas': 'akélas',
+    'aquela': 'akéla',
+    'aquelas': 'akélas',
     'ela': 'éla',
     'elas': 'élas',
     'ele': 'êli',
@@ -302,7 +320,7 @@ IRREGULAR_VERBS = {
     "fazer": "fazê", "faco": "fassu", "faço": "fassu", "faz": "fays", "fazemos": "fazêmu", "fazem": "fázeym", "fiz": "fis", "fez": "fêiz", "fizemos": "fizemu", "fizeram": "fizérãu", "fazia": "fazia", "faziamos": "faziamu", "faziam": "faziãu", "faria": "fazia", "fariam": "faziãu",
     "ir": "ih", "vou": "vô", "vai": "vai", "vamos": "vam", "vão": "vãum",
     "vir": "vim", "venho": "venhu", "vem": "veym", "vimos": "vimu", "vêm": "veym",
-    "dizer": "dizê", "digo": "digu", "diz": "dis", "dizemos": "dizemu", "dizem": "dizeym", "disse": "dissi", "dissemos": "dissemu", "disseram": "disseraum", "diria": "diria", "diriamos": "diriamus", "diriam": "diriaum", "dizia": "dizia", "diziamos": "diziamus", "diziam": "diziaum", "diga": "diz", "digamos": "digamu", "digam": "digãu",
+    "dizer": "dizê", "digo": "digu", "diz": "dis", "dizemos": "dizemu", "dizem": "dizeym", "disse": "dissi", "dissemos": "dissemu", "disseram": "disseraum", "diria": "diria", "diríamos": "diriamus", "diriamos": "diriamus", "diriam": "diriaum", "diga": "diz", "digamos": "digamu", "digam": "digãu",
     "pedir": "pedí", "peço": "pessu", "pedi": "pédi", "pedimos": "pedímu", "pedem": "pédeym",
     "dar": "dá", "dou": "dô", "dá": "dá", "damos": "dãmu", "dão": "dãum", "dei": "dei", "deu": "deu", "demos": "démus", "deram": "déraum",
     "faço": "fassu", "faz": "fays", "fazemos": "fazemu", "fazem": "fazeym", "fiz": "fis", "fizemos": "fizemu", "fizeram": "fizeraum",
@@ -499,10 +517,23 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = transformed[:-2] + 'ô'
         explanations.append("ou → ô")
     
-    # Rule 8p: Final 'm' => 'n' (nasalization)
+    # Rule 8p: 'al' followed by a consonant becomes 'au'
+    consonants = 'bcdfghjklmnpqrstvwxz'
+    if re.search(r'al[' + consonants + ']', transformed):
+        transformed = re.sub(r'al([' + consonants + '])', r'au\1', transformed)
+        explanations.append("al+consonant → au+consonant")
+
+    # Rule 9p: Final 'm' becomes 'n'
     if transformed.endswith('m'):
         transformed = transformed[:-1] + 'n'
         explanations.append("Final m → n")
+    
+    # Comprehensive rule for final 'l'
+    if transformed.endswith('l'):
+        old_word = transformed
+        transformed, explanation = handle_final_l(transformed)
+        if explanation:
+            explanations.append(explanation)
     
     # Rule 9p: Verb endings
     if is_verb(word):
@@ -516,58 +547,58 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             transformed = transformed[:-2] + 'í'
             explanations.append("Verb ending: ir → í")
     
-    # Rule 10p: Remove initial 'h'
+    # Rule 11p: Remove initial 'h'
     if transformed.startswith('h'):
         transformed = transformed[1:]
         explanations.append("Remove initial h")
     
-    # Rule 11p: Initial 'ex' becomes 'ez'
+    # Rule 12p: Initial 'ex' becomes 'ez'
     if transformed.startswith('ex'):
         transformed = 'ez' + transformed[2:]
         explanations.append("Initial ex → ez")
     
-    # Rule 12p: Initial 'pol' becomes 'pul'
+    # Rule 13p: Initial 'pol' becomes 'pul'
     if transformed.startswith('pol'):
         transformed = 'pul' + transformed[3:]
         explanations.append("Initial pol → pul")
     
-    # Rule 13p: Initial 'volt' becomes 'vout'
+    # Rule 14p: Initial 'volt' becomes 'vout'
     if transformed.startswith('volt'):
         transformed = 'vout' + transformed[4:]
         explanations.append("Initial volt → vout")
     
-    # Rule 14p: Final 'ol' => 'óu'
+    # Rule 15p: Final 'ol' => 'óu'
     if transformed.endswith('ol'):
         transformed = transformed[:-2] + 'óu'
         explanations.append("Final ol → óu")
     
-    # Rule 15p: Final 'l' => 'u'
+    # Rule 16p: Final 'l' => 'u'
     if transformed.endswith('l'):
         transformed = transformed[:-1] + 'u'
         explanations.append("Final l → u")
     
-    # Rule 16p: Insert 'i' between specific consonant pairs
+    # Rule 17p: Insert 'i' between specific consonant pairs
     for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç', 'dm', 'gn', 'tm', 'tn']:
         if p in transformed:
             transformed = transformed.replace(p, p[0] + 'i' + p[1])
             explanations.append(f"Insert i: {p} → {p[0]}i{p[1]}")
     
-    # Rule 17p: Append 'i' to words ending in specific consonants
+    # Rule 18p: Append 'i' to words ending in specific consonants
     if transformed.endswith(('d', 't', 'b', 'f', 'j', 'k', 'p', 'v')):
         transformed = transformed + 'i'
         explanations.append(f"Append i after final consonant")
     
-    # Rule 18p: Replace final 'c' with 'ki'
+    # Rule 19p: Replace final 'c' with 'ki'
     if transformed.endswith('c'):
         transformed = transformed[:-1] + 'ki'
         explanations.append("Final c → ki")
     
-    # Rule 19p: Append 'ui' to words ending in 'g'
+    # Rule 20p: Append 'ui' to words ending in 'g'
     if transformed.endswith('g'):
         transformed = transformed + 'ui'
         explanations.append("Append ui after final g")
     
-    # Rule 20p: Transform 'eir' to 'er'
+    # Rule 21p: Transform 'eir' to 'er'
     if 'eir' in transformed:
         transformed = transformed.replace('eir', 'êr')
         explanations.append("eir → êr")
@@ -589,9 +620,9 @@ def preserve_capital(original, transformed):
         return transformed[0].upper() + transformed[1:]
     return transformed
 
-def handle_vowel_combination(first, second):
+def handle_word_combination(first, second):
     """
-    Handle vowel combinations between words according to Portuguese pronunciation rules.
+    Handle word combinations between adjacent words according to Portuguese pronunciation rules.
     Rules Rule 1c - Rule 7c:
 
     Rule 0c: If word ends in 'r' and next word starts with vowel => merge keeping the 'r'
