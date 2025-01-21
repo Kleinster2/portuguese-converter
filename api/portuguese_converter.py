@@ -509,8 +509,8 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     
     # Rule 3p: 'ão' at the end becomes 'aum'
     if transformed.endswith('ão'):
-        transformed = transformed[:-2] + 'aum'
-        explanations.append("ão → aum")
+        transformed = transformed[:-2] + 'ãun'
+        explanations.append("ão → ãun")
     
     # Rule 4p: 's' between vowels becomes 'z'
     if re.search(r'([aeiouáéíóúâêîôûãẽĩõũ])s([aeiouáéíóúâêîôûãẽĩõũ])', transformed, re.IGNORECASE):
@@ -538,19 +538,39 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = re.sub(r'al([' + consonants + '])', r'au\1', transformed)
         explanations.append("al+consonant → au")
 
-    # Rule 9p: Final 'm' becomes 'n'
-    if transformed.endswith('m'):
-        transformed = transformed[:-1] + 'in'
-        explanations.append("Final m → in")
+    # Rule 9p: Final 'am' becomes 'aun'
+    if transformed.endswith('am'):
+        transformed = transformed[:-2] + 'aun'
+        explanations.append("Final am → aun")
     
-    # Rule 10p: Comprehensive rule for final 'l'
+    # Rule 10p: Final 'em' becomes 'êin'
+    if transformed.endswith('em'):
+        transformed = transformed[:-2] + 'êin'
+        explanations.append("Final em →êin")
+    
+    # Rule 11p: Final 'im' becomes 'in'
+    if transformed.endswith('im'):
+        transformed = transformed[:-2] + 'in'
+        explanations.append("Final im → in")
+    
+    # Rule 12p: Final 'om' becomes 'oun'
+    if transformed.endswith('om'):
+        transformed = transformed[:-2] + 'oun'
+        explanations.append("Final om → oun")
+
+    # Rule 13p: Final 'um' becomes 'un'
+    if transformed.endswith('um'):
+        transformed = transformed[:-2] + 'un'
+        explanations.append("Final um → un")
+
+    # Rule 14p: Comprehensive rule for final 'l'
     if transformed.endswith('l'):
         old_word = transformed
         transformed, explanation = handle_final_l(transformed)
         if explanation:
             explanations.append(explanation)
     
-    # Rule 11p: Verb endings
+    # Rule 15p: Verb endings
     if is_verb(word):
         if transformed.endswith('ar'):
             transformed = transformed[:-2] + 'á'
@@ -562,61 +582,61 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             transformed = transformed[:-2] + 'í'
             explanations.append("Verb ending: ir → í")
     
-    # Rule 12p: Remove initial 'h'
+    # Rule 16p: Remove initial 'h'
     if transformed.startswith('h'):
         transformed = transformed[1:]
         explanations.append("Remove initial h")
     
-    # Rule 13p: Initial 'ex' becomes 'ez'
+    # Rule 17p: Initial 'ex' becomes 'ez'
     if transformed.startswith('ex'):
         transformed = 'ez' + transformed[2:]
         explanations.append("Initial ex → ez")
     
-    # Rule 14p: Initial 'pol' becomes 'pul'
+    # Rule 18p: Initial 'pol' becomes 'pul'
     if transformed.startswith('pol'):
         transformed = 'pul' + transformed[3:]
         explanations.append("Initial pol → pul")
     
-    # Rule 15p: Initial 'volt' becomes 'vout'
+    # Rule 19p: Initial 'volt' becomes 'vout'
     if transformed.startswith('volt'):
         transformed = 'vout' + transformed[4:]
         explanations.append("Initial volt → vout")
     
-    # Rule 16p: Final 'ol' => 'óu'
+    # Rule 20p: Final 'ol' => 'óu'
     if transformed.endswith('ol'):
         transformed = transformed[:-2] + 'óu'
         explanations.append("Final ol → óu")
     
-    # Rule 17p: Final 'l' => 'u'
+    # Rule 21p: Final 'l' => 'u'
     if transformed.endswith('l'):
         transformed = transformed[:-1] + 'u'
         explanations.append("Final l → u")
     
-    # Rule 18p: Insert 'i' between specific consonant pairs
+    # Rule 22p: Insert 'i' between specific consonant pairs
     for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç', 'dm', 'gn', 'tm', 'tn']:
         if p in transformed:
             transformed = transformed.replace(p, p[0] + 'i' + p[1])
             explanations.append(f"Insert i: {p} → {p[0]}i{p[1]}")
     
-    # Rule 19p: Append 'i' to words ending in specific consonants
-    if transformed.endswith(('d', 't', 'b', 'f', 'j', 'k', 'p', 'v')):
+    # Rule 23p: Append 'i' to words ending in specific consonants
+    if transformed.endswith(['d', 't', 'b', 'f', 'j', 'k', 'p', 'v']):
         transformed = transformed + 'i'
         explanations.append(f"Append i after final consonant")
     
-    # Rule 20p: Replace final 'c' with 'ki'
+    # Rule 24p: Replace final 'c' with 'ki'
     if transformed.endswith('c'):
         transformed = transformed[:-1] + 'ki'
         explanations.append("Final c → ki")
     
-    # Rule 21p: Append 'ui' to words ending in 'g'
+    # Rule 25p: Append 'ui' to words ending in 'g'
     if transformed.endswith('g'):
         transformed = transformed + 'ui'
         explanations.append("Append ui after final g")
     
-    # Rule 22p: Transform 'eir' to 'er'
+    # Rule 26p: Transform 'eir' to 'er'
     if 'eir' in transformed:
         transformed = transformed.replace('eir', 'êr')
-        explanations.append("eir → êr")
+        explanations.append("eir →êr")
     
     # Preserve original capitalization
     transformed = preserve_capital(word, transformed)
