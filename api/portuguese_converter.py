@@ -27,15 +27,29 @@ ACCENTED_L_WORDS = {
 # Pre-defined phonetic transformations that bypass regular rules
 PHONETIC_DICTIONARY = {
     # Pronouns and Articles
-    'algum': 'augum',
+    'algum': 'augun',
     'alguma': 'auguma',
     'algumas': 'augumas',
     'alguns': 'auguns',
+    'alguém': 'auguêin',
+    'alguem': 'auguêin',
+    'ninguém': 'ninguêin',
+    'ninguem': 'ninguêin',
     'aquilo': 'akilu',
     'aquele': 'akêli',
     'aqueles': 'akêlis',
     'aquela': 'akéla',
     'aquelas': 'akélas',
+    'daquilo': 'dakilu',
+    'daquele': 'dakêli',
+    'daqueles': 'dakêlis',
+    'daquela': 'dakéla',
+    'daquelas': 'dakélas',
+    'naquilo': 'nakilu',
+    'naquele': 'nakêli',
+    'naqueles': 'nakêlis',
+    'naquela': 'nakéla',
+    'naquelas': 'nakélas',
     'ela': 'éla',
     'elas': 'élas',
     'ele': 'êli',
@@ -196,7 +210,7 @@ PHONETIC_DICTIONARY = {
 
 # Word pairs that need special handling (not covered by regular rules)
 WORD_PAIRS = {
-    'a gente': 'agênti',
+    'a gente': 'agenti',
     'por que': 'purkê',
     'por quê': 'purkê',
     'para que': 'prakê',
@@ -468,7 +482,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     # Check dictionary
     if lword in PHONETIC_DICTIONARY:
         transformed = preserve_capital(word, PHONETIC_DICTIONARY[lword])
-        return transformed, f"Dictionary: {word} → {transformed}"
+        return transformed, f"Pronunciation: {word} → {transformed}"
 
     # If not in dictionary, apply rules
     transformed = word.lower()  # Start with lowercase for consistent processing
@@ -521,84 +535,84 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     consonants = 'bcdfghjklmnpqrstvwxz'
     if re.search(r'al[' + consonants + ']', transformed):
         transformed = re.sub(r'al([' + consonants + '])', r'au\1', transformed)
-        explanations.append("al+consonant → au+consonant")
+        explanations.append("al+consonant → au")
 
     # Rule 9p: Final 'm' becomes 'n'
     if transformed.endswith('m'):
-        transformed = transformed[:-1] + 'n'
-        explanations.append("Final m → n")
+        transformed = transformed[:-1] + 'in'
+        explanations.append("Final m → in")
     
-    # Comprehensive rule for final 'l'
+    # Rule 10p: Comprehensive rule for final 'l'
     if transformed.endswith('l'):
         old_word = transformed
         transformed, explanation = handle_final_l(transformed)
         if explanation:
             explanations.append(explanation)
     
-    # Rule 9p: Verb endings
+    # Rule 11p: Verb endings
     if is_verb(word):
         if transformed.endswith('ar'):
             transformed = transformed[:-2] + 'á'
             explanations.append("Verb ending: ar → á")
         elif transformed.endswith('er'):
             transformed = transformed[:-2] + 'ê'
-            explanations.append("Verb ending: er → ê")
+            explanations.append("Verb ending: er →ê")
         elif transformed.endswith('ir'):
             transformed = transformed[:-2] + 'í'
             explanations.append("Verb ending: ir → í")
     
-    # Rule 11p: Remove initial 'h'
+    # Rule 12p: Remove initial 'h'
     if transformed.startswith('h'):
         transformed = transformed[1:]
         explanations.append("Remove initial h")
     
-    # Rule 12p: Initial 'ex' becomes 'ez'
+    # Rule 13p: Initial 'ex' becomes 'ez'
     if transformed.startswith('ex'):
         transformed = 'ez' + transformed[2:]
         explanations.append("Initial ex → ez")
     
-    # Rule 13p: Initial 'pol' becomes 'pul'
+    # Rule 14p: Initial 'pol' becomes 'pul'
     if transformed.startswith('pol'):
         transformed = 'pul' + transformed[3:]
         explanations.append("Initial pol → pul")
     
-    # Rule 14p: Initial 'volt' becomes 'vout'
+    # Rule 15p: Initial 'volt' becomes 'vout'
     if transformed.startswith('volt'):
         transformed = 'vout' + transformed[4:]
         explanations.append("Initial volt → vout")
     
-    # Rule 15p: Final 'ol' => 'óu'
+    # Rule 16p: Final 'ol' => 'óu'
     if transformed.endswith('ol'):
         transformed = transformed[:-2] + 'óu'
         explanations.append("Final ol → óu")
     
-    # Rule 16p: Final 'l' => 'u'
+    # Rule 17p: Final 'l' => 'u'
     if transformed.endswith('l'):
         transformed = transformed[:-1] + 'u'
         explanations.append("Final l → u")
     
-    # Rule 17p: Insert 'i' between specific consonant pairs
+    # Rule 18p: Insert 'i' between specific consonant pairs
     for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç', 'dm', 'gn', 'tm', 'tn']:
         if p in transformed:
             transformed = transformed.replace(p, p[0] + 'i' + p[1])
             explanations.append(f"Insert i: {p} → {p[0]}i{p[1]}")
     
-    # Rule 18p: Append 'i' to words ending in specific consonants
+    # Rule 19p: Append 'i' to words ending in specific consonants
     if transformed.endswith(('d', 't', 'b', 'f', 'j', 'k', 'p', 'v')):
         transformed = transformed + 'i'
         explanations.append(f"Append i after final consonant")
     
-    # Rule 19p: Replace final 'c' with 'ki'
+    # Rule 20p: Replace final 'c' with 'ki'
     if transformed.endswith('c'):
         transformed = transformed[:-1] + 'ki'
         explanations.append("Final c → ki")
     
-    # Rule 20p: Append 'ui' to words ending in 'g'
+    # Rule 21p: Append 'ui' to words ending in 'g'
     if transformed.endswith('g'):
         transformed = transformed + 'ui'
         explanations.append("Append ui after final g")
     
-    # Rule 21p: Transform 'eir' to 'er'
+    # Rule 22p: Transform 'eir' to 'er'
     if 'eir' in transformed:
         transformed = transformed.replace('eir', 'êr')
         explanations.append("eir → êr")
@@ -646,7 +660,7 @@ def handle_word_combination(first, second):
         return first, second  # Keep them separate so 'y' can combine with next word
         
     # Don't combine if result would be too long
-    MAX_COMBINED_LENGTH = 15
+    MAX_COMBINED_LENGTH = 20
     if len(first) + len(second) > MAX_COMBINED_LENGTH:
         return first, second
     
@@ -656,12 +670,12 @@ def handle_word_combination(first, second):
     if first.endswith('r') and second[0].lower() in vowels:
         return first + second, ''
 
-    # Special case: Double 'm' between words becomes single 'm'
+    # Special case: 'ia' followed by 'i' becomes just 'i'
     if first.endswith('ia') and second.startswith('i'):
         return first[:-2] + second, ''
 
-    # Special case: Double 'm' between words becomes single 'm'
-    if first.endswith('m') and second.startswith('m'):
+    # Special case: 'n' followed by 'n' becomes just 'n'
+    if first.endswith('n') and second.startswith('n'):
         return first[:-1] + second, ''
 
     # Special case: 'á' followed by 'a' becomes just 'á'
@@ -672,7 +686,7 @@ def handle_word_combination(first, second):
     if first.endswith('ê') and second.startswith('é'):
         return first[:-1] + second, ''
 
-    # Special case: Double 's' between words becomes single 's'
+    # Special case: 's' followed by 's' becomes just 's'
     if first.endswith('s') and second.startswith('s'):
         return first[:-1] + second, ''
 
