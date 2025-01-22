@@ -27,6 +27,7 @@ ACCENTED_L_WORDS = {
 # Pre-defined phonetic transformations that bypass regular rules
 PHONETIC_DICTIONARY = {
     # Pronouns and Articles
+    'ate': 'até',
     'algum': 'augun',
     'alguma': 'auguma',
     'algumas': 'augumas',
@@ -461,7 +462,17 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     # Initialize explanation list
     explanations = []
     
-    # First check if it's in our dictionary
+    # Rule 0p: Transform 'ovo' and 'ovos' endings to 'ôvo' and 'óvos'
+    if word.endswith('ovo'):
+        transformed = word[:-3] + 'ôvo'
+        explanations.append("Transform ending 'ovo' to 'ôvo'")
+        return transformed, ' + '.join(explanations) if explanations else "No changes needed"
+    elif word.endswith('ovos'):
+        transformed = word[:-4] + 'óvos'
+        explanations.append("Transform ending 'ovos' to 'óvos'")
+        return transformed, ' + '.join(explanations) if explanations else "No changes needed"
+
+    # First check if word is in pre-defined dictionary
     lword = word.lower()
     
     # Check irregular verbs first
@@ -641,6 +652,14 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     if transformed.startswith('des'):
         transformed = 'dis' + transformed[3:]
         explanations.append("Transform initial 'des' to 'dis'")
+    
+    # Rule 28p: Transform 'ora' and 'oras' endings to 'óra' and 'óras'
+    if transformed.endswith('ora'):
+        transformed = transformed[:-3] + 'óra'
+        explanations.append("Transform ending 'ora' to 'óra'")
+    elif transformed.endswith('oras'):
+        transformed = transformed[:-4] + 'óras'
+        explanations.append("Transform ending 'oras' to 'óras'")
     
     # Preserve original capitalization
     transformed = preserve_capital(word, transformed)
