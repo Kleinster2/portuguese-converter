@@ -696,6 +696,10 @@ def handle_word_combination(first, second):
     if first.endswith('á') and second.startswith('a'):
         return first[:-1] + second, ''
 
+    # Special case: 'a' followed by 'u' becomes just 'u'
+    if first.endswith('a') and second.startswith('u'):
+        return first[:-1] + second, ''
+
     # Special case: 'ê' followed by 'é' becomes just 'é'
     if first.endswith('ê') and second.startswith('é'):
         return first[:-1] + second, ''
