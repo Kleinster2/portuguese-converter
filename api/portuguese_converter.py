@@ -540,8 +540,8 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
 
     # Rule 9p: Final 'am' becomes 'aun'
     if transformed.endswith('am'):
-        transformed = transformed[:-2] + 'aun'
-        explanations.append("Final am → aun")
+        transformed = transformed[:-2] + 'ãun'
+        explanations.append("Final am → ãun")
     
     # Rule 10p: Final 'em' becomes 'êin'
     if transformed.endswith('em'):
@@ -562,78 +562,71 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     if transformed.endswith('um'):
         transformed = transformed[:-2] + 'un'
         explanations.append("Final um → un")
-
-    # Rule 14p: Comprehensive rule for final 'l'
-    if transformed.endswith('l'):
-        old_word = transformed
-        transformed, explanation = handle_final_l(transformed)
-        if explanation:
-            explanations.append(explanation)
     
-    # Rule 15p: Verb endings
+    # Rule 14p: Infinitive endings
     if is_verb(word):
         if transformed.endswith('ar'):
             transformed = transformed[:-2] + 'á'
-            explanations.append("Verb ending: ar → á")
+            explanations.append("Infinitive ending: ar → á")
         elif transformed.endswith('er'):
             transformed = transformed[:-2] + 'ê'
-            explanations.append("Verb ending: er →ê")
+            explanations.append("Infinitive ending: er →ê")
         elif transformed.endswith('ir'):
             transformed = transformed[:-2] + 'í'
-            explanations.append("Verb ending: ir → í")
+            explanations.append("Infinitive ending: ir → í")
     
-    # Rule 16p: Remove initial 'h'
+    # Rule 15p: Remove initial 'h'
     if transformed.startswith('h'):
         transformed = transformed[1:]
         explanations.append("Remove initial h")
     
-    # Rule 17p: Initial 'ex' becomes 'ez'
+    # Rule 16p: Initial 'ex' becomes 'ez'
     if transformed.startswith('ex'):
         transformed = 'ez' + transformed[2:]
         explanations.append("Initial ex → ez")
     
-    # Rule 18p: Initial 'pol' becomes 'pul'
+    # Rule 17p: Initial 'pol' becomes 'pul'
     if transformed.startswith('pol'):
         transformed = 'pul' + transformed[3:]
         explanations.append("Initial pol → pul")
     
-    # Rule 19p: Initial 'volt' becomes 'vout'
+    # Rule 18p: Initial 'volt' becomes 'vout'
     if transformed.startswith('volt'):
         transformed = 'vout' + transformed[4:]
         explanations.append("Initial volt → vout")
     
-    # Rule 20p: Final 'ol' => 'óu'
+    # Rule 19p: Final 'ol' => 'óu'
     if transformed.endswith('ol'):
         transformed = transformed[:-2] + 'óu'
         explanations.append("Final ol → óu")
     
-    # Rule 21p: Final 'l' => 'u'
+    # Rule 20p: Final 'l' => 'u'
     if transformed.endswith('l'):
         transformed = transformed[:-1] + 'u'
         explanations.append("Final l → u")
     
-    # Rule 22p: Insert 'i' between specific consonant pairs
+    # Rule 21p: Insert 'i' between specific consonant pairs
     for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç', 'dm', 'gn', 'tm', 'tn']:
         if p in transformed:
             transformed = transformed.replace(p, p[0] + 'i' + p[1])
             explanations.append(f"Insert i: {p} → {p[0]}i{p[1]}")
     
-    # Rule 23p: Append 'i' to words ending in specific consonants
+    # Rule 22p: Append 'i' to words ending in specific consonants
     if transformed.endswith(('d', 't', 'b', 'f', 'j', 'k', 'p', 'v')):
         transformed = transformed + 'i'
         explanations.append(f"Append i after final consonant")
     
-    # Rule 24p: Replace final 'c' with 'ki'
+    # Rule 23p: Replace final 'c' with 'ki'
     if transformed.endswith('c'):
         transformed = transformed[:-1] + 'ki'
         explanations.append("Final c → ki")
     
-    # Rule 25p: Append 'ui' to words ending in 'g'
+    # Rule 24p: Append 'ui' to words ending in 'g'
     if transformed.endswith('g'):
         transformed = transformed + 'ui'
         explanations.append("Append ui after final g")
     
-    # Rule 26p: Transform 'eir' to 'er'
+    # Rule 25p: Transform 'eir' to 'er'
     if 'eir' in transformed:
         transformed = transformed.replace('eir', 'êr')
         explanations.append("eir →êr")
