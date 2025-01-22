@@ -63,7 +63,7 @@ PHONETIC_DICTIONARY = {
     'estas': 'éstas',
     'este': 'êsti',
     'estes': 'êstis',
-    'eu': 'eu',
+    # 'eu': 'eu',
     'meu': 'mêu',
     'nesta': 'néssa',
     'nestas': 'néssas',
@@ -329,8 +329,8 @@ WORD_PAIRS = {
 
 # Verb identification constants
 IRREGULAR_VERBS = {
-    "estar": "está", "estou": "tô", "estás": "tá", "está": "tá", "estamos": "tamu", "estão": "tãum",
-    "ser": "sê", "sou": "sô", "é": "é", "somos": "somu", "são": "sãun",
+    "estar": "está", "estou": "tô", "estás": "tá", "está": "tá", "estamos": "tamu", "estão": "tãum", "estive": "tivi", "esteve": "tevi", "estivemos": "tivimu", "estiveram": "tiverãu", "estava": "tava", "estavamos": "tavamu", "estavam": "tavãu",
+    "ser": "sê", "sou": "sô", "é": "é", "somos": "somu", "são": "sãun", "fui": "fui", "foi": "fôi", "fomos": "fomu", "foram": "forãu",
     "ter": "tê", "tenho": "tenhu", "tem": "tein", "temos": "temu", "têm": "teim", "tive": "tivi", "teve": "tevi", "tivemos": "tivemu", "tiveram": "tiveraum", "tinha": "tinha", "tinhamos": "tinhamu", "tinham": "tinhaum",
     "fazer": "fazê", "faco": "fassu", "faço": "fassu", "faz": "fays", "fazemos": "fazêmu", "fazem": "fázeym", "fiz": "fis", "fez": "fêiz", "fizemos": "fizemu", "fizeram": "fizérãu", "fazia": "fazia", "faziamos": "faziamu", "faziam": "faziãu", "faria": "fazia", "fariam": "faziãu",
     "ir": "ih", "vou": "vô", "vai": "vai", "vamos": "vam", "vão": "vãun",
@@ -342,7 +342,8 @@ IRREGULAR_VERBS = {
     "querer": "kerê", "quero": "kéru", "quer": "ké", "queremos": "kerêmu", "querem": "kéreym", "quis": "kis", "quisemos": "kizemu", "quiseram": "kizeraum",
     "poder": "podê", "posso": "póssu", "pode": "pódi", "podemos": "podêmu", "podem": "pódeym", "pude": "pudi", "pudemos": "pudemu", "puderam": "puderaum",
     "ver": "vê", "vejo": "veju", "vê": "vê", "ve": "vê", "vemos": "vemu", "veem": "veem", "vi": "vi", "viu": "viu", "vimos": "vimu", "viram": "viraum",
-    "saber": "sabê", "sei": "sei"
+    "saber": "sabê", "sei": "sei",
+    "trazer": "trazê", "trago": "trago", "traz": "traz", "trazemos": "traizemu", "trazem": "traizeym", "trocar": "troca", "trocamos": "trocamu", "trocam": "trocaum", "trocaram": "trocaum",
 }
 
 # Basic/Essential Verbs
@@ -631,6 +632,11 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = transformed.replace('eir', 'êr')
         explanations.append("eir →êr")
     
+    # Rule 26p: Transform 'ou' at start of word to 'ô'
+    if transformed.startswith('ou'):
+        transformed = 'ô' + transformed[2:]
+        explanations.append("Transform initial 'ou' to 'ô'")
+    
     # Preserve original capitalization
     transformed = preserve_capital(word, transformed)
     
@@ -726,7 +732,7 @@ def handle_word_combination(first, second):
 
     # Rule 4c
     if first[-1] == 'u' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-        return first + 'w' + second, ''
+        return first[:-1] + 'w' + second, ''
 
     # Rule 6c
     if first[-1] in 'sz' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
