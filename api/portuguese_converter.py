@@ -664,9 +664,6 @@ def handle_word_combination(first, second):
             and first word ends in a vowel that's not 'y' or 'i',
             then attach the 'y' to the third word
     """
-    if not first or not second:
-        return first, second
-        
     # Special case for 'y' from 'e'
     if (second == 'y' and  # This is the transformed 'e'
         first[-1] in 'aáàâãeéèêoóòôuúùû' and  # First word ends in vowel but not y/i
@@ -898,9 +895,8 @@ def transform_text(text):
                         
                         # Words were not combined
                         else:
-                            new_tokens.append((combined, punct1))
-                            new_tokens.append((remaining, punct2))
-                            i += 2
+                            new_tokens.append((word1, punct1))
+                            i += 1
                             continue
                 
                 if i < len(transformed_tokens):
