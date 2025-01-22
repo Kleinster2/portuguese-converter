@@ -937,14 +937,15 @@ def main():
     # Convert and display each line
     for line in lines:
         result = convert_text(line)
+        print("Word Transformations:")
         print(result['before'])
         print(result['after'])
-        print("Explanations:")
         for explanation in result['explanations']:
             print(explanation)
-        print("Combinations:")
+        print("\nWord Combinations:")
         for combination in result['combinations']:
             print(combination)
+        print()
 
 if __name__ == "__main__":
     main()
