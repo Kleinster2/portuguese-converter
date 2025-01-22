@@ -100,10 +100,10 @@ PHONETIC_DICTIONARY = {
     # Adverbs
     'demais': 'dimais',
     'devagar': 'divagá',
-    'outro': 'ôtru',
-    'outros': 'ôtrus',
-    'outra': 'ôtra',
-    'outras': 'ôtras',
+    # 'outro': 'ôtru',
+    # 'outros': 'ôtrus',
+    # 'outra': 'ôtra',
+    # 'outras': 'ôtras',
 
     # Prepositions and Conjunctions
     'à': 'a',
@@ -636,6 +636,11 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     if transformed.startswith('ou'):
         transformed = 'ô' + transformed[2:]
         explanations.append("Transform initial 'ou' to 'ô'")
+    
+    # Rule 27p: Transform initial 'des' to 'dis'
+    if transformed.startswith('des'):
+        transformed = 'dis' + transformed[3:]
+        explanations.append("Transform initial 'des' to 'dis'")
     
     # Preserve original capitalization
     transformed = preserve_capital(word, transformed)
