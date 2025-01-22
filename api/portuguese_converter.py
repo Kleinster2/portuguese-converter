@@ -827,7 +827,8 @@ def transform_text(text):
                 # Apply dictionary lookup or phonetic rules
                 transformed, explanation = apply_phonetic_rules(word, next_word, next_next_word)
                 if explanation != "No changes needed":
-                    explanations.append(f"{word}: {explanation}")
+                    if not explanation.startswith("Rule"):  # Skip combination rules
+                        explanations.append(explanation)
                 transformed_tokens.append((transformed, punct))
             else:
                 transformed_tokens.append(('', punct))
@@ -849,9 +850,9 @@ def transform_text(text):
                     word3, punct3 = transformed_tokens[i + 2]
                     
                     # Special case for 'y' (from 'e') attraction
-                    if (word2 == 'y' and
-                        word1[-1] in 'aáàâãeéèêoóòôuúùû' and
-                        word3 and word3[0] in 'yi'):
+                    if (word2 == 'y' and  # This is the transformed 'e'
+                        word1[-1] in 'aáàâãeéèêoóòôuúùû' and  # First word ends in vowel but not y/i
+                        word3 and word3[0] in 'yi'):  # Third word starts with y/i
                         # Move the 'y' to the third word
                         new_tokens.append((word1, punct1))
                         new_tokens.append(('', punct2))
@@ -861,56 +862,42 @@ def transform_text(text):
                         made_combination = True
                         continue
                 
-                # If we have at least 2 tokens left
-                if i < len(transformed_tokens) - 1:
+                if i < len(transformed_tokens) - 1:  # We have at least 2 tokens to look at
                     word1, punct1 = transformed_tokens[i]
                     word2, punct2 = transformed_tokens[i + 1]
                     
-                    # Try to combine the words
-                    combined1, combined2 = handle_word_combination(word1, word2)
-                    if combined1 != word1 or combined2 != word2:
-                        made_combination = True
-                        if combined2:
+                    if word1 and word2:  # Both are actual words
+                        combined, remaining = handle_word_combination(word1, word2)
+                        if remaining == '':  # Words were combined
+                            # Determine which rule was applied
                             rule_explanation = ""
                             if word1.endswith('r') and word2[0].lower() in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"Rule 0c: {word1} + {word2} → {combined1} {combined2} (Keep 'r' when joining with vowel)"
+                                rule_explanation = f"Rule 0c: {word1} + {word2} → {combined} (Keep 'r' when joining with vowel)"
                             elif word1[-1].lower() == word2[0].lower() and word1[-1].lower() in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"Rule 1c: {word1} + {word2} → {combined1} {combined2} (Merge same vowels)"
+                                rule_explanation = f"Rule 1c: {word1} + {word2} → {combined} (Merge same vowels)"
                             elif word1[-1] in 'ao' and word2.startswith('e'):
-                                rule_explanation = f"Rule 2c: {word1} + {word2} → {combined1} {combined2} (Replace 'e' with 'i')"
+                                rule_explanation = f"Rule 2c: {word1} + {word2} → {combined} (Replace 'e' with 'i')"
                             elif word1[-1] == 'a' and word2[0] in 'eiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"Rule 3c: {word1} + {word2} → {combined1} {combined2} (Join 'a' with following vowel)"
+                                rule_explanation = f"Rule 3c: {word1} + {word2} → {combined} (Join 'a' with following vowel)"
                             elif word1[-1] == 'u' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"Rule 4c: {word1} + {word2} → {combined1} {combined2} (Add 'w' between vowels)"
+                                rule_explanation = f"Rule 4c: {word1} + {word2} → {combined} (Add 'w' between vowels)"
                             elif word1[-1] in 'sz' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"Rule 6c: {word1} + {word2} → {combined1} {combined2} (Use 'z' between words)"
+                                rule_explanation = f"Rule 6c: {word1} + {word2} → {combined} (Use 'z' between words)"
                             else:
-                                rule_explanation = f"Rule 5c: {word1} + {word2} → {combined1} {combined2} (Join vowels)"
+                                rule_explanation = f"Rule 5c: {word1} + {word2} → {combined} (Join vowels)"
                                 
                             combination_explanations.append(rule_explanation)
-                            new_tokens.append((combined1, punct1))
-                            new_tokens.append((combined2, punct2))
+                            new_tokens.append((combined, punct2))
+                            i += 2
+                            made_combination = True
+                            continue
+                        
+                        # Words were not combined
                         else:
-                            rule_explanation = ""
-                            if word1.endswith('r') and word2[0].lower() in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"Rule 0c: {word1} + {word2} → {combined1} (Keep 'r' when joining with vowel)"
-                            elif word1[-1].lower() == word2[0].lower() and word1[-1].lower() in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"Rule 1c: {word1} + {word2} → {combined1} (Merge same vowels)"
-                            elif word1[-1] in 'ao' and word2.startswith('e'):
-                                rule_explanation = f"Rule 2c: {word1} + {word2} → {combined1} (Replace 'e' with 'i')"
-                            elif word1[-1] == 'a' and word2[0] in 'eiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"Rule 3c: {word1} + {word2} → {combined1} (Join 'a' with following vowel)"
-                            elif word1[-1] == 'u' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"Rule 4c: {word1} + {word2} → {combined1} (Add 'w' between vowels)"
-                            elif word1[-1] in 'sz' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"Rule 6c: {word1} + {word2} → {combined1} (Use 'z' between words)"
-                            else:
-                                rule_explanation = f"Rule 5c: {word1} + {word2} → {combined1} (Join vowels)"
-                                
-                            combination_explanations.append(rule_explanation)
-                            new_tokens.append((combined1, punct2))
-                        i += 2
-                        continue
+                            new_tokens.append((combined, punct1))
+                            new_tokens.append((remaining, punct2))
+                            i += 2
+                            continue
                 
                 if i < len(transformed_tokens):
                     new_tokens.append(transformed_tokens[i])
