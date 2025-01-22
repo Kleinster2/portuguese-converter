@@ -232,7 +232,7 @@
                     if (data.combinations && data.combinations.length > 0) {
                         outputHtml += '<div class="transformation-section">';
                         outputHtml += '<div class="explanation-title">Word Combinations:</div>';
-                        outputHtml += `<pre>${afterLines.join('\n')}</pre>`;
+                        outputHtml += `<pre>${data.after}</pre>`;
                         data.combinations.forEach(combination => {
                             outputHtml += `<div class="explanation-item">${combination}</div>`;
                         });
