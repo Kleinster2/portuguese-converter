@@ -827,7 +827,7 @@ def transform_text(text):
                 # Apply dictionary lookup or phonetic rules
                 transformed, explanation = apply_phonetic_rules(word, next_word, next_next_word)
                 if explanation != "No changes needed":
-                    explanations.append(explanation)
+                    explanations.append(f"{word}: {explanation}")
                 transformed_tokens.append((transformed, punct))
             else:
                 transformed_tokens.append(('', punct))
