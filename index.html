@@ -222,11 +222,9 @@
                     
                     // Add explanations directly under transformations
                     if (data.explanations && data.explanations.length > 0) {
-                        outputHtml += '<div class="explanation-section">';
                         data.explanations.forEach(explanation => {
                             outputHtml += `<div class="explanation-item">${explanation}</div>`;
                         });
-                        outputHtml += '</div>';
                     }
                     outputHtml += '</div>';
                     
