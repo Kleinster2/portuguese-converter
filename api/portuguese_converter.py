@@ -869,7 +869,8 @@ def transform_text(text):
                     word1, punct1 = transformed_tokens[i]
                     word2, punct2 = transformed_tokens[i + 1]
                     
-                    if word1 and word2:  # Both are actual words
+                    # Try to combine words if they both exist and word1 is not empty
+                    if word1 and word2 and word1.strip():  # Both are actual words and word1 is not empty
                         combined, remaining = handle_word_combination(word1, word2)
                         if remaining == '':  # Words were combined
                             # Determine which rule was applied
@@ -888,7 +889,7 @@ def transform_text(text):
                                 rule_explanation = f"{word1} + {word2} → {combined} (Use 'z' between words)"
                             else:
                                 rule_explanation = f"{word1} + {word2} → {combined} (Join vowels)"
-                                
+                            
                             combination_explanations.append(rule_explanation)
                             new_tokens.append((combined, punct2))
                             i += 2
