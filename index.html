@@ -139,6 +139,10 @@
             background-color: #fff;
             border-radius: 3px;
         }
+        
+        .transformation-section {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -152,25 +156,9 @@
         <div id="loading" class="loading">Converting...</div>
         
         <div id="result" class="result" style="display: none;">
-            <span id="output"></span>
-            <!-- Audio feature temporarily disabled
-            <div style="margin-top: 10px;">
-                <button id="speakBtn" onclick="speakText()" style="width: auto; display: none;">
-                    <span class="button-text">🔊 Speak</span>
-                </button>
-            </div>
-            -->
+            <div id="output"></div>
         </div>
         
-        <div class="explanation-section">
-            <div class="explanation-title">Word Transformations:</div>
-            <div id="explanations"></div>
-        </div>
-        
-        <div class="explanation-section">
-            <div class="explanation-title">Word Combinations:</div>
-            <div id="combinations"></div>
-        </div>
     </div>
 
     <script>
@@ -218,9 +206,6 @@
                 const data = await response.json();
                 result.style.display = 'block';
                 
-                // Log the response for debugging
-                console.log('API Response:', JSON.stringify(data, null, 2));
-                
                 if (data.error || data.details) {
                     const errorMessage = data.details || data.error || 'Unknown error occurred';
                     document.getElementById('output').textContent = 'Error: ' + errorMessage;
@@ -230,34 +215,32 @@
                     const beforeLines = data.before.split('\n');
                     const afterLines = data.after.split('\n');
                     
-                    // Create formatted output with proper line breaks
-                    let formattedResult = '\n<strong>Transformation 1:</strong>\n';
-                    formattedResult += beforeLines.join('\n');
-                    formattedResult += '\n\n<strong>Transformation 2:</strong>\n';
-                    formattedResult += afterLines.join('\n');
+                    // Create the output HTML
+                    let outputHtml = '<div class="transformation-section">';
+                    outputHtml += '<div class="explanation-title">Word Transformations:</div>';
+                    outputHtml += `<pre>${beforeLines.join('\n')}\n${afterLines.join('\n')}</pre>`;
                     
-                    const outputElement = document.getElementById('output');
-                    outputElement.innerHTML = `<pre>${formattedResult}</pre>`;
+                    // Add explanations directly under transformations
+                    if (data.explanations && data.explanations.length > 0) {
+                        outputHtml += '<div class="explanation-section">';
+                        data.explanations.forEach(explanation => {
+                            outputHtml += `<div class="explanation-item">${explanation}</div>`;
+                        });
+                        outputHtml += '</div>';
+                    }
+                    outputHtml += '</div>';
                     
-                    // Display explanations
-                    const explanationsDiv = document.getElementById('explanations');
-                    explanationsDiv.innerHTML = '';
-                    data.explanations.forEach(explanation => {
-                        const div = document.createElement('div');
-                        div.className = 'explanation-item';
-                        div.textContent = explanation;
-                        explanationsDiv.appendChild(div);
-                    });
+                    // Add combinations section
+                    if (data.combinations && data.combinations.length > 0) {
+                        outputHtml += '<div class="transformation-section">';
+                        outputHtml += '<div class="explanation-title">Word Combinations:</div>';
+                        data.combinations.forEach(combination => {
+                            outputHtml += `<div class="explanation-item">${combination}</div>`;
+                        });
+                        outputHtml += '</div>';
+                    }
                     
-                    // Display combinations
-                    const combinationsDiv = document.getElementById('combinations');
-                    combinationsDiv.innerHTML = '';
-                    data.combinations.forEach(combination => {
-                        const div = document.createElement('div');
-                        div.className = 'explanation-item';
-                        div.textContent = combination;
-                        combinationsDiv.appendChild(div);
-                    });
+                    document.getElementById('output').innerHTML = outputHtml;
                 } else {
                     const errorMessage = 'Invalid response format from server';
                     document.getElementById('output').textContent = 'Error: ' + errorMessage;
