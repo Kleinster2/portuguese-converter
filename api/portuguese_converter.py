@@ -363,15 +363,15 @@ ACTION_VERB_ROOTS = {
     "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
     "danç", "descans", "desliz", "destac", "destru", "dit", "edit", "empreg", "empurr", "encontr", "encost", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
     "flert", "form", "grit", "guard", "imprim", "inund", "jog", "junt", "lav", "levant", "lig", "limp", "lut", "marc", 
-    "met", "mex", "molh", "mord", "mostr", "mud", "olh", "peg", "proteg", "provoc", "reform", "remarc", "remov", "repet", "resist", "retir", "reun", "salt", 
-    "salv", "samb", "soletr", "som", "solt", "sorr", "soterr", "sub", "substitu", "suj", "surprend", 
+    "met", "mex", "molh", "mord", "mostr", "mud", "olh", "peg", "proteg", "provoc", "reform", "reaj", "realiz", "receb", "reclam", "reduz", "reflet", "relax", "represent", "reserv", 
+    "resolv", "respond", "restit", "romp", "segu", "serv", "sorr", "sub", "substitu", "suj", "surprend", 
     "traduz", "transform", "un", "us", "suport", "sustent", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
 }
 
 # Cognitive/Mental Verbs
 COGNITIVE_VERB_ROOTS = {
     "ach", "adivinh", "ador", "admir", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "analis", "anot", "aprend", "apresent", 
-    "assist", "assum", "chec", "coment", "comet", "compar", "concord", "conhec", "consegu", "consig", "consig", "consider", "consist", 
+    "assist", "assum", "chec", "coment", "comet", "compar", "concord", "conhec", "consegu", "consig", "consist", 
     "consent", "consult", "contempl", "cont", "convers", "decid", "defend", "defin", "demor", "depend", "desej", "desenh", "desenvolv", 
     "descobr", "desist", "dirig", "discut", "divid", "entend", "esper", "esquec", "esqueç", "estud", "evit", 
     "foc", "gost", "imagin", "import", "indic", "inform", "inici", "insist", "instru", "lembr", "ment", "mint", "not", "observ", "opin", 
@@ -576,10 +576,10 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = transformed[:-2] + 'in'
         explanations.append("Final im → in")
     
-    # Rule 15p: Final 'om' becomes 'oun'
+    # Rule 15p: Final 'om' becomes 'ôun'
     if transformed.endswith('om'):
-        transformed = transformed[:-2] + 'oun'
-        explanations.append("Final om → oun")
+        transformed = transformed[:-2] + 'ôun'
+        explanations.append("Final om → ôun")
 
     # Rule 16p: Final 'um' becomes 'un'
     if transformed.endswith('um'):
@@ -671,6 +671,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     elif transformed.endswith('oras'):
         transformed = transformed[:-4] + 'óras'
         explanations.append("Transform ending 'oras' to 'óras'")
+    
     
     # Preserve original capitalization
     transformed = preserve_capital(word, transformed)
@@ -766,8 +767,12 @@ def handle_word_combination(first, second):
         return first[:-1] + second, ''
 
     # Rule 4c
-    if first[-1] == 'u' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
+    if first[-1] == 'u' and second[0] in 'aiouáíóúâêîôûãẽĩõũy':
         return first + second, ''
+
+    # Rule 4.1c: Special case for 'u' followed by 'e' or 'é'
+    if first[-1] == 'u' and second.startswith('é', 'e'):
+        return first[:-1] + second, ''
 
     # Rule 6c
     if first[-1] in 'sz' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
@@ -916,17 +921,19 @@ def transform_text(text):
                             if word1.endswith('r') and word2[0].lower() in 'aeiouáéíóúâêîôûãẽĩõũy':
                                 rule_explanation = f"{word1} + {word2} → {combined} (Keep 'r' when joining with vowel)"
                             elif word1[-1].lower() == word2[0].lower() and word1[-1].lower() in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join same letter)"
+                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter)"
                             elif word1[-1] in 'ao' and word2.startswith('e'):
                                 rule_explanation = f"{word1} + {word2} → {combined} (Replace 'e' with 'i')"
                             elif word1[-1] == 'a' and word2[0] in 'eiouáéíóúâêîôûãẽĩõũy':
                                 rule_explanation = f"{word1} + {word2} → {combined} (Join 'a' with following vowel)"
-                            elif word1[-1] == 'u' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join same letter)"
+                            elif word1[-1] == 'u' and second.startswith('é'):
+                                rule_explanation = f"{word1} + {word2} → {combined} (Drop 'u' before 'é')"
+                            elif word1[-1] == 'u' and word2[0] in 'aiouáíóúâêîôûãẽĩõũy':
+                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter)"
                             elif word1[-1] in 'sz' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
                                 rule_explanation = f"{word1} + {word2} → {combined} (Use 'z' between words)"
                             else:
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join same letter)"
+                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter)"
                             
                             combination_explanations.append(rule_explanation)
                             new_tokens.append((combined, punct2))
