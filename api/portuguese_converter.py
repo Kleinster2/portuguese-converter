@@ -209,6 +209,17 @@ PHONETIC_DICTIONARY = {
     'bonitos': 'bunitus'
 }
 
+# Direct transformations that bypass the phonetic rules pipeline
+DIRECT_TRANSFORMATIONS = {
+    'não': 'nãum',
+    'sim': 'sin',
+    'bem': 'bein',
+    'também': 'tambein',
+    'alguém': 'auguein',
+    'ninguém': 'ninguein',
+    'quem': 'kein',
+}
+
 # Word pairs that need special handling (not covered by regular rules)
 WORD_PAIRS = {
     'a gente': 'agenti',
@@ -465,6 +476,11 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
 
     # First check if word is in pre-defined dictionary
     lword = word.lower()
+
+    # Check direct transformations first - these bypass the pipeline completely
+    if lword in DIRECT_TRANSFORMATIONS:
+        transformed = preserve_capital(word, DIRECT_TRANSFORMATIONS[lword])
+        return transformed, f"Direct transformation: {word} → {transformed}"
 
     # Initialize transformed word and explanations
     transformed = lword
@@ -928,17 +944,17 @@ def transform_text(text):
                             if word1.endswith('r') and word2[0].lower() in 'aeiouáéíóúâêîôûãẽĩõũy':
                                 rule_explanation = f"{word1} + {word2} → {combined} (Keep 'r' when joining with vowel)"
                             elif word1[-1].lower() == word2[0].lower() and word1[-1].lower() in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter)"
+                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
                             elif word1[-1] in 'ao' and word2.startswith('e'):
                                 rule_explanation = f"{word1} + {word2} → {combined} (Replace 'e' with 'i')"
                             elif word1[-1] == 'a' and word2[0] in 'eiouáéíóúâêîôûãẽĩõũy':
                                 rule_explanation = f"{word1} + {word2} → {combined} (Join 'a' with following vowel)"
                             elif word1[-1] == 'u' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter)"
+                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
                             elif word1[-1] in 'sz' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
                                 rule_explanation = f"{word1} + {word2} → {combined} (Use 'z' between words)"
                             else:
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter)"
+                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
                             
                             combination_explanations.append(rule_explanation)
                             new_tokens.append((combined, punct2))
