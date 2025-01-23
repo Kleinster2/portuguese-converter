@@ -771,14 +771,14 @@ def handle_word_combination(first, second):
         return first + second, ''
 
     # Rule 4.1c: Special case for 'u' followed by 'e' or 'é'
-    if first[-1] == 'u' and second.startswith('é', 'e'):
+    if first[-1] == 'u' and second[0] in 'eé':
         return first[:-1] + second, ''
 
-    # Rule 6c
+    # Rule 5c
     if first[-1] in 'sz' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
         return first[:-1] + 'z' + second, ''
 
-    # Rule 5c - moved after other rules
+    # Rule 6c - moved after other rules
     if first[-1] in 'eiouáéíóúâêîôûãẽĩõũy' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
         return first + second, ''
 
@@ -926,9 +926,7 @@ def transform_text(text):
                                 rule_explanation = f"{word1} + {word2} → {combined} (Replace 'e' with 'i')"
                             elif word1[-1] == 'a' and word2[0] in 'eiouáéíóúâêîôûãẽĩõũy':
                                 rule_explanation = f"{word1} + {word2} → {combined} (Join 'a' with following vowel)"
-                            elif word1[-1] == 'u' and second.startswith('é'):
-                                rule_explanation = f"{word1} + {word2} → {combined} (Drop 'u' before 'é')"
-                            elif word1[-1] == 'u' and word2[0] in 'aiouáíóúâêîôûãẽĩõũy':
+                            elif word1[-1] == 'u' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
                                 rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter)"
                             elif word1[-1] in 'sz' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
                                 rule_explanation = f"{word1} + {word2} → {combined} (Use 'z' between words)"
