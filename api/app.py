@@ -94,12 +94,10 @@ def convert():
 def convert_new():
     try:
         data = request.get_json()
-        if not data or 'text' not in data:
-            return jsonify({'error': 'No text provided'}), 400
-        
-        text = data['text']
+        text = data.get('text', '')
+        print(f"Received text: {text}")  # Debug
         result = convert_text(text)
-        
+        print(f"Conversion result: {result}")  # Debug
         return jsonify({
             'original': result['original'],
             'before': result['before'],
@@ -109,7 +107,8 @@ def convert_new():
         })
         
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"Error in convert: {str(e)}")  # Debug
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 # Vercel requires the app to be named 'app'

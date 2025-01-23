@@ -872,9 +872,11 @@ def transform_text(text):
     try:
         # First tokenize the text into words and punctuation
         tokens = tokenize_text(text)
+        print(f"Initial tokens: {tokens}")  # Debug
         
         # Transform each word token according to rules
         transformed_tokens = []
+        explanations = []
         for i, (word, punct) in enumerate(tokens):
             if word:
                 # Get next word and word after that for verb/pronoun detection
@@ -886,6 +888,7 @@ def transform_text(text):
                         next_next_word = tokens[i + 2][0]
                 # Apply dictionary lookup or phonetic rules
                 transformed, explanation = apply_phonetic_rules(word, next_word, next_next_word)
+                print(f"Word '{word}' transformed to '{transformed}' with explanation: {explanation}")  # Debug
                 if explanation != "No changes needed":
                     explanations.append(f"{word}: {explanation}")
                 transformed_tokens.append((transformed, punct))
@@ -894,9 +897,12 @@ def transform_text(text):
         
         # Capture the "Before Combination" output
         before_combination = reassemble_tokens_smartly(transformed_tokens)
+        print(f"Before word pairs: {before_combination}")  # Debug
         
         # Now merge word pairs after individual transformations
         transformed_tokens = merge_word_pairs(transformed_tokens)
+        after_pairs = reassemble_tokens_smartly(transformed_tokens)
+        print(f"After word pairs: {after_pairs}")  # Debug
 
         # Now handle vowel combinations between words in multiple passes
         made_combination = True
@@ -991,7 +997,10 @@ def transform_text(text):
 
 def convert_text(text):
     """Convert Portuguese text to its phonetic representation with explanations."""
-    return transform_text(text)
+    print(f"convert_text called with: {text}")  # Debug
+    result = transform_text(text)
+    print(f"transform_text returned: {result}")  # Debug
+    return result
 
 def main():
     # Set UTF-8 encoding for stdout
