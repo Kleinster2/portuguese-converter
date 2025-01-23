@@ -767,7 +767,7 @@ def handle_word_combination(first, second):
 
     # Rule 4c
     if first[-1] == 'u' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-        return first[:-1] + 'w' + second, ''
+        return first + second, ''
 
     # Rule 6c
     if first[-1] in 'sz' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
