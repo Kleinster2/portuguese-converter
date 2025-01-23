@@ -493,18 +493,18 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     # Rule 1p: Transform 'ovo' and 'ovos' endings to 'ôvo' and 'óvos'
     if word.endswith('ovo'):
         transformed = word[:-3] + 'ôvo'
-        explanations.append("Transform ending 'ovo' to 'ôvo'")
+        explanations.append("Transform ending 'ovo' to 'ô'")
     elif word.endswith('ovos'):
         transformed = word[:-4] + 'óvos'
-        explanations.append("Transform ending 'ovos' to 'óvos'")
+        explanations.append("Transform ending 'ovos' to 'ó'")
 
     # Rule 2p: Transform 'ogo' and 'ogos' endings to 'ôgo' and 'ógos'
     if word.endswith('ogo'):
         transformed = word[:-3] + 'ôgo'
-        explanations.append("Transform ending 'ogo' to 'ôgo'")
+        explanations.append("Transform ending 'ogo' to 'ô'")
     elif word.endswith('ogos'):
         transformed = word[:-4] + 'ógos'
-        explanations.append("Transform ending 'ogos' to 'ógos'")
+        explanations.append("Transform ending 'ogos' to 'ó'")
 
     # Rule 3p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', 'e'->'i', 'es'->'is')
     if transformed.endswith('o'):
@@ -556,32 +556,37 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = re.sub(r'al([' + consonants + '])', r'au\1', transformed)
         explanations.append("al+consonant → au")
 
-    # Rule 11p: Final 'am' becomes 'aun'
+    # Rule 11p: 'on' followed by a consonant becomes 'ôun'
+    if re.search(r'on[' + consonants + ']', transformed):
+        transformed = re.sub(r'on([' + consonants + '])', r'ôun\1', transformed)
+        explanations.append("on+consonant → ôun")
+
+    # Rule 12p: Final 'am' becomes 'aun'
     if transformed.endswith('am'):
         transformed = transformed[:-2] + 'ãun'
         explanations.append("Final am → ãun")
     
-    # Rule 12p: Final 'em' becomes 'êin'
+    # Rule 13p: Final 'em' becomes 'êin'
     if transformed.endswith('em'):
         transformed = transformed[:-2] + 'êin'
         explanations.append("Final em →êin")
     
-    # Rule 13p: Final 'im' becomes 'in'
+    # Rule 14p: Final 'im' becomes 'in'
     if transformed.endswith('im'):
         transformed = transformed[:-2] + 'in'
         explanations.append("Final im → in")
     
-    # Rule 14p: Final 'om' becomes 'oun'
+    # Rule 15p: Final 'om' becomes 'oun'
     if transformed.endswith('om'):
         transformed = transformed[:-2] + 'oun'
         explanations.append("Final om → oun")
 
-    # Rule 15p: Final 'um' becomes 'un'
+    # Rule 16p: Final 'um' becomes 'un'
     if transformed.endswith('um'):
         transformed = transformed[:-2] + 'un'
         explanations.append("Final um → un")
     
-    # Rule 16p: Infinitive endings
+    # Rule 17p: Infinitive endings
     if is_verb(word):
         if transformed.endswith('ar'):
             transformed = transformed[:-2] + 'á'
@@ -593,73 +598,73 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             transformed = transformed[:-2] + 'í'
             explanations.append("Infinitive ending: ir → í")
     
-    # Rule 17p: Remove initial 'h'
+    # Rule 18p: Remove initial 'h'
     if transformed.startswith('h'):
         transformed = transformed[1:]
         explanations.append("Remove initial h")
     
-    # Rule 18p: Initial 'ex' becomes 'ez'
+    # Rule 19p: Initial 'ex' becomes 'ez'
     if transformed.startswith('ex'):
         transformed = 'ez' + transformed[2:]
         explanations.append("Initial ex → ez")
     
-    # Rule 19p: Initial 'pol' becomes 'pul'
+    # Rule 20p: Initial 'pol' becomes 'pul'
     if transformed.startswith('pol'):
         transformed = 'pul' + transformed[3:]
         explanations.append("Initial pol → pul")
     
-    # Rule 20p: Initial 'volt' becomes 'vout'
+    # Rule 21p: Initial 'volt' becomes 'vout'
     if transformed.startswith('volt'):
         transformed = 'vout' + transformed[4:]
         explanations.append("Initial volt → vout")
     
-    # Rule 21p: Final 'ol' => 'óu'
+    # Rule 22p: Final 'ol' => 'óu'
     if transformed.endswith('ol'):
         transformed = transformed[:-2] + 'óu'
         explanations.append("Final ol → óu")
     
-    # Rule 22p: Final 'l' => 'u'
+    # Rule 23p: Final 'l' => 'u'
     if transformed.endswith('l'):
         transformed = transformed[:-1] + 'u'
         explanations.append("Final l → u")
     
-    # Rule 23p: Insert 'i' between specific consonant pairs
+    # Rule 24p: Insert 'i' between specific consonant pairs
     for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç', 'dm', 'gn', 'tm', 'tn']:
         if p in transformed:
             transformed = transformed.replace(p, p[0] + 'i' + p[1])
             explanations.append(f"Insert i: {p} → {p[0]}i{p[1]}")
     
-    # Rule 24p: Append 'i' to words ending in specific consonants
+    # Rule 25p: Append 'i' to words ending in specific consonants
     if transformed.endswith(('d', 't', 'b', 'f', 'j', 'k', 'p', 'v')):
         transformed = transformed + 'i'
         explanations.append(f"Append i after final consonant")
     
-    # Rule 25p: Replace final 'c' with 'ki'
+    # Rule 26p: Replace final 'c' with 'ki'
     if transformed.endswith('c'):
         transformed = transformed[:-1] + 'ki'
         explanations.append("Final c → ki")
     
-    # Rule 26p: Append 'ui' to words ending in 'g'
+    # Rule 27p: Append 'ui' to words ending in 'g'
     if transformed.endswith('g'):
         transformed = transformed + 'ui'
         explanations.append("Append ui after final g")
     
-    # Rule 27p: Transform 'eir' to 'er'
+    # Rule 28p: Transform 'eir' to 'er'
     if 'eir' in transformed:
         transformed = transformed.replace('eir', 'êr')
         explanations.append("eir →êr")
     
-    # Rule 28p: Transform 'ou' at start of word to 'ô'
+    # Rule 29p: Transform 'ou' at start of word to 'ô'
     if transformed.startswith('ou'):
         transformed = 'ô' + transformed[2:]
         explanations.append("Transform initial 'ou' to 'ô'")
     
-    # Rule 29p: Transform initial 'des' to 'dis'
+    # Rule 30p: Transform initial 'des' to 'dis'
     if transformed.startswith('des'):
         transformed = 'dis' + transformed[3:]
         explanations.append("Transform initial 'des' to 'dis'")
     
-    # Rule 30p: Transform 'ora' and 'oras' endings to 'óra' and 'óras'
+    # Rule 31p: Transform 'ora' and 'oras' endings to 'óra' and 'óras'
     if transformed.endswith('ora'):
         transformed = transformed[:-3] + 'óra'
         explanations.append("Transform ending 'ora' to 'óra'")
