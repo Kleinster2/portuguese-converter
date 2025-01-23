@@ -109,7 +109,7 @@ PHONETIC_DICTIONARY = {
     # Prepositions and Conjunctions
     'à': 'a',
     'às': 'as',
-    'com': 'cum',
+    # 'com': 'cum',
     'sem': 'sêyn',
     'e': 'i',
     'em': 'ein',
@@ -916,17 +916,17 @@ def transform_text(text):
                             if word1.endswith('r') and word2[0].lower() in 'aeiouáéíóúâêîôûãẽĩõũy':
                                 rule_explanation = f"{word1} + {word2} → {combined} (Keep 'r' when joining with vowel)"
                             elif word1[-1].lower() == word2[0].lower() and word1[-1].lower() in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"{word1} + {word2} → {combined} (Merge same vowels)"
+                                rule_explanation = f"{word1} + {word2} → {combined} (Join same letter)"
                             elif word1[-1] in 'ao' and word2.startswith('e'):
                                 rule_explanation = f"{word1} + {word2} → {combined} (Replace 'e' with 'i')"
                             elif word1[-1] == 'a' and word2[0] in 'eiouáéíóúâêîôûãẽĩõũy':
                                 rule_explanation = f"{word1} + {word2} → {combined} (Join 'a' with following vowel)"
                             elif word1[-1] == 'u' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"{word1} + {word2} → {combined} (Add 'w' between vowels)"
+                                rule_explanation = f"{word1} + {word2} → {combined} (Join same letter)"
                             elif word1[-1] in 'sz' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
                                 rule_explanation = f"{word1} + {word2} → {combined} (Use 'z' between words)"
                             else:
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowels)"
+                                rule_explanation = f"{word1} + {word2} → {combined} (Join same letter)"
                             
                             combination_explanations.append(rule_explanation)
                             new_tokens.append((combined, punct2))
