@@ -748,6 +748,10 @@ def handle_word_combination(first, second):
     if first.endswith('n') and second.startswith('n'):
         return first[:-1] + second, ''
 
+    # Special case: 'm' followed by 'm' becomes just 'm'
+    if first.endswith('m') and second.startswith('m'):
+        return first[:-1] + second, ''
+
     # Special case: 'á' followed by 'a' becomes just 'á'
     if first.endswith('á') and second.startswith('a'):
         return first[:-1] + second, ''
@@ -763,6 +767,10 @@ def handle_word_combination(first, second):
     # Special case: 's' followed by 's' becomes just 's'
     if first.endswith('s') and second.startswith('s'):
         return first[:-1] + second, ''
+
+    # Special case: 'yn' followed by 'm' becomes just 'ym'
+    if first.endswith('yn') and second.startswith('m'):
+        return first[:-2] + 'y' + second, ''
 
     if (first[-1].lower() in vowels
         and second[0].lower() in vowels
@@ -951,7 +959,7 @@ def transform_text(text):
                             elif word1[-1] == 'u' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
                                 rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
                             elif word1[-1] in 'sz' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"{word1} + {word2} → {combined} (Use 'z' between words)"
+                                rule_explanation = f"{word1} + {word2} → {combined} ('s' between vowels becomes'z')"
                             else:
                                 rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
                             
