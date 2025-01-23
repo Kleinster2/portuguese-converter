@@ -461,16 +461,6 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     
     # Initialize explanation list
     explanations = []
-    
-    # Rule 0p: Transform 'ovo' and 'ovos' endings to 'ôvo' and 'óvos'
-    if word.endswith('ovo'):
-        transformed = word[:-3] + 'ôvo'
-        explanations.append("Transform ending 'ovo' to 'ôvo'")
-        return transformed, ' + '.join(explanations) if explanations else "No changes needed"
-    elif word.endswith('ovos'):
-        transformed = word[:-4] + 'óvos'
-        explanations.append("Transform ending 'ovos' to 'óvos'")
-        return transformed, ' + '.join(explanations) if explanations else "No changes needed"
 
     # First check if word is in pre-defined dictionary
     lword = word.lower()
@@ -500,6 +490,16 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     # If not in dictionary, apply rules
     transformed = word.lower()  # Start with lowercase for consistent processing
     
+    # Rule 0p: Transform 'ovo' and 'ovos' endings to 'ôvo' and 'óvos'
+    if word.endswith('ovo'):
+        transformed = word[:-3] + 'ôvo'
+        explanations.append("Transform ending 'ovo' to 'ôvo'")
+        # return transformed, ' + '.join(explanations) if explanations else "No changes needed"
+    elif word.endswith('ovos'):
+        transformed = word[:-4] + 'óvos'
+        explanations.append("Transform ending 'ovos' to 'óvos'")
+        # return transformed, ' + '.join(explanations) if explanations else "No changes needed"
+
     # Rule 1p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', 'e'->'i', 'es'->'is')
     if transformed.endswith('o'):
         transformed = transformed[:-1] + 'u'
