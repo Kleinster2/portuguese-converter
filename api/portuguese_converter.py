@@ -343,7 +343,7 @@ IRREGULAR_VERBS = {
     "querer": "kerê", "quero": "kéru", "quer": "ké", "queremos": "kerêmu", "querem": "kéreym", "quis": "kis", "quisemos": "kizemu", "quiseram": "kizeraum",
     "poder": "podê", "posso": "póssu", "pode": "pódi", "podemos": "podêmu", "podem": "pódeym", "pude": "pudi", "pudemos": "pudemu", "puderam": "puderaum",
     "ver": "vê", "vejo": "veju", "vê": "vê", "ve": "vê", "vemos": "vemu", "veem": "veem", "vi": "vi", "viu": "viu", "vimos": "vimu", "viram": "viraum",
-    "saber": "sabê", "sei": "sei", "soube": "sôbe", "soubemos": "sôbemos", "souberam": "sôberam",
+    "saber": "sabê", "sei": "sei", "soube": "soube", "soubemos": "soubemos", "souberam": "souberam",
     "trazer": "trazê", "trago": "trago", "traz": "traz", "trazemos": "traizemu", "trazem": "traizeym", "trocar": "troca", "trocamos": "trocamu", "trocam": "trocaum", "trocaram": "trocaum",
     "mentir": "menti", "minto": "minto", "mente": "meinte", "mentimos": "mintimos", "mentem": "mentem", "mentia": "mintia", "mentiamos": "mintiamos", "mentiam": "mintiam", "mentiram": "mintiram",
 }
@@ -660,12 +660,17 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = 'ô' + transformed[2:]
         explanations.append("Transform initial 'ou' to 'ô'")
     
-    # Rule 30p: Transform initial 'des' to 'dis'
+    # Rule 30p: Transform initial 'sou' to 'sô'
+    if transformed.startswith('sou'):
+        transformed = 'sô' + transformed[3:]
+        explanations.append("Transform initial 'sou' to 'sô'")
+    
+    # Rule 31p: Transform initial 'des' to 'dis'
     if transformed.startswith('des'):
         transformed = 'dis' + transformed[3:]
         explanations.append("Transform initial 'des' to 'dis'")
     
-    # Rule 31p: Transform 'ora' and 'oras' endings to 'óra' and 'óras'
+    # Rule 32p: Transform 'ora' and 'oras' endings to 'óra' and 'óras'
     if transformed.endswith('ora'):
         transformed = transformed[:-3] + 'óra'
         explanations.append("Transform ending 'ora' to 'óra'")
