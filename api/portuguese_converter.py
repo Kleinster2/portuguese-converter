@@ -28,10 +28,10 @@ ACCENTED_L_WORDS = {
 PHONETIC_DICTIONARY = {
     # Pronouns and Articles
     'ate': 'até',
-    'algum': 'augun',
-    'alguma': 'auguma',
-    'algumas': 'augumas',
-    'alguns': 'auguns',
+    # 'algum': 'augun',
+    # 'alguma': 'auguma',
+    # 'algumas': 'augumas',
+    # 'alguns': 'auguns',
     'alguém': 'auguêin',
     'alguem': 'auguêin',
     'ninguém': 'ninguêin',
@@ -211,13 +211,7 @@ PHONETIC_DICTIONARY = {
 
 # Direct transformations that bypass the phonetic rules pipeline
 DIRECT_TRANSFORMATIONS = {
-    'não': 'nãum',
-    'sim': 'sin',
-    'bem': 'bein',
-    'também': 'tambein',
-    'alguém': 'auguein',
-    'ninguém': 'ninguein',
-    'quem': 'kein',
+    'vamos': 'vam',
 }
 
 # Word pairs that need special handling (not covered by regular rules)
@@ -345,7 +339,7 @@ IRREGULAR_VERBS = {
     "ser": "sê", "sou": "sô", "é": "é", "somos": "somu", "são": "sãun", "fui": "fui", "foi": "fôi", "fomos": "fomu", "foram": "forãu",
     "ter": "tê", "tenho": "tenhu", "tem": "tein", "temos": "temu", "têm": "teim", "tive": "tivi", "teve": "tevi", "tivemos": "tivemu", "tiveram": "tiveraum", "tinha": "tinha", "tinhamos": "tinhamu", "tinham": "tinhaum",
     "fazer": "fazê", "faco": "fassu", "faço": "fassu", "faz": "fays", "fazemos": "fazêmu", "fazem": "fázeym", "fiz": "fis", "fez": "fêiz", "fizemos": "fizemu", "fizeram": "fizérãu", "fazia": "fazia", "faziamos": "faziamu", "faziam": "faziãu", "faria": "fazia", "fariam": "faziãu",
-    "ir": "ih", "vou": "vô", "vai": "vai", "vamos": "vam", "vão": "vãun",
+    "ir": "ih", "vou": "vô", "vai": "vai", "vamos": "vamos", "vão": "vãun",
     "vir": "vim", "venho": "venhu", "vem": "veyn", "vimos": "vimu", "vêm": "veym",
     "dizer": "dizê", "digo": "digu", "diz": "dis", "dizemos": "dizemu", "dizem": "dizeym", "disse": "dissi", "dissemos": "dissemu", "disseram": "disseraum", "diria": "diria", "diríamos": "diriamus", "diriamos": "diriamus", "diriam": "diriaum", "diga": "diz", "digamos": "digamu", "digam": "digãu",
     "pedir": "pedí", "peço": "pessu", "pedi": "pédi", "pedimos": "pedímu", "pedem": "pédeym",
@@ -879,10 +873,6 @@ def transform_text(text):
         # First tokenize the text into words and punctuation
         tokens = tokenize_text(text)
         
-        # Merge word pairs that need special handling
-        tokens = merge_word_pairs(tokens)
-        explanations = []
-        
         # Transform each word token according to rules
         transformed_tokens = []
         for i, (word, punct) in enumerate(tokens):
@@ -905,6 +895,9 @@ def transform_text(text):
         # Capture the "Before Combination" output
         before_combination = reassemble_tokens_smartly(transformed_tokens)
         
+        # Now merge word pairs after individual transformations
+        transformed_tokens = merge_word_pairs(transformed_tokens)
+
         # Now handle vowel combinations between words in multiple passes
         made_combination = True
         combination_explanations = []
