@@ -466,6 +466,15 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     # First check if word is in pre-defined dictionary
     lword = word.lower()
 
+    # Initialize transformed word and explanations
+    transformed = lword
+    explanations = []
+
+    # Check if it's an irregular verb first - use as starting point
+    if lword in IRREGULAR_VERBS:
+        transformed = IRREGULAR_VERBS[lword].lower()
+        explanations.append(f"Start with irregular verb form: {word} → {transformed}")
+
     # Special handling for não before verbs
     if lword in ["não", "nao"]:
         if next_word:
@@ -478,14 +487,12 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             elif is_verb(next_word):
                 return preserve_capital(word, "num"), "Negation before verb: não → num"
 
-    # Check dictionary
+    # Check phonetic dictionary
     if lword in PHONETIC_DICTIONARY:
-        transformed = preserve_capital(word, PHONETIC_DICTIONARY[lword])
-        return transformed, f"Pronunciation: {word} → {transformed}"
+        transformed = PHONETIC_DICTIONARY[lword].lower()
+        explanations.append(f"Dictionary: {word} → {transformed}")
 
-    # Initialize transformed word
-    transformed = lword
-
+    # Apply all phonetic rules
     # Rule 1p: Transform 'ovo' and 'ovos' endings to 'ôvo' and 'óvos'
     if word.endswith('ovo'):
         transformed = word[:-3] + 'ôvo'
@@ -673,14 +680,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = transformed[:-4] + 'óras'
         explanations.append("Transform ending 'oras' to 'óras'")
     
-    # Check if it's an irregular verb
-    if lword in IRREGULAR_VERBS:
-        # Apply phonetic rules to the irregular verb form
-        irregular_form = IRREGULAR_VERBS[lword]
-        transformed = preserve_capital(word, irregular_form)
-        explanations.append(f"Irregular verb form: {word} → {transformed}")
-
-    # Preserve original capitalization
+    # Preserve capitalization
     transformed = preserve_capital(word, transformed)
     
     explanation = " + ".join(explanations) if explanations else "No changes needed"
