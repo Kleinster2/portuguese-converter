@@ -465,11 +465,6 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
 
     # First check if word is in pre-defined dictionary
     lword = word.lower()
-    
-    # Check irregular verbs first
-    if lword in IRREGULAR_VERBS:
-        transformed = preserve_capital(word, IRREGULAR_VERBS[lword])
-        return transformed, f"Irregular verb: {word} → {transformed}"
 
     # Special handling for não before verbs
     if lword in ["não", "nao"]:
@@ -488,9 +483,9 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = preserve_capital(word, PHONETIC_DICTIONARY[lword])
         return transformed, f"Pronunciation: {word} → {transformed}"
 
-    # If not in dictionary, apply rules
-    transformed = word.lower()  # Start with lowercase for consistent processing
-    
+    # Initialize transformed word
+    transformed = lword
+
     # Rule 1p: Transform 'ovo' and 'ovos' endings to 'ôvo' and 'óvos'
     if word.endswith('ovo'):
         transformed = word[:-3] + 'ôvo'
@@ -678,7 +673,13 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = transformed[:-4] + 'óras'
         explanations.append("Transform ending 'oras' to 'óras'")
     
-    
+    # Check if it's an irregular verb
+    if lword in IRREGULAR_VERBS:
+        # Apply phonetic rules to the irregular verb form
+        irregular_form = IRREGULAR_VERBS[lword]
+        transformed = preserve_capital(word, irregular_form)
+        explanations.append(f"Irregular verb form: {word} → {transformed}")
+
     # Preserve original capitalization
     transformed = preserve_capital(word, transformed)
     
