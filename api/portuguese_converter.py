@@ -109,7 +109,7 @@ PHONETIC_DICTIONARY = {
     # Prepositions and Conjunctions
     'à': 'a',
     'às': 'as',
-    # 'com': 'cum',
+    'com': 'cu',
     'sem': 'sêyn',
     'e': 'i',
     'em': 'ein',
