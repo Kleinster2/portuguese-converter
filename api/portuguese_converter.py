@@ -240,7 +240,7 @@ WORD_PAIRS = {
     'de voces': 'ducêys',
     'de você': 'ducê',
     'de vocês': 'ducêys',
-    'o que': 'ukê',
+    # 'o que': 'ukê',
     'em um': 'num',
     'em uns': 'nuns',
     'em uma': 'numa',
