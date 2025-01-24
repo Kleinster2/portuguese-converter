@@ -220,9 +220,9 @@ DIRECT_TRANSFORMATIONS = {
 WORD_PAIRS = {
     'a gente': 'agenti',
     'por que': 'purkê',
-    'por quê': 'purkê',
+    # 'por quê': 'purkê',
     'para que': 'prakê',
-    # 'para quê': 'prakê',
+    'para quê': 'prakê',
     'vamos embora': 'vambóra',
     'vamo embora': 'vambóra',
     'com você': 'cucê',
@@ -851,7 +851,7 @@ def tokenize_text(text):
     Returns a list of (word, punct) tuples, e.g.:
         "Olá, mundo!" => [("Olá", ""), ("", ","), ("mundo", ""), ("", "!")]
     """
-    pattern = r'([A-Za-zÀ-ÖØ-öø-ÿ0-9]+)|([.,!?;:()\[\]{}]+)'
+    pattern = r'([A-Za-zÀ-ÖØ-öø-ÿ0-9]+)|([.,!?;:]+)'
     tokens = []
     
     for match in re.finditer(pattern, text):
@@ -896,7 +896,11 @@ def reassemble_tokens_smartly(final_tokens):
 
 def transform_text(text):
     """Transform text using phonetic rules and word pair replacements."""
+    print("DEBUG: Input text =", repr(text))
     try:
+        # Normalize spaces (convert non-breaking spaces to regular spaces)
+        text = text.replace('\xa0', ' ')
+        
         # First check if the entire text is in WORD_PAIRS
         text_lower = text.lower()
         
@@ -987,7 +991,17 @@ def transform_text(text):
                         i += 3
                         made_combination = True
                         continue
-                
+                    
+                    # Special case: 'y' followed by 'i' becomes just 'i'
+                    if word2 == 'y' and word3.startswith('i'):
+                        new_tokens.append((word1, punct1))
+                        new_tokens.append(('', punct2))
+                        new_tokens.append((word3, punct3))
+                        combination_explanations.append(f"{word1} + {word2} + {word3} → {word1} + {word3} (Remove 'y' before 'i')")
+                        i += 3
+                        made_combination = True
+                        continue
+                    
                 if i < len(transformed_tokens) - 1:  # We have at least 2 tokens to look at
                     word1, punct1 = transformed_tokens[i]
                     word2, punct2 = transformed_tokens[i + 1]
@@ -1024,7 +1038,7 @@ def transform_text(text):
                             new_tokens.append((word1, punct1))
                             i += 1
                             continue
-                
+                    
                 if i < len(transformed_tokens):
                     new_tokens.append(transformed_tokens[i])
                 i += 1
