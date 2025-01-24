@@ -449,18 +449,37 @@ def merge_word_pairs(tokens):
         if i + 1 < len(tokens):
             word2, punct2 = tokens[i + 1]
             word_pair = f"{word1} {word2}".lower()
-            word_pair_normalized = f"{remove_accents(word1)} {remove_accents(word2)}"
-            if (word1 and word2 and not punct1 and 
-                (word_pair in WORD_PAIRS or word_pair_normalized in WORD_PAIRS)):
-                # Add the merged pair to be transformed by the pipeline
-                key = word_pair if word_pair in WORD_PAIRS else word_pair_normalized
-                new_tokens.append((WORD_PAIRS[key], punct2))
+            
+            # First try exact match
+            if word_pair in WORD_PAIRS:
+                new_tokens.append((WORD_PAIRS[word_pair], punct2))
                 i += 2
                 continue
-        # No merge, just append the current
-        new_tokens.append((word1, punct1))
-        i += 1
-    
+            
+            # Then try with 'que' normalized to 'quê'
+            if word_pair.endswith('que'):
+                word_pair_alt = word_pair[:-3] + 'quê'
+                if word_pair_alt in WORD_PAIRS:
+                    new_tokens.append((WORD_PAIRS[word_pair_alt], punct2))
+                    i += 2
+                    continue
+            
+            # Finally try with accents removed
+            word_pair_no_accents = remove_accents(word_pair)
+            for key in WORD_PAIRS:
+                key_no_accents = remove_accents(key)
+                if key_no_accents == word_pair_no_accents:
+                    new_tokens.append((WORD_PAIRS[key], punct2))
+                    i += 2
+                    break
+            else:
+                # No merge, just append the current
+                new_tokens.append((word1, punct1))
+                i += 1
+        else:
+            # Last token, just append it
+            new_tokens.append((word1, punct1))
+            i += 1
     return new_tokens
 
 def apply_phonetic_rules(word, next_word=None, next_next_word=None):
@@ -875,33 +894,33 @@ def reassemble_tokens_smartly(final_tokens):
     return "".join(output)
 
 def transform_text(text):
-    """
-    Transform the input text using phonetic rules,
-    handle cross-word vowel combinations in multiple passes,
-    then reassemble with no extra spaces around punctuation.
-    Returns:
-        dict: Contains original text, transformed versions, and explanations
-    """
-    if not text:
-        return {
-            'original': text,
-            'before': text,
-            'after': text,
-            'explanations': [],
-            'combinations': []
-        }
-    
+    """Transform text using phonetic rules and word pair replacements."""
     try:
         # First check if the entire text is in WORD_PAIRS
         text_lower = text.lower()
-        # For word pairs ending in 'que', try with 'quê'
-        if text_lower.endswith('que'):
-            text_lower = text_lower[:-3] + 'quê'
         
-        # Check for exact match in WORD_PAIRS
+        # Try all variants
+        word = None
+        
+        # First try exact match
         if text_lower in WORD_PAIRS:
             word = WORD_PAIRS[text_lower]
-            print(f"Found match! '{text_lower}' -> '{word}'")  # Debug
+        # Then try with 'que' normalized to 'quê'
+        elif text_lower.endswith('que'):
+            text_lower_alt = text_lower[:-3] + 'quê'
+            if text_lower_alt in WORD_PAIRS:
+                word = WORD_PAIRS[text_lower_alt]
+        # Finally try with accents removed
+        else:
+            text_no_accents = remove_accents(text_lower)
+            for key in WORD_PAIRS:
+                key_no_accents = remove_accents(key)
+                if key_no_accents == text_no_accents:
+                    word = WORD_PAIRS[key]
+                    break
+        
+        # If we found a word pair match
+        if word:
             # Transform the word through the normal pipeline
             transformed, explanation = apply_phonetic_rules(word)
             return {
@@ -911,10 +930,9 @@ def transform_text(text):
                 'explanations': [f"{text}: Word pair → {word}"],
                 'combinations': []
             }
-
+        
         # If not a word pair, proceed with normal tokenization
         tokens = tokenize_text(text)
-        print(f"Initial tokens: {tokens}")  # Debug
         
         # Transform each word token according to rules
         transformed_tokens = []
@@ -930,7 +948,6 @@ def transform_text(text):
                         next_next_word = tokens[i + 2][0]
                 # Apply dictionary lookup or phonetic rules
                 transformed, explanation = apply_phonetic_rules(word, next_word, next_next_word)
-                print(f"Word '{word}' transformed to '{transformed}' with explanation: {explanation}")  # Debug
                 if explanation != "No changes needed":
                     explanations.append(f"{word}: {explanation}")
                 transformed_tokens.append((transformed, punct))
@@ -939,12 +956,10 @@ def transform_text(text):
         
         # Capture the "Before Combination" output
         before_combination = reassemble_tokens_smartly(transformed_tokens)
-        print(f"Before word pairs: {before_combination}")  # Debug
         
         # Now merge word pairs after individual transformations
         transformed_tokens = merge_word_pairs(transformed_tokens)
         after_pairs = reassemble_tokens_smartly(transformed_tokens)
-        print(f"After word pairs: {after_pairs}")  # Debug
 
         # Now handle vowel combinations between words in multiple passes
         made_combination = True
@@ -1027,21 +1042,18 @@ def transform_text(text):
         }
     
     except Exception as e:
-        print(f"Error transforming text: {str(e)}")
-        traceback.print_exc(file=sys.stdout)
+        print(f"Error in transform_text: {str(e)}")
         return {
             'original': text,
             'before': text,
             'after': text,
-            'explanations': [],
+            'explanations': [f"Error: {str(e)}"],
             'combinations': []
         }
 
 def convert_text(text):
     """Convert Portuguese text to its phonetic representation with explanations."""
-    print(f"convert_text called with: {text}")  # Debug
     result = transform_text(text)
-    print(f"transform_text returned: {result}")  # Debug
     return result
 
 def main():
