@@ -219,7 +219,7 @@ DIRECT_TRANSFORMATIONS = {
 WORD_PAIRS = {
     'a gente': 'agenti',
     'por que': 'purkê',
-    'por quê': 'purkê',
+    # 'por quê': 'purkê',
     'para que': 'prakê',
     'para quê': 'prakê',
     'vamos embora': 'vambóra',
