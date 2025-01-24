@@ -428,6 +428,18 @@ def is_verb(word):
                 return True
     return False
 
+def remove_accents(text):
+    """Remove all accents from text while preserving case."""
+    replacements = {
+        'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+        'â': 'a', 'ê': 'e', 'î': 'i', 'ô': 'o', 'û': 'u',
+        'ã': 'a', 'ẽ': 'e', 'ĩ': 'i', 'õ': 'o', 'ũ': 'u',
+        'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
+        'Â': 'A', 'Ê': 'E', 'Î': 'I', 'Ô': 'O', 'Û': 'U',
+        'Ã': 'A', 'Ẽ': 'E', 'Ĩ': 'I', 'Õ': 'O', 'Ũ': 'U'
+    }
+    return ''.join(replacements.get(c, c) for c in text)
+
 def merge_word_pairs(tokens):
     """Merge word pairs that need special handling before individual word transformations."""
     new_tokens = []
@@ -437,10 +449,12 @@ def merge_word_pairs(tokens):
         if i + 1 < len(tokens):
             word2, punct2 = tokens[i + 1]
             word_pair = f"{word1} {word2}".lower()
+            word_pair_normalized = f"{remove_accents(word1)} {remove_accents(word2)}"
             if (word1 and word2 and not punct1 and 
-                word_pair in WORD_PAIRS):
+                (word_pair in WORD_PAIRS or word_pair_normalized in WORD_PAIRS)):
                 # Add the merged pair to be transformed by the pipeline
-                new_tokens.append((WORD_PAIRS[word_pair], punct2))
+                key = word_pair if word_pair in WORD_PAIRS else word_pair_normalized
+                new_tokens.append((WORD_PAIRS[key], punct2))
                 i += 2
                 continue
         # No merge, just append the current
@@ -880,10 +894,14 @@ def transform_text(text):
     try:
         # First check if the entire text is in WORD_PAIRS
         text_lower = text.lower()
-        # Also check with accents removed
-        for word_pair in WORD_PAIRS:
-            if text_lower == word_pair or text_lower.replace('e', 'ê') == word_pair:
-                word = WORD_PAIRS[word_pair]
+        text_normalized = remove_accents(text_lower)
+        print(f"Checking word pair: '{text_lower}' (normalized: '{text_normalized}')")  # Debug
+        
+        # Check for exact match in WORD_PAIRS or normalized match
+        for key in WORD_PAIRS:
+            if text_lower == key or text_normalized == remove_accents(key):
+                print(f"Found match! '{key}' -> '{WORD_PAIRS[key]}'")  # Debug
+                word = WORD_PAIRS[key]
                 # Transform the word through the normal pipeline
                 transformed, explanation = apply_phonetic_rules(word)
                 return {
