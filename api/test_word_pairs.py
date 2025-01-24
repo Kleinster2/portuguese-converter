@@ -17,8 +17,7 @@ def test_word_pair(text):
         print(f"  - {comb}")
     print("-" * 40)
 
-# Test each word pair
-test_word_pair("por que")
-test_word_pair("por quê")
-test_word_pair("com você")
-test_word_pair("com voce")
+# Test each word pair with different Unicode forms
+test_word_pair("por que")  # Plain form
+test_word_pair("por quê")  # Precomposed form (U+00EA)
+test_word_pair("por que\u0302")  # Decomposed form (e + U+0302)

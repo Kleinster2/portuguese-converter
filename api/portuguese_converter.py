@@ -5,6 +5,7 @@ import re
 import sys
 import traceback
 import io
+import unicodedata
 
 # Words ending in 'l' that have special accent patterns
 ACCENTED_L_SUFFIXES = {
@@ -219,7 +220,7 @@ DIRECT_TRANSFORMATIONS = {
 WORD_PAIRS = {
     'a gente': 'agenti',
     'por que': 'purkê',
-    # 'por quê': 'purkê',
+    'por quê': 'purkê',
     'para que': 'prakê',
     'para quê': 'prakê',
     'vamos embora': 'vambóra',
@@ -429,16 +430,16 @@ def is_verb(word):
     return False
 
 def remove_accents(text):
-    """Remove all accents from text while preserving case."""
-    replacements = {
-        'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
-        'â': 'a', 'ê': 'e', 'î': 'i', 'ô': 'o', 'û': 'u',
-        'ã': 'a', 'ẽ': 'e', 'ĩ': 'i', 'õ': 'o', 'ũ': 'u',
-        'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
-        'Â': 'A', 'Ê': 'E', 'Î': 'I', 'Ô': 'O', 'Û': 'U',
-        'Ã': 'A', 'Ẽ': 'E', 'Ĩ': 'I', 'Õ': 'O', 'Ũ': 'U'
-    }
-    return ''.join(replacements.get(c, c) for c in text)
+    """
+    Remove all accents from text while preserving case.
+    Uses Unicode normalization to handle both precomposed and combining characters.
+    """
+    # Normalize to NFD (decompose): e.g. "ê" => "e" + combining ^
+    text = unicodedata.normalize('NFD', text)
+    # Remove all combining marks in the range U+0300 to U+036F
+    text = re.sub(r'[\u0300-\u036f]', '', text)
+    # Re-normalize back to NFC for consistency
+    return unicodedata.normalize('NFC', text)
 
 def merge_word_pairs(tokens):
     """Merge word pairs that need special handling before individual word transformations."""
