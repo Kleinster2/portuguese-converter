@@ -160,7 +160,7 @@ PHONETIC_DICTIONARY = {
     'ali': 'alí',
     'aqui': 'akí',
     'atrás': 'atráyz',
-    'bem': 'beyn',
+    # 'bem': 'beyn',
     'depois': 'dipois',
     'desculpa': 'discupa',
     'desculpas': 'discupas',
@@ -180,8 +180,8 @@ PHONETIC_DICTIONARY = {
     'obrigado': 'brigadu',
     'que': 'ki',
     'sempre': 'seynpri',
-    'também': 'tãmbêyn',
-    'tambem': 'tãmbêyn',
+    'também': 'tãmbêin',
+    'tambem': 'tãmbêin',
     'teatro': 'tiatru',
     'teatros': 'tiatrus',
     'última': 'útima',
@@ -220,7 +220,7 @@ DIRECT_TRANSFORMATIONS = {
 WORD_PAIRS = {
     'a gente': 'agenti',
     'por que': 'purkê',
-    # 'por quê': 'purkê',
+    'por quê': 'purkê',
     'para que': 'prakê',
     'para quê': 'prakê',
     'vamos embora': 'vambóra',
@@ -486,11 +486,15 @@ def merge_word_pairs(tokens):
         word1, punct1 = tokens[i]
         if i + 1 < len(tokens):
             word2, punct2 = tokens[i + 1]
-            word_pair = f"{word1} {word2}".lower()
+            # Strip any whitespace from the words for matching
+            clean_word1 = word1.strip()
+            clean_word2 = word2.strip()
+            word_pair = f"{clean_word1} {clean_word2}".lower()
             
             # First try exact match
             if word_pair in WORD_PAIRS:
-                new_tokens.append((WORD_PAIRS[word_pair], punct2))
+                # Keep the punctuation from both words
+                new_tokens.append((WORD_PAIRS[word_pair], punct1 + punct2))
                 i += 2
                 continue
             
@@ -498,19 +502,24 @@ def merge_word_pairs(tokens):
             if word_pair.endswith('que'):
                 word_pair_alt = word_pair[:-3] + 'quê'
                 if word_pair_alt in WORD_PAIRS:
-                    new_tokens.append((WORD_PAIRS[word_pair_alt], punct2))
+                    # Keep the punctuation from both words
+                    new_tokens.append((WORD_PAIRS[word_pair_alt], punct1 + punct2))
                     i += 2
                     continue
             
             # Finally try with accents removed
             word_pair_no_accents = remove_accents(word_pair)
+            matched = False
             for key in WORD_PAIRS:
                 key_no_accents = remove_accents(key)
                 if key_no_accents == word_pair_no_accents:
-                    new_tokens.append((WORD_PAIRS[key], punct2))
+                    # Keep the punctuation from both words
+                    new_tokens.append((WORD_PAIRS[key], punct1 + punct2))
                     i += 2
+                    matched = True
                     break
-            else:
+            
+            if not matched:
                 # No merge, just append the current
                 new_tokens.append((word1, punct1))
                 i += 1
@@ -939,17 +948,18 @@ def transform_text(text):
         text = text.replace('\xa0', ' ')
         
         # First check if the entire text is in WORD_PAIRS
-        text_lower = text.lower()
-        text_no_accents = remove_accents(text_lower)
+        # Only strip for dictionary lookup, keep original text intact
+        text_for_lookup = text.lower().strip()
+        text_no_accents = remove_accents(text_for_lookup)
         
         # Try to find a match in WORD_PAIRS
         word = None
         template = None
         
         # First try exact match
-        if text_lower in WORD_PAIRS:
-            word = WORD_PAIRS[text_lower]
-            template = text_lower
+        if text_for_lookup in WORD_PAIRS:
+            word = WORD_PAIRS[text_for_lookup]
+            template = text_for_lookup
         # Then try without accents
         else:
             for key in WORD_PAIRS:
@@ -962,7 +972,7 @@ def transform_text(text):
         # If we found a word pair match
         if word:
             # Restore accents based on the template
-            text_with_accents = restore_accents(text_lower, template)
+            text_with_accents = restore_accents(text_for_lookup, template)
             # Transform the word through the normal pipeline
             transformed, explanation = apply_phonetic_rules(word)
             return {
