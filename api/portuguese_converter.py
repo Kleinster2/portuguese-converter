@@ -484,43 +484,60 @@ def merge_word_pairs(tokens):
     i = 0
     while i < len(tokens):
         word1, punct1 = tokens[i]
+        if not word1:  # Skip punctuation tokens
+            new_tokens.append((word1, punct1))
+            i += 1
+            continue
+            
         if i + 1 < len(tokens):
             word2, punct2 = tokens[i + 1]
+            if not word2:  # Skip if second token is punctuation
+                new_tokens.append((word1, punct1))
+                i += 1
+                continue
+                
             # Strip any whitespace from the words for matching
             clean_word1 = word1.strip()
             clean_word2 = word2.strip()
             word_pair = f"{clean_word1} {clean_word2}".lower()
             
+            # Check if this pair is in WORD_PAIRS (ignoring case and accents)
+            matched = False
+            
             # First try exact match
             if word_pair in WORD_PAIRS:
                 # Keep the punctuation from both words
                 new_tokens.append((WORD_PAIRS[word_pair], punct1 + punct2))
-                i += 2
-                continue
+                matched = True
             
             # Then try with 'que' normalized to 'quê'
-            if word_pair.endswith('que'):
+            elif word_pair.endswith('que'):
                 word_pair_alt = word_pair[:-3] + 'quê'
                 if word_pair_alt in WORD_PAIRS:
                     # Keep the punctuation from both words
                     new_tokens.append((WORD_PAIRS[word_pair_alt], punct1 + punct2))
-                    i += 2
-                    continue
+                    matched = True
             
             # Finally try with accents removed
-            word_pair_no_accents = remove_accents(word_pair)
-            matched = False
-            for key in WORD_PAIRS:
-                key_no_accents = remove_accents(key)
-                if key_no_accents == word_pair_no_accents:
-                    # Keep the punctuation from both words
-                    new_tokens.append((WORD_PAIRS[key], punct1 + punct2))
-                    i += 2
-                    matched = True
-                    break
+            else:
+                word_pair_no_accents = remove_accents(word_pair)
+                for key in WORD_PAIRS:
+                    key_no_accents = remove_accents(key)
+                    if key_no_accents == word_pair_no_accents:
+                        # Keep the punctuation from both words
+                        new_tokens.append((WORD_PAIRS[key], punct1 + punct2))
+                        matched = True
+                        break
             
-            if not matched:
-                # No merge, just append the current
+            if matched:
+                i += 2  # Skip both words
+                
+                # If there's punctuation after the second word, keep it
+                if i + 1 < len(tokens) and not tokens[i + 1][0]:
+                    new_tokens[-1] = (new_tokens[-1][0], new_tokens[-1][1] + tokens[i + 1][1])
+                    i += 1
+            else:
+                # No match, just append the first word
                 new_tokens.append((word1, punct1))
                 i += 1
         else:
