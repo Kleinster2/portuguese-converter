@@ -222,7 +222,7 @@ WORD_PAIRS = {
     'por que': 'purkê',
     'por quê': 'purkê',
     'para que': 'prakê',
-    'para quê': 'prakê',
+    # 'para quê': 'prakê',
     'vamos embora': 'vambóra',
     'vamo embora': 'vambóra',
     'com você': 'cucê',
