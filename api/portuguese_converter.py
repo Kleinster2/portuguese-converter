@@ -879,17 +879,20 @@ def transform_text(text):
     
     try:
         # First check if the entire text is in WORD_PAIRS
-        if text.lower() in WORD_PAIRS:
-            word = WORD_PAIRS[text.lower()]
-            # Transform the word through the normal pipeline
-            transformed, explanation = apply_phonetic_rules(word)
-            return {
-                'original': text,
-                'before': word,
-                'after': transformed,
-                'explanations': [f"{text}: Word pair → {word}"],
-                'combinations': []
-            }
+        text_lower = text.lower()
+        # Also check with accents removed
+        for word_pair in WORD_PAIRS:
+            if text_lower == word_pair or text_lower.replace('e', 'ê') == word_pair:
+                word = WORD_PAIRS[word_pair]
+                # Transform the word through the normal pipeline
+                transformed, explanation = apply_phonetic_rules(word)
+                return {
+                    'original': text,
+                    'before': word,
+                    'after': transformed,
+                    'explanations': [f"{text}: Word pair → {word}"],
+                    'combinations': []
+                }
 
         # If not a word pair, proceed with normal tokenization
         tokens = tokenize_text(text)
