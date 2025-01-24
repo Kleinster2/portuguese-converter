@@ -441,6 +441,43 @@ def remove_accents(text):
     # Re-normalize back to NFC for consistency
     return unicodedata.normalize('NFC', text)
 
+def restore_accents(word, template):
+    """
+    Restore accents to a word based on a template word.
+    For example:
+        word = "que", template = "quê" -> returns "quê"
+        word = "por que", template = "por quê" -> returns "por quê"
+    """
+    # If lengths don't match, can't restore accents
+    if len(word) != len(template):
+        return word
+        
+    # Convert both to NFD to separate base characters and combining marks
+    template = unicodedata.normalize('NFD', template)
+    word = unicodedata.normalize('NFD', word)
+    
+    # For each character in the word, if the template has an accent at that position,
+    # add it to the word
+    result = []
+    i = 0
+    while i < len(word):
+        # Get base character from word
+        result.append(word[i])
+        
+        # If template has combining marks after this position, add them
+        j = i + 1
+        while j < len(template) and unicodedata.combining(template[j]):
+            result.append(template[j])
+            j += 1
+        
+        i += 1
+        # Skip any combining marks in word
+        while i < len(word) and unicodedata.combining(word[i]):
+            i += 1
+    
+    # Convert back to NFC (composed form)
+    return unicodedata.normalize('NFC', ''.join(result))
+
 def merge_word_pairs(tokens):
     """Merge word pairs that need special handling before individual word transformations."""
     new_tokens = []
@@ -903,36 +940,36 @@ def transform_text(text):
         
         # First check if the entire text is in WORD_PAIRS
         text_lower = text.lower()
+        text_no_accents = remove_accents(text_lower)
         
-        # Try all variants
+        # Try to find a match in WORD_PAIRS
         word = None
+        template = None
         
         # First try exact match
         if text_lower in WORD_PAIRS:
             word = WORD_PAIRS[text_lower]
-        # Then try with 'que' normalized to 'quê'
-        elif text_lower.endswith('que'):
-            text_lower_alt = text_lower[:-3] + 'quê'
-            if text_lower_alt in WORD_PAIRS:
-                word = WORD_PAIRS[text_lower_alt]
-        # Finally try with accents removed
+            template = text_lower
+        # Then try without accents
         else:
-            text_no_accents = remove_accents(text_lower)
             for key in WORD_PAIRS:
                 key_no_accents = remove_accents(key)
                 if key_no_accents == text_no_accents:
                     word = WORD_PAIRS[key]
+                    template = key
                     break
         
         # If we found a word pair match
         if word:
+            # Restore accents based on the template
+            text_with_accents = restore_accents(text_lower, template)
             # Transform the word through the normal pipeline
             transformed, explanation = apply_phonetic_rules(word)
             return {
                 'original': text,
                 'before': word,
                 'after': transformed,
-                'explanations': [f"{text}: Word pair → {word}"],
+                'explanations': [f"{text_with_accents}: Word pair → {word}"],
                 'combinations': []
             }
         
