@@ -894,23 +894,23 @@ def transform_text(text):
     try:
         # First check if the entire text is in WORD_PAIRS
         text_lower = text.lower()
-        text_normalized = remove_accents(text_lower)
-        print(f"Checking word pair: '{text_lower}' (normalized: '{text_normalized}')")  # Debug
+        # For word pairs ending in 'que', try with 'quê'
+        if text_lower.endswith('que'):
+            text_lower = text_lower[:-3] + 'quê'
         
-        # Check for exact match in WORD_PAIRS or normalized match
-        for key in WORD_PAIRS:
-            if text_lower == key or text_normalized == remove_accents(key):
-                print(f"Found match! '{key}' -> '{WORD_PAIRS[key]}'")  # Debug
-                word = WORD_PAIRS[key]
-                # Transform the word through the normal pipeline
-                transformed, explanation = apply_phonetic_rules(word)
-                return {
-                    'original': text,
-                    'before': word,
-                    'after': transformed,
-                    'explanations': [f"{text}: Word pair → {word}"],
-                    'combinations': []
-                }
+        # Check for exact match in WORD_PAIRS
+        if text_lower in WORD_PAIRS:
+            word = WORD_PAIRS[text_lower]
+            print(f"Found match! '{text_lower}' -> '{word}'")  # Debug
+            # Transform the word through the normal pipeline
+            transformed, explanation = apply_phonetic_rules(word)
+            return {
+                'original': text,
+                'before': word,
+                'after': transformed,
+                'explanations': [f"{text}: Word pair → {word}"],
+                'combinations': []
+            }
 
         # If not a word pair, proceed with normal tokenization
         tokens = tokenize_text(text)
