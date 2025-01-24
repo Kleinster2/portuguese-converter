@@ -212,6 +212,7 @@ PHONETIC_DICTIONARY = {
 # Direct transformations that bypass the phonetic rules pipeline
 DIRECT_TRANSFORMATIONS = {
     'vamos': 'vam',
+    'para': 'pra',
 }
 
 # Word pairs that need special handling (not covered by regular rules)
@@ -438,15 +439,14 @@ def merge_word_pairs(tokens):
             word_pair = f"{word1} {word2}".lower()
             if (word1 and word2 and not punct1 and 
                 word_pair in WORD_PAIRS):
-                # Merge them
-                merged = preserve_capital(word1, WORD_PAIRS[word_pair])
-                # Add as a single token (word, punct)
-                new_tokens.append((merged, punct2))
+                # Add the merged pair to be transformed by the pipeline
+                new_tokens.append((WORD_PAIRS[word_pair], punct2))
                 i += 2
                 continue
         # No merge, just append the current
         new_tokens.append((word1, punct1))
         i += 1
+    
     return new_tokens
 
 def apply_phonetic_rules(word, next_word=None, next_next_word=None):
