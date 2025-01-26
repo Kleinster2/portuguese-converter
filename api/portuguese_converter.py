@@ -941,168 +941,153 @@ def reassemble_tokens_smartly(final_tokens):
     return "".join(output)
 
 def transform_text(text):
-    """Transform text using phonetic rules and word pair replacements."""
+    """
+    1) Tokenize the input.
+    2) Merge known word pairs from WORD_PAIRS before single-word phonetic rules.
+    3) Apply single-word transformations (apply_phonetic_rules).
+    4) Run multiple passes of inline combination rules (the big if/elif
+       for 'r' + vowel, 'a' + vowel, 'sz' + vowel, etc.).
+    5) Reassemble into the final text.
+    """
     print("DEBUG: Input text =", repr(text))
     try:
-        # Normalize spaces (convert non-breaking spaces to regular spaces)
+        # ---------------------------------------------------------------------
+        # 1) Normalize non-breaking spaces (optional)
+        # ---------------------------------------------------------------------
         text = text.replace('\xa0', ' ')
-        
-        # First check if the entire text is in WORD_PAIRS
-        # Only strip for dictionary lookup, keep original text intact
-        text_for_lookup = text.lower().strip()
-        text_no_accents = remove_accents(text_for_lookup)
-        
-        # Try to find a match in WORD_PAIRS
-        word = None
-        template = None
-        
-        # First try exact match
-        if text_for_lookup in WORD_PAIRS:
-            word = WORD_PAIRS[text_for_lookup]
-            template = text_for_lookup
-        # Then try without accents
-        else:
-            for key in WORD_PAIRS:
-                key_no_accents = remove_accents(key)
-                if key_no_accents == text_no_accents:
-                    word = WORD_PAIRS[key]
-                    template = key
-                    break
-        
-        # If we found a word pair match
-        if word:
-            # Restore accents based on the template
-            text_with_accents = restore_accents(text_for_lookup, template)
-            # Transform the word through the normal pipeline
-            transformed, explanation = apply_phonetic_rules(word)
-            return {
-                'original': text,
-                'before': word,
-                'after': transformed,
-                'explanations': [f"{text_with_accents}: Word pair → {word}"],
-                'combinations': []
-            }
-        
-        # If not a word pair, proceed with normal tokenization
+
+        # ---------------------------------------------------------------------
+        # 2) Tokenize
+        # ---------------------------------------------------------------------
         tokens = tokenize_text(text)
-        
-        # Transform each word token according to rules
+
+        # ---------------------------------------------------------------------
+        # 3) Merge word pairs first (e.g. "por que" -> "purkê")
+        # ---------------------------------------------------------------------
+        tokens = merge_word_pairs(tokens)
+
+        # ---------------------------------------------------------------------
+        # 4) Apply single-word phonetic transformations to each token
+        #    (including those merged into single tokens)
+        # ---------------------------------------------------------------------
         transformed_tokens = []
         explanations = []
+
         for i, (word, punct) in enumerate(tokens):
             if word:
-                # Get next word and word after that for verb/pronoun detection
-                next_word = None
-                next_next_word = None
-                if i + 1 < len(tokens):
-                    next_word = tokens[i + 1][0]
-                    if i + 2 < len(tokens):
-                        next_next_word = tokens[i + 2][0]
-                # Apply dictionary lookup or phonetic rules
-                transformed, explanation = apply_phonetic_rules(word, next_word, next_next_word)
+                next_word = tokens[i+1][0] if (i+1 < len(tokens)) else None
+                next_next_word = tokens[i+2][0] if (i+2 < len(tokens)) else None
+
+                # Apply dictionary + phonetic rules to this single word
+                new_word, explanation = apply_phonetic_rules(word, next_word, next_next_word)
                 if explanation != "No changes needed":
                     explanations.append(f"{word}: {explanation}")
-                transformed_tokens.append((transformed, punct))
-            else:
-                transformed_tokens.append(('', punct))
-        
-        # Capture the "Before Combination" output
-        before_combination = reassemble_tokens_smartly(transformed_tokens)
-        
-        # Now merge word pairs after individual transformations
-        transformed_tokens = merge_word_pairs(transformed_tokens)
-        after_pairs = reassemble_tokens_smartly(transformed_tokens)
 
-        # Now handle vowel combinations between words in multiple passes
+                transformed_tokens.append((new_word, punct))
+            else:
+                # This token is punctuation-only => just keep it
+                transformed_tokens.append((word, punct))
+
+        # ---------------------------------------------------------------------
+        # 5) Now apply your inline combination rules in a loop until no more merges
+        #    (the big if/elif checks for 'r'+vowel, 'a'+vowel, 'sz'+vowel, etc.)
+        # ---------------------------------------------------------------------
         made_combination = True
         combination_explanations = []
+
         while made_combination:
             made_combination = False
             new_tokens = []
             i = 0
+
             while i < len(transformed_tokens):
-                if i < len(transformed_tokens) - 2:  # We have at least 3 tokens to look at
+                if i < len(transformed_tokens) - 1:
                     word1, punct1 = transformed_tokens[i]
                     word2, punct2 = transformed_tokens[i + 1]
-                    word3, punct3 = transformed_tokens[i + 2]
-                    
-                    # Special case for 'y' (from 'e') attraction
-                    if (word2 == 'y' and  # This is the transformed 'e'
-                        word1[-1] in 'aáàâãeéèêoóòôuúùû' and  # First word ends in vowel but not y/i
-                        word3 and word3[0] in 'yi'):  # Third word starts with y/i
-                        # Move the 'y' to the third word
-                        new_tokens.append((word1, punct1))
-                        new_tokens.append(('', punct2))
-                        new_tokens.append(('y' + word3, punct3))
-                        combination_explanations.append(f"{word1} + {word2} + {word3} → {word1} + y{word3} (Move 'y' to next word starting with y/i)")
-                        i += 3
-                        made_combination = True
-                        continue
-                    
-                    # Special case: 'y' followed by 'i' becomes just 'i'
-                    if word2 == 'y' and word3.startswith('i'):
-                        new_tokens.append((word1, punct1))
-                        new_tokens.append(('', punct2))
-                        new_tokens.append((word3, punct3))
-                        combination_explanations.append(f"{word1} + {word2} + {word3} → {word1} + {word3} (Remove 'y' before 'i')")
-                        i += 3
-                        made_combination = True
-                        continue
-                    
-                if i < len(transformed_tokens) - 1:  # We have at least 2 tokens to look at
-                    word1, punct1 = transformed_tokens[i]
-                    word2, punct2 = transformed_tokens[i + 1]
-                    
-                    # Try to combine words if they both exist and word1 is not empty
-                    if word1 and word2 and word1.strip():  # Both are actual words and word1 is not empty
-                        combined, remaining = handle_word_combination(word1, word2)
-                        if remaining == '':  # Words were combined
-                            # Determine which rule was applied
-                            rule_explanation = ""
-                            if word1.endswith('r') and word2[0].lower() in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"{word1} + {word2} → {combined} (Keep 'r' when joining with vowel)"
-                            elif word1[-1].lower() == word2[0].lower() and word1[-1].lower() in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
-                            elif word1[-1] in 'ao' and word2.startswith('e'):
-                                rule_explanation = f"{word1} + {word2} → {combined} (Replace 'e' with 'i')"
-                            elif word1[-1] == 'a' and word2[0] in 'eiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join 'a' with following vowel)"
-                            elif word1[-1] == 'u' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
-                            elif word1[-1] in 'sz' and word2[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-                                rule_explanation = f"{word1} + {word2} → {combined} ('s' between vowels becomes'z')"
-                            else:
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
-                            
+
+                    # Only try to combine if both tokens are real words
+                    if word1 and word2 and word1.strip():
+                        # We'll define a small helper string of vowels
+                        vowels = 'aeiouáéíóúâêîôûãẽĩõũy'
+
+                        combined = None  # We'll set this if a merge happens
+                        rule_explanation = ""
+
+                        # -------------------------------------------------------------------------
+                        # Your inline combination rules: check conditions in order
+                        # -------------------------------------------------------------------------
+                        if word1.endswith('r') and word2[0].lower() in vowels:
+                            # e.g. "andar amigo" => "andaramigo" (keeping 'r' + vowel)
+                            combined = word1 + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (Keep 'r' when joining with vowel)"
+
+                        elif word1[-1].lower() == word2[0].lower() and word1[-1].lower() in vowels:
+                            # e.g. "seu uva" => "seuva" or "boa outra" => "boautra"
+                            combined = word1[:-1] + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
+
+                        elif word1[-1] in 'ao' and word2.startswith('e'):
+                            # e.g. "vao ele" => "vaiele" (Replace 'e' with 'i')
+                            # If you want to literally replace 'e' with 'i', you can do:
+                            # combined = word1 + 'i' + word2[1:]
+                            # or if you want "vaoele" => "vaole" you can adapt. 
+                            # In the snippet, we see "Replace 'e' with 'i'".
+                            combined = word1 + 'i' + word2[1:]
+                            rule_explanation = f"{word1} + {word2} → {combined} (Replace 'e' with 'i')"
+
+                        elif word1[-1] == 'a' and word2[0] in vowels:
+                            # e.g. "esta aqui" => "estaaqui" or drop the 'a': "est" + "aqui" ...
+                            combined = word1[:-1] + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (Join 'a' with following vowel)"
+
+                        elif word1[-1] == 'u' and word2[0] in vowels:
+                            # e.g. "seu amigo" => "seuamigo"
+                            combined = word1 + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
+
+                        elif word1[-1] in 'sz' and word2[0] in vowels:
+                            # e.g. "mas eu" => "mazeu" or "faz isso" => "fazisso" => "fazisso"
+                            combined = word1[:-1] + 'z' + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} ('s' between vowels becomes 'z')"
+
+                        else:
+                            # Default fallback: just combine them directly
+                            combined = word1 + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
+
+                        # -------------------------------------------------------------------------
+                        # If we set 'combined', we do a merge => skip the second token
+                        # -------------------------------------------------------------------------
+                        if combined is not None:
                             combination_explanations.append(rule_explanation)
                             new_tokens.append((combined, punct2))
                             i += 2
                             made_combination = True
                             continue
-                        
-                        # Words were not combined
-                        else:
-                            new_tokens.append((word1, punct1))
-                            i += 1
-                            continue
-                    
-                if i < len(transformed_tokens):
+
+                    # If no merge happened, just append the current token
+                    new_tokens.append((word1, punct1))
+                    i += 1
+                else:
+                    # Last token => no next token to merge
                     new_tokens.append(transformed_tokens[i])
-                i += 1
-            
+                    i += 1
+
             transformed_tokens = new_tokens
-        
-        # Capture the "After Combination" output
-        after_combination = reassemble_tokens_smartly(transformed_tokens)
-        
+
+        # ---------------------------------------------------------------------
+        # 6) Reassemble the final tokens
+        # ---------------------------------------------------------------------
+        final_text = reassemble_tokens_smartly(transformed_tokens)
+
         return {
             'original': text,
-            'before': before_combination,
-            'after': after_combination,
+            'before': final_text,
+            'after': final_text,
             'explanations': explanations,
             'combinations': combination_explanations
         }
-    
+
     except Exception as e:
         print(f"Error in transform_text: {str(e)}")
         return {
