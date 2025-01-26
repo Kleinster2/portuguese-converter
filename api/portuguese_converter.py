@@ -828,7 +828,7 @@ def handle_word_combination(first, second):
     if len(first) + len(second) > MAX_COMBINED_LENGTH:
         return first, second
     
-    vowels = 'aeiouáéíóúâêîô úãẽĩõũy'
+    vowels = 'aeiouáéíóúâêîôúãẽĩõũy'
     
     # Rule 0c: If word ends in 'r' and next word starts with vowel => merge keeping the 'r'
     if first.endswith('r') and second[0].lower() in vowels:
