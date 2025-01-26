@@ -1,0 +1,50 @@
+[
+  {
+    "test": "por que",
+    "result": {
+      "original": "por que",
+      "before": "purkê",
+      "after": "purkê",
+      "explanations": [
+        "por que: Word pair → purkê"
+      ],
+      "combinations": []
+    }
+  },
+  {
+    "test": "por quê",
+    "result": {
+      "original": "por quê",
+      "before": "purkê",
+      "after": "purkê",
+      "explanations": [
+        "por quê: Word pair → purkê"
+      ],
+      "combinations": []
+    }
+  },
+  {
+    "test": "com você",
+    "result": {
+      "original": "com você",
+      "before": "cucê",
+      "after": "cucê",
+      "explanations": [
+        "com você: Word pair → cucê"
+      ],
+      "combinations": []
+    }
+  },
+  {
+    "test": "com voce",
+    "result": {
+      "original": "com voce",
+      "before": "cucê",
+      "after": "cucê",
+      "explanations": [
+        "com voce: Word pair → cucê"
+      ],
+      "combinations": []
+    }
+  }
+]

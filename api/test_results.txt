@@ -1,0 +1,60 @@
+------------------------------------------------------------
+Testing: por que
+------------------------------------------------------------
+
+Result:
+Original: por que
+Before:   purkê
+After:    purkê
+
+Explanations:
+  - por que: Word pair → purkê
+
+Combinations:
+------------------------------------------------------------
+
+------------------------------------------------------------
+Testing: por quê
+------------------------------------------------------------
+
+Result:
+Original: por quê
+Before:   purkê
+After:    purkê
+
+Explanations:
+  - por quê: Word pair → purkê
+
+Combinations:
+------------------------------------------------------------
+
+------------------------------------------------------------
+Testing: com você
+------------------------------------------------------------
+
+Result:
+Original: com você
+Before:   cucê
+After:    cucê
+
+Explanations:
+  - com você: Word pair → cucê
+
+Combinations:
+------------------------------------------------------------
+
+------------------------------------------------------------
+Testing: com voce
+------------------------------------------------------------
+
+Result:
+Original: com voce
+Before:   cucê
+After:    cucê
+
+Explanations:
+  - com voce: Word pair → cucê
+
+Combinations:
+------------------------------------------------------------
+

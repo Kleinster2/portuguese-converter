@@ -24,3 +24,12 @@ test_word_pair("por que\u0302")  # With combining circumflex
 test_word_pair("por\u00A0quê")  # With non-breaking space
 test_word_pair("POR QUÊ")  # All caps with accent
 test_word_pair("Por Quê")  # Title case with accent
+
+# Test with trailing spaces
+print("Testing with trailing spaces:")
+test_word_pair("para que")      # No trailing space
+test_word_pair("para que ")     # One trailing space
+test_word_pair("para quê")      # No trailing space
+test_word_pair("para quê ")     # One trailing space
+test_word_pair(" para quê")     # Leading space
+test_word_pair(" para quê ")

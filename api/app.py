@@ -67,6 +67,7 @@ def convert():
             
             # Return in the format expected by frontend
             if isinstance(result, dict) and 'before' in result and 'after' in result:
+                logger.info(f"DEBUG: Result has combinations: {result.get('combinations', [])}")
                 return jsonify(result)
             else:
                 logger.error(f"Unexpected result format from convert_text: {result}")

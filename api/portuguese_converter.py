@@ -997,11 +997,11 @@ def transform_text(text):
         # 5) Now apply your inline combination rules in a loop until no more merges
         #    (the big if/elif checks for 'r'+vowel, 'a'+vowel, 'sz'+vowel, etc.)
         # ---------------------------------------------------------------------
-        made_combination = True
         combination_explanations = []
+        made_combination = True  # Start as True to enter the loop
 
         while made_combination:
-            made_combination = False
+            made_combination = False  # Reset for this iteration
             new_tokens = []
             i = 0
 
@@ -1047,7 +1047,7 @@ def transform_text(text):
                             rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
 
                         elif word1[-1] in 'sz' and word2[0] in vowels:
-                            # e.g. "mas eu" => "mazeu" or "faz isso" => "fazisso" => "fazisso"
+                            # e.g. "mas eu" => "mazeu" or "faz isso" => "fazisso"
                             combined = word1[:-1] + 'z' + word2
                             rule_explanation = f"{word1} + {word2} → {combined} ('s' between vowels becomes 'z')"
 
@@ -1055,6 +1055,7 @@ def transform_text(text):
                         # If we set 'combined', we do a merge => skip the second token
                         # -------------------------------------------------------------------------
                         if combined is not None:
+                            print(f"DEBUG: Found combination: {rule_explanation}")  # Debug line
                             combination_explanations.append(rule_explanation)
                             new_tokens.append((combined, punct2))
                             i += 2
@@ -1065,14 +1066,15 @@ def transform_text(text):
                     new_tokens.append((word1, punct1))
                     i += 1
                 else:
-                    # Last token => no next token to merge
+                    # Last token => just append it
                     new_tokens.append(transformed_tokens[i])
                     i += 1
 
+            # Update tokens for next iteration (if any)
             transformed_tokens = new_tokens
 
         # ---------------------------------------------------------------------
-        # 6) Reassemble the final tokens
+        # 6) Reassemble the final text
         # ---------------------------------------------------------------------
         after_combinations = reassemble_tokens_smartly(transformed_tokens)
 
