@@ -479,71 +479,54 @@ def restore_accents(word, template):
     return unicodedata.normalize('NFC', ''.join(result))
 
 def merge_word_pairs(tokens):
-    """Merge word pairs that need special handling before individual word transformations."""
+    """
+    Merge only if two adjacent tokens are both words (no punctuation in between)
+    and the exact pair (in lowercase) is in WORD_PAIRS.
+    """
     new_tokens = []
     i = 0
     while i < len(tokens):
         word1, punct1 = tokens[i]
-        if not word1:  # Skip punctuation tokens
+
+        # If this token is punctuation, just keep it and move on
+        if not word1:
             new_tokens.append((word1, punct1))
             i += 1
             continue
-            
+
+        # Check if there is a "next" token to form a pair
         if i + 1 < len(tokens):
             word2, punct2 = tokens[i + 1]
-            if not word2:  # Skip if second token is punctuation
+
+            # If the next token is actually punctuation, we cannot form a pair
+            if not word2:
+                # Keep the current token (word1)
                 new_tokens.append((word1, punct1))
                 i += 1
                 continue
-                
-            # Strip any whitespace from the words for matching
-            clean_word1 = word1.strip()
-            clean_word2 = word2.strip()
-            word_pair = f"{clean_word1} {clean_word2}".lower()
-            
-            # Check if this pair is in WORD_PAIRS (ignoring case and accents)
-            matched = False
-            
-            # First try exact match
-            if word_pair in WORD_PAIRS:
-                # Keep the punctuation from both words
-                new_tokens.append((WORD_PAIRS[word_pair], punct1 + punct2))
-                matched = True
-            
-            # Then try with 'que' normalized to 'quê'
-            elif word_pair.endswith('que'):
-                word_pair_alt = word_pair[:-3] + 'quê'
-                if word_pair_alt in WORD_PAIRS:
-                    # Keep the punctuation from both words
-                    new_tokens.append((WORD_PAIRS[word_pair_alt], punct1 + punct2))
-                    matched = True
-            
-            # Finally try with accents removed
+
+            # Build a pair string in lowercase
+            pair = f"{word1.lower().strip()} {word2.lower().strip()}"
+
+            # Try an exact match against WORD_PAIRS
+            if pair in WORD_PAIRS:
+                # If matched, create a single merged token
+                replacement = WORD_PAIRS[pair]
+                # Merge punctuation from both tokens
+                merged_punct = punct1 + punct2
+                # Add to new_tokens
+                new_tokens.append((replacement, merged_punct))
+                # Skip the second token in the pair
+                i += 2
             else:
-                word_pair_no_accents = remove_accents(word_pair)
-                for key in WORD_PAIRS:
-                    key_no_accents = remove_accents(key)
-                    if key_no_accents == word_pair_no_accents:
-                        # Keep the punctuation from both words
-                        new_tokens.append((WORD_PAIRS[key], punct1 + punct2))
-                        matched = True
-                        break
-            
-            if matched:
-                i += 2  # Skip both words
-                
-                # If there's punctuation after the second word, keep it
-                if i + 1 < len(tokens) and not tokens[i + 1][0]:
-                    new_tokens[-1] = (new_tokens[-1][0], new_tokens[-1][1] + tokens[i + 1][1])
-                    i += 1
-            else:
-                # No match, just append the first word
+                # No match, keep word1 as-is
                 new_tokens.append((word1, punct1))
                 i += 1
         else:
-            # Last token, just append it
+            # Last token, no pair to form
             new_tokens.append((word1, punct1))
             i += 1
+
     return new_tokens
 
 def apply_phonetic_rules(word, next_word=None, next_next_word=None):
