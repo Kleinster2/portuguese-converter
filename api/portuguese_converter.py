@@ -521,7 +521,7 @@ def merge_word_pairs(tokens):
                 merged_punct = punct1 + punct2
                 # Add to new_tokens
                 new_tokens.append((replacement, merged_punct))
-                explanations.append(f"Merged word pair: {pair} -> {replacement}")
+                explanations.append(f"Common pronunciation and usage: {pair} → {replacement}")
                 # Skip the second token in the pair
                 i += 2
             else:
