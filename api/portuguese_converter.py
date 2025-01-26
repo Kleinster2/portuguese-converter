@@ -834,6 +834,10 @@ def handle_word_combination(first, second):
     if first.endswith('r') and second[0].lower() in vowels:
         return first + second, ''
 
+    # Rule 1c: If first word ends in 'n' and second starts with 'm', drop the 'n'
+    if first.endswith('n') and second.startswith('m'):
+        return first[:-1] + second, ''
+
     # Special case: 'ia' followed by 'i' becomes just 'i'
     if first.endswith('ia') and second.startswith('i'):
         return first[:-2] + second, ''
@@ -900,10 +904,6 @@ def handle_word_combination(first, second):
     # Rule 6c - moved after other rules
     if first[-1] in 'eiouáéíóúâêîôûãẽĩõũy' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
         return first + second, ''
-
-    # Rule 8c: If first word ends in 'n' and second starts with 'm', drop the 'n'
-    if first.endswith('n') and second.startswith('m'):
-        return first[:-1] + second, ''
 
     # Rule 7c: If word ends in 'm' and next word starts with vowel => merge
     if first[-1] == 'm' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
