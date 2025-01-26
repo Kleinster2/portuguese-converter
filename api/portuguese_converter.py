@@ -1050,10 +1050,10 @@ def transform_text(text):
                             combined = word1[:-1] + 'z' + word2
                             rule_explanation = f"{word1} + {word2} → {combined} ('s' between vowels becomes 'z')"
 
-                        else:
-                            # Default fallback: just combine them directly
-                            combined = word1 + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
+                        # else:
+                        #     # Default fallback: just combine them directly
+                        #     combined = word1 + word2
+                        #     rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
 
                         # -------------------------------------------------------------------------
                         # If we set 'combined', we do a merge => skip the second token
