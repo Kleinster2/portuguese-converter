@@ -382,7 +382,7 @@ ACTION_VERB_ROOTS = {
 
 # Cognitive/Mental Verbs
 COGNITIVE_VERB_ROOTS = {
-    "ach", "adivinh", "ador", "admir", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "analis", "anot", "aprend", "apresent", 
+    "ach", "acontec", "adivinh", "ador", "admir", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "analis", "anot", "aprend", "apresent", 
     "assist", "assum", "chec", "coment", "comet", "compar", "concord", "conhec", "consegu", "consig", "consist", 
     "consent", "consult", "contempl", "cont", "convers", "decid", "defend", "defin", "demor", "depend", "desej", "desenh", "desenvolv", 
     "descobr", "desist", "dirig", "discut", "divid", "entend", "esper", "esquec", "esqueç", "estud", "evit", 
@@ -489,6 +489,7 @@ def merge_word_pairs(tokens):
     """
     new_tokens = []
     i = 0
+    explanations = []  # Move explanations list up here
     while i < len(tokens):
         word1, punct1 = tokens[i]
 
@@ -520,6 +521,7 @@ def merge_word_pairs(tokens):
                 merged_punct = punct1 + punct2
                 # Add to new_tokens
                 new_tokens.append((replacement, merged_punct))
+                explanations.append(f"Merged word pair: {pair} -> {replacement}")
                 # Skip the second token in the pair
                 i += 2
             else:
@@ -531,7 +533,7 @@ def merge_word_pairs(tokens):
             new_tokens.append((word1, punct1))
             i += 1
 
-    return new_tokens
+    return new_tokens, explanations
 
 def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     """
@@ -828,7 +830,7 @@ def handle_word_combination(first, second):
     if len(first) + len(second) > MAX_COMBINED_LENGTH:
         return first, second
     
-    vowels = 'aeiouáéíóúâêîôúãẽĩõũy'
+    vowels = 'aeiouáéíóúâêîô úãẽĩõũy'
     
     # Rule 0c: If word ends in 'r' and next word starts with vowel => merge keeping the 'r'
     if first.endswith('r') and second[0].lower() in vowels:
@@ -986,15 +988,14 @@ def transform_text(text):
         # ---------------------------------------------------------------------
         # 3) Merge word pairs first (e.g. "por que" -> "purkê")
         # ---------------------------------------------------------------------
-        tokens = merge_word_pairs(tokens)
+        tokens, word_pair_explanations = merge_word_pairs(tokens)
 
         # ---------------------------------------------------------------------
         # 4) Apply single-word phonetic transformations to each token
         #    (including those merged into single tokens)
         # ---------------------------------------------------------------------
         transformed_tokens = []
-        explanations = []
-
+        explanations = word_pair_explanations  # Start with word pair explanations
         for i, (word, punct) in enumerate(tokens):
             if word:
                 next_word = tokens[i+1][0] if (i+1 < len(tokens)) else None
