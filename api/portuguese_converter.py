@@ -901,13 +901,13 @@ def handle_word_combination(first, second):
     if first[-1] in 'eiouáéíóúâêîôûãẽĩõũy' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
         return first + second, ''
 
-    # Rule 7c: If word ends in 'm' and next word starts with vowel => merge
-    if first[-1] == 'm' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-        return first + second, ''
-
     # Rule 8c: If first word ends in 'n' and second starts with 'm', drop the 'n'
     if first.endswith('n') and second.startswith('m'):
         return first[:-1] + second, ''
+
+    # Rule 7c: If word ends in 'm' and next word starts with vowel => merge
+    if first[-1] == 'm' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
+        return first + second, ''
 
     return first, second
 
