@@ -807,7 +807,7 @@ def handle_word_combination(first, second):
     Rules Rule 1c - Rule 7c:
 
     Rule 0c: If word ends in 'r' and next word starts with vowel => merge keeping the 'r'
-    Rule 1c: If the first ends in a vowel and the second starts with the same vowel => merge
+    Rule 1c: If the first ends in n and the second starts with m => merge dropping the 'n'
     Rule 2c: If first ends in 'a' or 'o' and second starts with 'e' => merge with 'i'
     Rule 3c: If first ends in 'a' and second starts with vowel
     Rule 4c: If first ends in 'u' and second starts with vowel => add 'w' between
@@ -1047,6 +1047,11 @@ def transform_text(text):
                             # e.g. "andar amigo" => "andaramigo" (keeping 'r' + vowel)
                             combined = word1 + word2
                             rule_explanation = f"{word1} + {word2} → {combined} (Keep 'r' when joining with vowel)"
+
+                        elif word1.endswith('n') and word2.startswith('m'):
+                            # e.g. "un momento" => "umomento" (drop 'n' before 'm')
+                            combined = word1[:-1] + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (Drop 'n' before 'm')"
 
                         elif word1[-1].lower() == word2[0].lower() and word1[-1].lower() in vowels:
                             # e.g. "seu uva" => "seuva" or "boa outra" => "boautra"
