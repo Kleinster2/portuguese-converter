@@ -216,7 +216,8 @@ DIRECT_TRANSFORMATIONS = {
     'para': 'pra',
     'nova': 'nóva',
     'novas': 'nóvas',
-    'novamente': 'nóvamente'
+    'novamente': 'nóvamente',
+    'otimo': 'ótimo'
 }
 
 # Word pairs that need special handling (not covered by regular rules)
@@ -594,7 +595,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     elif word.endswith('ovos'):
         transformed = word[:-4] + 'óvos'
         explanations.append("Transform ending 'ovos' to 'óvos'")
-
+    
     # Rule 2p: Transform 'ogo' and 'ogos' endings to 'ôgo' and 'ógos'
     if word.endswith('ogo'):
         transformed = word[:-3] + 'ôgo'
@@ -718,69 +719,64 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = 'pul' + transformed[3:]
         explanations.append("Initial pol → pul")
     
-    # Rule 22p: Initial 'volt' becomes 'vout'
-    if transformed.startswith('volt'):
-        transformed = 'vout' + transformed[4:]
-        explanations.append("Initial volt → vout")
-    
-    # Rule 23p: Final 'ol' => 'óu'
+    # Rule 22p: Final 'ol' => 'óu'
     if transformed.endswith('ol'):
         transformed = transformed[:-2] + 'óu'
         explanations.append("Final ol → óu")
     
-    # Rule 24p: Final 'l' => 'u'
+    # Rule 23p: Final 'l' => 'u'
     if transformed.endswith('l'):
         transformed = transformed[:-1] + 'u'
         explanations.append("Final l → u")
     
-    # Rule 25p: 'l' before consonant becomes 'u'
-    consonants = 'bcdfghjklmnpqrstvwxz'
+    # Rule 24p: 'l' before consonant becomes 'u'
+    consonants = 'bcdfgjklmnpqrstvwxz'
     if re.search(f'l[{consonants}]', transformed):
         transformed = re.sub(f'l([{consonants}])', r'u\1', transformed)
         explanations.append("l before consonant → u")
 
-    # Rule 26p: Insert 'i' between specific consonant pairs
+    # Rule 25p: Insert 'i' between specific consonant pairs
     for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç', 'dm', 'gn', 'tm', 'tn']:
         if p in transformed:
             transformed = transformed.replace(p, p[0] + 'i' + p[1])
             explanations.append(f"Insert i: {p} → {p[0]}i{p[1]}")
     
-    # Rule 27p: Append 'i' to words ending in specific consonants
+    # Rule 26p: Append 'i' to words ending in specific consonants
     if transformed.endswith(('d', 't', 'b', 'f', 'j', 'k', 'p', 'v')):
         transformed = transformed + 'i'
         explanations.append(f"Append i after final consonant")
     
-    # Rule 28p: Replace final 'c' with 'ki'
+    # Rule 27p: Replace final 'c' with 'ki'
     if transformed.endswith('c'):
         transformed = transformed[:-1] + 'ki'
         explanations.append("Final c → ki")
     
-    # Rule 29p: Append 'ui' to words ending in 'g'
+    # Rule 28p: Append 'ui' to words ending in 'g'
     if transformed.endswith('g'):
         transformed = transformed + 'ui'
         explanations.append("Append ui after final g")
     
-    # Rule 30p: Transform 'eir' to 'er'
+    # Rule 29p: Transform 'eir' to 'er'
     if 'eir' in transformed:
         transformed = transformed.replace('eir', 'êr')
         explanations.append("eir →êr")
     
-    # Rule 31p: Transform initial 'ou' to 'ô'
+    # Rule 30p: Transform initial 'ou' to 'ô'
     if transformed.startswith('ou'):
         transformed = 'ô' + transformed[2:]
         explanations.append("Transform initial 'ou' to 'ô'")
     
-    # Rule 32p: Transform initial 'sou' to 'sô'
+    # Rule 31p: Transform initial 'sou' to 'sô'
     if transformed.startswith('sou'):
         transformed = 'sô' + transformed[3:]
         explanations.append("Transform initial 'sou' to 'sô'")
     
-    # Rule 33p: Transform initial 'des' to 'dis'
+    # Rule 32p: Transform initial 'des' to 'dis'
     if transformed.startswith('des'):
         transformed = 'dis' + transformed[3:]
         explanations.append("Transform initial 'des' to 'dis'")
     
-    # Rule 34p: Transform 'ora' and 'oras' endings to 'óra' and 'óras'
+    # Rule 33p: Transform 'ora' and 'oras' endings to 'óra' and 'óras'
     if transformed.endswith('ora'):
         transformed = transformed[:-3] + 'óra'
         explanations.append("Transform ending 'ora' to 'óra'")
@@ -908,6 +904,10 @@ def handle_word_combination(first, second):
     # Rule 7c: If word ends in 'm' and next word starts with vowel => merge
     if first[-1] == 'm' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
         return first + second, ''
+
+    # Rule 8c: If first word ends in 'n' and second starts with 'm', drop the 'n'
+    if first.endswith('n') and second.startswith('m'):
+        return first[:-1] + second, ''
 
     return first, second
 
