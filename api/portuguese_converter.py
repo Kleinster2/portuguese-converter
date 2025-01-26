@@ -556,14 +556,15 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = preserve_capital(word, DIRECT_TRANSFORMATIONS[lword])
         return transformed, f"Direct transformation: {word} → {transformed}"
 
-    # Check if it's an irregular verb first - bypass all other rules if found
-    if lword in IRREGULAR_VERBS:
-        transformed = IRREGULAR_VERBS[lword].lower()
-        return preserve_capital(word, transformed), f"Irregular verb: {word} → {transformed}"
-
     # Initialize transformed word and explanations
     transformed = lword
     explanations = []
+
+    # Check if it's an irregular verb first - if so, skip phonetic rules but allow combinations
+    if lword in IRREGULAR_VERBS:
+        transformed = IRREGULAR_VERBS[lword].lower()
+        transformed = preserve_capital(word, transformed)
+        return transformed, f"Irregular verb: {word} → {transformed}"
 
     # Special handling for não before verbs
     if lword in ["não", "nao"]:
@@ -574,8 +575,8 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
                 # Check if the word after pronoun is a verb
                 if next_next_word and is_verb(next_next_word):
                     return preserve_capital(word, "num"), "Negation before pronoun+verb: não → num"
-            elif is_verb(next_word):
-                return preserve_capital(word, "num"), "Negation before verb: não → num"
+                elif is_verb(next_word):
+                    return preserve_capital(word, "num"), "Negation before verb: não → num"
 
     # Check phonetic dictionary
     if lword in PHONETIC_DICTIONARY:
@@ -814,7 +815,7 @@ def handle_word_combination(first, second):
     if len(first) + len(second) > MAX_COMBINED_LENGTH:
         return first, second
     
-    vowels = 'aeiouáéíóúâêîôûãẽĩõũy'
+    vowels = 'aeiouáéíóúâêîô úãẽĩõũy'
     
     # Rule 0c: If word ends in 'r' and next word starts with vowel => merge keeping the 'r'
     if first.endswith('r') and second[0].lower() in vowels:
