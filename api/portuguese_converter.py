@@ -334,10 +334,10 @@ WORD_PAIRS = {
     'em outros': 'nôtrus',
     'em outras': 'nôtras'
 }
-
+    
 # Verb identification constants
 IRREGULAR_VERBS = {
-    "estar": "está", "estou": "tô", "estás": "tá", "está": "tá", "estamos": "tamu", "estão": "tãum", "estive": "tivi", "esteve": "tevi", "estivemos": "tivimu", "estiveram": "tiverãu", "estava": "tava", "estavamos": "tavamu", "estavam": "tavãu",
+    "estar": "está", "estou": "tô", "estás": "tá", "está": "tá", "estamos": "tam", "estão": "tãum", "estive": "tivi", "esteve": "tevi", "estivemos": "tivimu", "estiveram": "tiverãu", "estava": "tava", "estavamos": "tavamu", "estavam": "tavãu",
     "ser": "sê", "sou": "sô", "é": "é", "somos": "somu", "são": "sãun", "fui": "fui", "foi": "fôi", "fomos": "fomu", "foram": "forãu",
     "ter": "tê", "tenho": "tenhu", "tem": "tein", "temos": "temu", "têm": "teim", "tive": "tivi", "teve": "tevi", "tivemos": "tivemu", "tiveram": "tiveraum", "tinha": "tinha", "tinhamos": "tinhamu", "tinham": "tinhaum",
     "fazer": "fazê", "faco": "fassu", "faço": "fassu", "faz": "fays", "fazemos": "fazêmu", "fazem": "fázeym", "fiz": "fis", "fez": "fêiz", "fizemos": "fizemu", "fizeram": "fizérãu", "fazia": "fazia", "faziamos": "faziamu", "faziam": "faziãu", "faria": "fazia", "fariam": "faziãu",
@@ -989,6 +989,11 @@ def transform_text(text):
                 transformed_tokens.append((word, punct))
 
         # ---------------------------------------------------------------------
+        # Capture state after transformations but before combinations
+        # ---------------------------------------------------------------------
+        before_combinations = reassemble_tokens_smartly(transformed_tokens)
+
+        # ---------------------------------------------------------------------
         # 5) Now apply your inline combination rules in a loop until no more merges
         #    (the big if/elif checks for 'r'+vowel, 'a'+vowel, 'sz'+vowel, etc.)
         # ---------------------------------------------------------------------
@@ -1028,10 +1033,6 @@ def transform_text(text):
 
                         elif word1[-1] in 'ao' and word2.startswith('e'):
                             # e.g. "vao ele" => "vaiele" (Replace 'e' with 'i')
-                            # If you want to literally replace 'e' with 'i', you can do:
-                            # combined = word1 + 'i' + word2[1:]
-                            # or if you want "vaoele" => "vaole" you can adapt. 
-                            # In the snippet, we see "Replace 'e' with 'i'".
                             combined = word1 + 'i' + word2[1:]
                             rule_explanation = f"{word1} + {word2} → {combined} (Replace 'e' with 'i')"
 
@@ -1049,11 +1050,6 @@ def transform_text(text):
                             # e.g. "mas eu" => "mazeu" or "faz isso" => "fazisso" => "fazisso"
                             combined = word1[:-1] + 'z' + word2
                             rule_explanation = f"{word1} + {word2} → {combined} ('s' between vowels becomes 'z')"
-
-                        # else:
-                        #     # Default fallback: just combine them directly
-                        #     combined = word1 + word2
-                        #     rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
 
                         # -------------------------------------------------------------------------
                         # If we set 'combined', we do a merge => skip the second token
@@ -1078,12 +1074,12 @@ def transform_text(text):
         # ---------------------------------------------------------------------
         # 6) Reassemble the final tokens
         # ---------------------------------------------------------------------
-        final_text = reassemble_tokens_smartly(transformed_tokens)
+        after_combinations = reassemble_tokens_smartly(transformed_tokens)
 
         return {
             'original': text,
-            'before': final_text,
-            'after': final_text,
+            'before': before_combinations,
+            'after': after_combinations,
             'explanations': explanations,
             'combinations': combination_explanations
         }
