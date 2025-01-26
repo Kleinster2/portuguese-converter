@@ -888,6 +888,10 @@ def handle_word_combination(first, second):
     if first[-1] in 'eiouáéíóúâêîôûãẽĩõũy' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
         return first + second, ''
 
+    # Rule 7c: If word ends in 'm' and next word starts with vowel => merge
+    if first[-1] == 'm' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
+        return first + second, ''
+
     return first, second
 
 def tokenize_text(text):
@@ -1051,6 +1055,11 @@ def transform_text(text):
                             # e.g. "mas eu" => "mazeu" or "faz isso" => "fazisso"
                             combined = word1[:-1] + 'z' + word2
                             rule_explanation = f"{word1} + {word2} → {combined} ('s' between vowels becomes 'z')"
+
+                        elif word1[-1] == 'm' and word2[0] in vowels:
+                            # e.g. "tam em" => "tamein"
+                            combined = word1 + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (Join 'm' with following vowel)"
 
                         # -------------------------------------------------------------------------
                         # If we set 'combined', we do a merge => skip the second token
