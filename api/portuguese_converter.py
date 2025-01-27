@@ -588,7 +588,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
                 return preserve_capital(word, "num"), "Negation before verb: não → num"
 
     # Special handling for ucê before verbs
-    if lword == "ucê":
+    if lword in ["ucê", "você", "voce"]:
         if next_word:
             # Check if the next word is a pronoun
             pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas"]
