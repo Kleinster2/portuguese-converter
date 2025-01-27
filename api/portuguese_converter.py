@@ -591,7 +591,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     if lword in ["ucê", "você", "voce"]:
         if next_word:
             # Check if the next word is a pronoun
-            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas"]
+            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "nao", "não"]
             if next_word.lower() in pronouns:
                 # Check if the word after pronoun is a verb
                 if next_next_word and is_verb(next_next_word):
@@ -601,6 +601,21 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             # If not a pronoun, check if it's a verb directly
             elif is_verb(next_word):
                 return preserve_capital(word, "cê"), "Pronoun before verb: ucê → cê"
+
+    # Special handling for ucêis before verbs
+    if lword in ["ucêis", "vocês", "voces`"]:
+        if next_word:
+            # Check if the next word is a pronoun
+            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "nao", "não"]
+            if next_word.lower() in pronouns:
+                # Check if the word after pronoun is a verb
+                if next_next_word and is_verb(next_next_word):
+                    return preserve_capital(word, "cêis"), "Pronoun before pronoun+verb: ucê → cê"
+                elif is_verb(next_word):
+                    return preserve_capital(word, "cêis"), "Pronoun before verb: ucê → cê"
+            # If not a pronoun, check if it's a verb directly
+            elif is_verb(next_word):
+                return preserve_capital(word, "cêis"), "Pronoun before verb: ucê → cê"
 
     # Check if it's an irregular verb - if so, skip phonetic rules but allow combinations
     if lword in IRREGULAR_VERBS:
