@@ -174,6 +174,8 @@ PHONETIC_DICTIONARY = {
     'muita': 'muynta',
     'muitas': 'muyntas',
     'muitos': 'muyntus',
+    # 'nao': 'nãu',
+    # 'não': 'nãu',
     'obrigada': 'brigada',
     'obrigado': 'brigadu',
     'que': 'ki',
@@ -564,12 +566,6 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     transformed = lword
     explanations = []
 
-    # Check if it's an irregular verb first - if so, skip phonetic rules but allow combinations
-    if lword in IRREGULAR_VERBS:
-        transformed = IRREGULAR_VERBS[lword].lower()
-        transformed = preserve_capital(word, transformed)
-        return transformed, f"Irregular verb: {word} → {transformed}"
-
     # Special handling for não before verbs
     if lword in ["não", "nao"]:
         if next_word:
@@ -581,6 +577,15 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
                     return preserve_capital(word, "num"), "Negation before pronoun+verb: não → num"
                 elif is_verb(next_word):
                     return preserve_capital(word, "num"), "Negation before verb: não → num"
+            # If not a pronoun, check if it's a verb directly
+            elif is_verb(next_word):
+                return preserve_capital(word, "num"), "Negation before verb: não → num"
+
+    # Check if it's an irregular verb - if so, skip phonetic rules but allow combinations
+    if lword in IRREGULAR_VERBS:
+        transformed = IRREGULAR_VERBS[lword].lower()
+        transformed = preserve_capital(word, transformed)
+        return transformed, f"Irregular verb: {word} → {transformed}"
 
     # Check phonetic dictionary
     if lword in PHONETIC_DICTIONARY:
