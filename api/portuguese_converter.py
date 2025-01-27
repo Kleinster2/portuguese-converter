@@ -174,8 +174,6 @@ PHONETIC_DICTIONARY = {
     'muita': 'muynta',
     'muitas': 'muyntas',
     'muitos': 'muyntus',
-    'nao': 'nãu',
-    'não': 'nãu',
     'obrigada': 'brigada',
     'obrigado': 'brigadu',
     'que': 'ki',
