@@ -96,8 +96,8 @@ PHONETIC_DICTIONARY = {
     'os' : 'us',
     'voce' : 'ucê',
     'você' : 'ucê',
-    'voces' : 'ucêys',
-    'vocês' : 'ucêys',
+    'voces' : 'ucêis',
+    'vocês' : 'ucêis',
 
     # Adverbs
     'demais': 'dimais',
@@ -220,8 +220,9 @@ DIRECT_TRANSFORMATIONS = {
     'para': 'pra',
     'nova': 'nóva',
     'novas': 'nóvas',
-    'novamente': 'nóvamente',
-    'otimo': 'ótimo'
+    'novamente': 'nóvamenti',
+    'otimo': 'ótimu',
+    'ótimo': 'ótimu'
 }
 
 # Word pairs that need special handling (not covered by regular rules)
@@ -360,7 +361,8 @@ IRREGULAR_VERBS = {
     "ver": "vê", "vejo": "veju", "vê": "vê", "ve": "vê", "vemos": "vemu", "veem": "veem", "vi": "vi", "viu": "viu", "vimos": "vimu", "viram": "viraum",
     "saber": "sabê", "sei": "sei", "soube": "soube", "soubemos": "soubemos", "souberam": "souberam",
     "trazer": "trazê", "trago": "trago", "traz": "traz", "trazemos": "traizemu", "trazem": "traizeym", "trocar": "troca", "trocamos": "trocamu", "trocam": "trocaum", "trocaram": "trocaum",
-    "mentir": "menti", "minto": "minto", "mente": "meinte", "mentimos": "mintimos", "mentem": "mentem", "mentia": "mintia", "mentiamos": "mintiamos", "mentiam": "mintiam", "mentiram": "mintiram",
+    "mentir": "menti", "minto": "minto", "mente": "meinti", "mentimos": "mintimos", "mentem": "mentem", "mentia": "mintia", "mentiamos": "mintiamos", "mentiam": "mintiam", "mentiram": "mintiram",
+    "ler": "lê", "leio": "lêiu", "lê": "lê", "lemos": "lêmus",
 }
 
 # Basic/Essential Verbs
@@ -378,7 +380,7 @@ ACTION_VERB_ROOTS = {
     "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "coç", "colet", "colid", "colh", "começ",  "comec", 
     "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
     "danç", "descans", "desliz", "destac", "destru", "dit", "edit", "empreg", "empurr", "encontr", "encost", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
-    "flert", "form", "grit", "guard", "imprim", "inund", "jog", "junt", "lav", "levant", "lig", "limp", "lut", "marc", 
+    "flert", "form", "grit", "guard", "imprim", "inund", "jog", "junt", "lav", "levant", "lig", "limp", "livr", "lut", "marc", 
     "met", "mex", "molh", "mord", "mostr", "mud", "olh", "peg", "proteg", "provoc", "reform", "reaj", "realiz", "receb", "reclam", "reduz", "reflet", "relax", "represent", "reserv", 
     "resolv", "respond", "restit", "romp", "segu", "serv", "sorr", "sub", "substitu", "suj", "surprend", 
     "traduz", "transform", "un", "us", "suport", "sustent", "torc", "trabalh", "transport", "trat", "troc", "utiliz", "vest", "viaj"
@@ -671,10 +673,10 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = re.sub(r'al([' + consonants + '])', r'au\1', transformed)
         explanations.append("al+consonant → au")
 
-    # Rule 12p: 'on' followed by a consonant becomes 'ôun'
+    # Rule 12p: 'on' followed by a consonant becomes 'oun'
     if re.search(r'on[' + consonants + ']', transformed):
-        transformed = re.sub(r'on([' + consonants + '])', r'ôun\1', transformed)
-        explanations.append("on+consonant → ôun")
+        transformed = re.sub(r'on([' + consonants + '])', r'oun\1', transformed)
+        explanations.append("on+consonant → oun")
 
     # Rule 13p: Final 'am' becomes 'aun'
     if transformed.endswith('am'):
@@ -851,6 +853,10 @@ def handle_word_combination(first, second):
     if first.endswith('ia') and second.startswith('i'):
         return first[:-2] + second, ''
 
+    # Special case: 'i' followed by 'eéê' drops the 'i'
+    if first.endswith('i') and second.startswith('eéê'):
+        return first[:-1] + second, ''
+        
     # Special case: 'n' followed by 'n' becomes just 'n'
     if first.endswith('n') and second.startswith('n'):
         return first[:-1] + second, ''
@@ -899,11 +905,7 @@ def handle_word_combination(first, second):
         return first[:-1] + second, ''
 
     # Rule 4c
-    if first[-1] == 'u' and second[0] in 'aiouáíóúâêîôûãẽĩõũy':
-        return first + second, ''
-
-    # Rule 4.1c: Special case for 'u' followed by 'e' or 'é'
-    if first[-1] == 'u' and second[0] in 'eé':
+    if first[-1] == 'u' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
         return first[:-1] + second, ''
 
     # Rule 5c
