@@ -130,6 +130,10 @@ PHONETIC_DICTIONARY = {
     'destas': 'déssas',
     'deste': 'dêssi',
     'destes': 'dêssis',
+    'dessa': 'déssa',
+    'dessas': 'déssas',
+    'desse': 'dêssi',
+    'desses': 'dêssis',
 
     # Tech Terms
     'app': 'épi',
