@@ -70,15 +70,17 @@ def create_error_response(error_msg, details=None, status_code=500):
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
-@app.route('/api/', methods=['GET'])
+@app.route('/', methods=['GET'])
 def home():
-    response = jsonify({'message': 'Portuguese Converter API is running'})
+    """Root endpoint for health check"""
+    response = jsonify({'status': 'ok', 'message': 'Portuguese Converter API is running'})
     response.headers['Content-Type'] = 'application/json'
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 @app.route('/api/convert', methods=['POST', 'OPTIONS'])
 def convert():
+    """Convert Portuguese text endpoint"""
     # Handle preflight request
     if request.method == 'OPTIONS':
         response = Response()
@@ -251,131 +253,61 @@ def after_request(response):
 # Vercel requires a handler function
 def handler(event, context):
     """Handle requests in Vercel serverless environment"""
-    # Parse request data from event
+    logger.debug(f"Received Vercel event: {event}")
+    
     try:
-        logger.debug(f"Received event: {event}")
+        # Get the HTTP method
+        method = event.get('method', 'GET')
         
+        # Get the path
         path = event.get('path', '/')
         if not path.startswith('/'):
             path = '/' + path
             
-        # Get request method
-        method = event.get('method', 'GET')
-        if method == 'OPTIONS':
-            # Handle CORS preflight
-            headers = {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Accept',
-                'Access-Control-Max-Age': '86400',  # 24 hours
-            }
-            return {
-                'statusCode': 204,
-                'headers': headers,
-                'body': ''
-            }
-            
-        # Get headers and body
-        raw_headers = event.get('headers', {})
-        # Normalize header names to lowercase for consistent access
-        headers = {k.lower(): v for k, v in raw_headers.items()}
+        # Get headers
+        headers = event.get('headers', {})
+        
+        # Get body if present
         body = event.get('body', '')
-        
-        logger.debug(f"Request headers: {headers}")
-        logger.debug(f"Request body: {body}")
-        
-        # Parse JSON body if content-type is application/json
-        content_type = headers.get('content-type', '')
-        if method == 'POST' and ('application/json' in content_type.lower()):
+        if isinstance(body, str) and body:
             try:
-                if isinstance(body, str):
-                    body = json.loads(body)
-                elif isinstance(body, bytes):
-                    body = json.loads(body.decode('utf-8'))
-                elif isinstance(body, dict):
-                    # Already parsed by Vercel
-                    pass
-                else:
-                    logger.error(f"Unexpected body type: {type(body)}")
-                    return {
-                        'statusCode': 400,
-                        'headers': {
-                            'Content-Type': 'application/json',
-                            'Access-Control-Allow-Origin': '*'
-                        },
-                        'body': json.dumps({
-                            'error': 'Invalid request format',
-                            'details': f'Unexpected body type: {type(body)}'
-                        })
-                    }
-                    
-                # Re-serialize to ensure valid JSON
-                if not isinstance(body, dict):
-                    body = json.loads(body)
-                logger.debug(f"Parsed JSON body: {body}")
-                
-            except (json.JSONDecodeError, ValueError, TypeError) as e:
-                logger.error(f"Failed to parse JSON body: {e}")
-                logger.error(f"Raw body: {body}")
-                return {
-                    'statusCode': 400,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*'
-                    },
-                    'body': json.dumps({
-                        'error': 'Invalid request format',
-                        'details': f'Invalid JSON data: {str(e)}'
-                    })
-                }
+                body = json.loads(body)
+            except json.JSONDecodeError:
+                pass
         
         # Create test request context
         with app.test_request_context(
             path=path,
             method=method,
             headers=headers,
-            data=json.dumps(body) if isinstance(body, dict) else body,
+            json=body if isinstance(body, dict) else None,
+            data=body if not isinstance(body, dict) else None,
             environ_base={'REMOTE_ADDR': event.get('ip', '')}
         ):
             try:
                 # Dispatch request to Flask app
                 response = app.full_dispatch_request()
                 
-                # Get response data
-                response_data = response.get_data(as_text=True)
-                logger.debug(f"Response data: {response_data}")
-                
                 # Convert Flask response to Vercel format
                 return {
                     'statusCode': response.status_code,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*',
-                        **dict(response.headers)
-                    },
-                    'body': response_data
+                    'headers': dict(response.headers),
+                    'body': response.get_data(as_text=True)
                 }
                 
             except Exception as e:
                 logger.error(f"Error in request dispatch: {str(e)}")
-                traceback.print_exc()
+                logger.error(traceback.format_exc())
                 error_response = create_error_response('Internal server error', str(e))
                 return {
                     'statusCode': error_response.status_code,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*',
-                        **dict(error_response.headers)
-                    },
+                    'headers': dict(error_response.headers),
                     'body': error_response.get_data(as_text=True)
                 }
                 
     except Exception as e:
         logger.error(f"Error in handler: {str(e)}")
-        traceback.print_exc()
-        error_message = str(e)
-        error_details = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
-        logger.error(f"Error details: {error_details}")
+        logger.error(traceback.format_exc())
         return {
             'statusCode': 500,
             'headers': {
@@ -384,8 +316,8 @@ def handler(event, context):
             },
             'body': json.dumps({
                 'error': 'Internal server error',
-                'message': error_message,
-                'details': error_details
+                'message': str(e),
+                'details': ''.join(traceback.format_exception(type(e), e, e.__traceback__))
             })
         }
 
