@@ -6,6 +6,13 @@ import traceback
 from flask_cors import CORS
 import json
 
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 # Add the api directory to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
@@ -18,9 +25,7 @@ from api.portuguese_converter import convert_text
 from api.config import SpellCheckConfig
 from api.spellcheck import init_spellchecker, get_spellchecker
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
+# Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
@@ -57,6 +62,9 @@ def convert():
 
     try:
         logger.debug("Received POST request for conversion")
+        logger.debug(f"Request headers: {dict(request.headers)}")
+        logger.debug(f"Request data: {request.get_data(as_text=True)}")
+        
         if not request.is_json:
             logger.error("Request data is not JSON")
             return create_error_response(
@@ -83,7 +91,7 @@ def convert():
                 400
             )
             
-        logger.debug(f"Request data: {data}")
+        logger.debug(f"Parsed request data: {data}")
         text = data.get('text', '')
         if not text:
             logger.warning("No text provided in request")
@@ -300,5 +308,6 @@ def handler(event, context):
             })
         }
 
+# This is required for local development
 if __name__ == '__main__':
     app.run(debug=True)
