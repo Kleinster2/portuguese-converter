@@ -43,6 +43,11 @@
         }
     },
     "env": {
-        "PYTHONPATH": "/var/task:/var/task/api"
+        "PYTHONPATH": "/var/task:/var/task/api",
+        "OPENAI_API_KEY": "@openai_api_key",
+        "SPELL_CHECK_ENABLED": "true",
+        "SPELL_CHECK_RATE_LIMIT": "60",
+        "SPELL_CHECK_CACHE_SIZE": "1000",
+        "SPELL_CHECK_CACHE_TTL": "3600"
     }
 }
