@@ -3,6 +3,7 @@ import os
 import sys
 import logging
 import traceback
+from flask_cors import CORS
 
 # Add the api directory to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -20,6 +21,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Initialize spellchecker
 try:
@@ -33,11 +35,27 @@ except Exception as e:
 def home():
     return jsonify({'message': 'Portuguese Converter API is running'})
 
-@app.route('/api/convert', methods=['POST'])
+@app.route('/api/convert', methods=['POST', 'OPTIONS'])
 def convert():
+    # Handle preflight request
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Methods', 'POST')
+        return response
+
     try:
         logger.debug("Received POST request for conversion")
+        if not request.is_json:
+            logger.error("Request data is not JSON")
+            return jsonify({'error': 'Request must be JSON'}), 400
+            
         data = request.get_json()
+        if data is None:
+            logger.error("Failed to parse JSON data")
+            return jsonify({'error': 'Invalid JSON data'}), 400
+            
         logger.debug(f"Request data: {data}")
         text = data.get('text', '')
         if not text:
@@ -86,3 +104,6 @@ def convert():
         error_msg = f"Error during conversion: {str(e)}\n{traceback.format_exc()}"
         logger.error(error_msg)
         return jsonify({'error': error_msg}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
