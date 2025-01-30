@@ -185,6 +185,8 @@ def handler(event, context):
     """Handle requests in Vercel serverless environment"""
     # Parse request data from event
     try:
+        logger.debug(f"Received event: {event}")
+        
         path = event.get('path', '/')
         if not path.startswith('/'):
             path = '/' + path
@@ -206,8 +208,45 @@ def handler(event, context):
             }
             
         # Get headers and body
-        headers = event.get('headers', {})
+        raw_headers = event.get('headers', {})
+        # Normalize header names to lowercase for consistent access
+        headers = {k.lower(): v for k, v in raw_headers.items()}
         body = event.get('body', '')
+        
+        logger.debug(f"Request headers: {headers}")
+        logger.debug(f"Request body: {body}")
+        
+        # Parse JSON body if content-type is application/json
+        content_type = headers.get('content-type', '')
+        if method == 'POST' and ('application/json' in content_type.lower()):
+            try:
+                if isinstance(body, str):
+                    body = json.loads(body)
+                elif isinstance(body, bytes):
+                    body = json.loads(body.decode('utf-8'))
+                elif isinstance(body, dict):
+                    # Already parsed by Vercel
+                    pass
+                else:
+                    raise ValueError(f"Unexpected body type: {type(body)}")
+                    
+                # Re-serialize to ensure valid JSON
+                body = json.dumps(body)
+                logger.debug(f"Parsed JSON body: {body}")
+                
+            except (json.JSONDecodeError, ValueError) as e:
+                logger.error(f"Failed to parse JSON body: {e}")
+                return {
+                    'statusCode': 400,
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    'body': json.dumps({
+                        'error': 'Invalid request format',
+                        'details': 'Invalid JSON data'
+                    })
+                }
         
         # Create test request context
         with app.test_request_context(
