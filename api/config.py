@@ -1,8 +1,8 @@
-from typing import Optional
+from typing import Optional, List
 import os
 import logging
 from dotenv import load_dotenv
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import time
 import threading
 
@@ -19,13 +19,13 @@ class SpellCheckConfig:
     cache_ttl: int = 3600  # cache time-to-live in seconds
     api_key: Optional[str] = None
     
-    # Rate limiting
-    _request_times: list = None
-    _rate_limit_lock: threading.Lock = None
+    # Rate limiting - use field(default_factory=...) for mutable defaults
+    _request_times: List[float] = field(default_factory=list)
+    _rate_limit_lock: threading.Lock = field(default_factory=threading.Lock)
 
     def __post_init__(self):
-        self._request_times = []
-        self._rate_limit_lock = threading.Lock()
+        # No longer needed since we're using field(default_factory=...)
+        pass
 
     @classmethod
     def from_env(cls) -> 'SpellCheckConfig':
