@@ -9,14 +9,6 @@ import threading
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Try to load environment variables from .env, but don't fail if not available
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-    logger.info("Loaded environment variables from .env file")
-except ImportError:
-    logger.warning("python-dotenv not available, using OS environment variables")
-
 @dataclass
 class SpellCheckConfig:
     enabled: bool = False
@@ -33,6 +25,13 @@ class SpellCheckConfig:
     @classmethod
     def from_env(cls) -> 'SpellCheckConfig':
         """Create config from environment variables."""
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+            logger.info("Loaded environment variables from .env file")
+        except ImportError:
+            logger.warning("python-dotenv not available, using OS environment variables")
+
         enabled_str = os.getenv('SPELL_CHECK_ENABLED', 'false').lower()
         enabled = enabled_str == 'true'
         

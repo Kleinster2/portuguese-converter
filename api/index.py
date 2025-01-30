@@ -25,14 +25,6 @@ sys.path.insert(0, current_dir)  # Insert at beginning to ensure our modules are
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-# Try to load environment variables from .env
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-    logger.info("Loaded environment variables from .env file")
-except ImportError:
-    logger.warning("python-dotenv not available, using OS environment variables")
-
 try:
     from portuguese_converter import convert_text
     from config import SpellCheckConfig
