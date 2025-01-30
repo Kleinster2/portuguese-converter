@@ -218,7 +218,18 @@
                     const afterLines = data.after.split('\n');
                     
                     // Create the output HTML
-                    let outputHtml = '<div class="transformation-section">';
+                    let outputHtml = '';
+                    
+                    // Add spell check section if available
+                    if (data.spell_corrections) {
+                        outputHtml += '<div class="transformation-section">';
+                        outputHtml += '<div class="explanation-title">Spell Check:</div>';
+                        outputHtml += `<div class="explanation-item">${data.spell_corrections}</div>`;
+                        outputHtml += '</div>';
+                    }
+                    
+                    // Add word transformations section
+                    outputHtml += '<div class="transformation-section">';
                     outputHtml += '<div class="explanation-title">Word Transformations:</div>';
                     outputHtml += `<pre>${data.before}</pre>`;
                     
