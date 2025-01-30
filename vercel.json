@@ -1,25 +1,17 @@
 {
     "version": 2,
-    "builds": [
-        {
-            "src": "api/index.py",
-            "use": "@vercel/python",
-            "config": {
-                "maxLambdaSize": "15mb",
-                "runtime": "python3.9",
-                "includeFiles": ["api/**"],
-                "installCommand": "pip install -r api/requirements.txt"
-            }
-        },
-        {
-            "src": "*.html",
-            "use": "@vercel/static"
-        }
-    ],
+    "env": {
+        "PYTHONPATH": "/var/task:/var/task/api",
+        "openai_api_key": "@openai_api_key",
+        "SPELL_CHECK_ENABLED": "true",
+        "SPELL_CHECK_RATE_LIMIT": "60",
+        "SPELL_CHECK_CACHE_SIZE": "1000",
+        "SPELL_CHECK_CACHE_TTL": "3600"
+    },
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/api/index.py",
+            "dest": "/api/$1",
             "methods": ["GET", "POST", "OPTIONS"],
             "headers": {
                 "Access-Control-Allow-Origin": "*",
@@ -35,19 +27,5 @@
             "src": "/(.*)",
             "dest": "/index.html"
         }
-    ],
-    "functions": {
-        "api/index.py": {
-            "memory": 1024,
-            "maxDuration": 10
-        }
-    },
-    "env": {
-        "PYTHONPATH": "/var/task:/var/task/api",
-        "openai_api_key": "@openai_api_key",
-        "SPELL_CHECK_ENABLED": "true",
-        "SPELL_CHECK_RATE_LIMIT": "60",
-        "SPELL_CHECK_CACHE_SIZE": "1000",
-        "SPELL_CHECK_CACHE_TTL": "3600"
-    }
+    ]
 }
