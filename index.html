@@ -231,27 +231,39 @@
             loadingDiv.style.display = 'block';
             
             try {
-                const response = await fetch('/api/convert', {
+                const apiUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000/api/convert'
+                    : '/api/convert';
+                    
+                console.log('Making request to:', apiUrl);
+                console.log('Request payload:', { text: inputText });
+                
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'Cache-Control': 'no-cache'
+                        'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ text: inputText }),
-                    credentials: 'same-origin'
+                    body: JSON.stringify({ text: inputText })
                 });
                 
-                let data;
+                // Log response headers and status
+                console.log('Response status:', response.status);
+                console.log('Response headers:', Object.fromEntries([...response.headers]));
+                
+                // Get raw response text first
                 const responseText = await response.text();
                 console.log('Raw response:', responseText);
                 
+                let data;
                 try {
+                    // Try to parse the response as JSON
                     data = JSON.parse(responseText);
+                    console.log('Parsed response:', data);
                 } catch (e) {
                     console.error('Error parsing response:', e);
                     console.error('Response text:', responseText);
-                    displayError('Server returned invalid JSON response');
+                    displayError(`Server returned invalid JSON response: ${responseText}`);
                     return;
                 } finally {
                     // Hide loading indicator
@@ -260,7 +272,8 @@
                 
                 // Check if response was not OK (HTTP error)
                 if (!response.ok) {
-                    const errorMessage = data.details || data.error || `HTTP error! status: ${response.status}`;
+                    const errorMessage = data?.details || data?.error || `HTTP error! status: ${response.status}`;
+                    console.error('HTTP error:', errorMessage);
                     displayError(errorMessage);
                     return;
                 }
@@ -268,6 +281,7 @@
                 // Check for error in the response
                 if (data.error) {
                     const errorMessage = data.details ? `${data.error}: ${data.details}` : data.error;
+                    console.error('API error:', errorMessage);
                     displayError(errorMessage);
                     return;
                 }
@@ -300,8 +314,8 @@
                 }
                 
             } catch (error) {
-                console.error('Error:', error);
-                displayError(error.message || 'An error occurred while processing your request');
+                console.error('Network error:', error);
+                displayError(`Network error: ${error.message}`);
             } finally {
                 // Hide loading indicator
                 loadingDiv.style.display = 'none';

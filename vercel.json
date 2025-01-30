@@ -21,12 +21,13 @@
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/api/index.py",
+            "dest": "api/index.py",
             "methods": ["GET", "POST", "OPTIONS"],
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, Accept"
+                "Access-Control-Allow-Headers": "Content-Type, Accept",
+                "Access-Control-Max-Age": "86400"
             }
         },
         {
