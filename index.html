@@ -220,7 +220,7 @@
                     // Create the output HTML
                     let outputHtml = '<div class="transformation-section">';
                     outputHtml += '<div class="explanation-title">Word Transformations:</div>';
-                    outputHtml += `<pre>${beforeLines.join('\n')}</pre>`;
+                    outputHtml += `<pre>${data.after}</pre>`;
                     
                     // Add explanations directly under transformations
                     if (data.explanations && data.explanations.length > 0) {
