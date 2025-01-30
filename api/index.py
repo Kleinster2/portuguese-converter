@@ -1,19 +1,12 @@
 from http.server import BaseHTTPRequestHandler
 import json
 
-def handler(request):
-    """Handle incoming requests."""
-    if request.method == "GET":
-        return {
-            "statusCode": 200,
-            "body": json.dumps({
-                "message": "Portuguese Converter API"
-            })
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        response = {
+            'message': 'Portuguese Converter API is working'
         }
-    else:
-        return {
-            "statusCode": 405,
-            "body": json.dumps({
-                "error": "Method not allowed"
-            })
-        }
+        self.wfile.write(json.dumps(response).encode())
