@@ -1,4 +1,4 @@
-import openai
+from openai import OpenAI
 import logging
 from typing import Dict, Optional, Tuple
 from .config import SpellCheckConfig
@@ -10,7 +10,7 @@ class SpellChecker:
     def __init__(self, config: SpellCheckConfig):
         self.config = config
         self.cache = Cache(max_size=config.cache_size, ttl=config.cache_ttl)
-        openai.api_key = config.api_key
+        self.client = OpenAI(api_key=config.api_key)
 
     def check_text(self, text: str) -> Tuple[str, Optional[str]]:
         """
@@ -45,7 +45,7 @@ class SpellChecker:
                 {"role": "user", "content": f"Check this Portuguese text: {text}"}
             ]
 
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model="gpt-4",
                 messages=messages,
                 temperature=0.1,  # Low temperature for more consistent corrections
