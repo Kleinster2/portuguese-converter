@@ -1221,6 +1221,8 @@ def transform_text(text: str) -> Dict[str, Union[str, List[str]]]:
 
 def convert_text(text: str) -> Dict[str, Union[str, List[str]]]:
     """Convert Portuguese text to its phonetic representation with explanations."""
+    logger.debug(f"Starting conversion of text: {repr(text)}")
+    
     if not text or not isinstance(text, str):
         logger.warning(f"Invalid input text: {repr(text)}")
         return {
@@ -1233,7 +1235,10 @@ def convert_text(text: str) -> Dict[str, Union[str, List[str]]]:
         }
     
     try:
+        logger.debug("Calling transform_text...")
         result = transform_text(text)
+        logger.debug(f"Got transform_text result: {result}")
+        
         if not isinstance(result, dict):
             logger.error(f"Invalid transformation result type: {type(result)}")
             return {
@@ -1259,11 +1264,13 @@ def convert_text(text: str) -> Dict[str, Union[str, List[str]]]:
                 'combinations': []
             }
         
+        logger.debug("Conversion successful, returning result")
         return result
         
     except ValueError as e:
         # Handle expected errors with details
         logger.error(f"Value error in convert_text: {str(e)}")
+        logger.error(traceback.format_exc())
         return {
             'error': 'Conversion error',
             'details': str(e),
@@ -1275,7 +1282,7 @@ def convert_text(text: str) -> Dict[str, Union[str, List[str]]]:
     except Exception as e:
         # Handle unexpected errors
         logger.error(f"Unexpected error in convert_text: {str(e)}")
-        traceback.print_exc()
+        logger.error(traceback.format_exc())
         return {
             'error': 'Internal server error',
             'details': str(e),

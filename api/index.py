@@ -298,11 +298,20 @@ def handler(event, context):
         
         # Get body if present
         body = event.get('body', '')
+        
+        # If body is a string, try to parse as JSON
         if isinstance(body, str) and body:
             try:
                 body = json.loads(body)
-            except json.JSONDecodeError:
-                pass
+                logger.debug(f"Parsed JSON body: {body}")
+            except json.JSONDecodeError as e:
+                logger.warning(f"Failed to parse body as JSON: {e}")
+                # Keep original string body
+        elif isinstance(body, dict):
+            logger.debug(f"Body is already a dict: {body}")
+        else:
+            logger.warning(f"Unexpected body type: {type(body)}")
+            body = {}
         
         # Create test request context
         with app.test_request_context(
@@ -318,11 +327,13 @@ def handler(event, context):
                 response = app.full_dispatch_request()
                 
                 # Convert Flask response to Vercel format
-                return {
+                vercel_response = {
                     'statusCode': response.status_code,
                     'headers': dict(response.headers),
                     'body': response.get_data(as_text=True)
                 }
+                logger.debug(f"Sending Vercel response: {vercel_response}")
+                return vercel_response
                 
             except Exception as e:
                 logger.error(f"Error in request dispatch: {str(e)}")
@@ -341,12 +352,14 @@ def handler(event, context):
             'statusCode': 500,
             'headers': {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Accept, Origin'
             },
             'body': json.dumps({
                 'error': 'Internal server error',
-                'message': str(e),
-                'details': ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+                'details': str(e),
+                'trace': ''.join(traceback.format_exception(type(e), e, e.__traceback__))
             })
         }
 
