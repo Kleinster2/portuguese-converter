@@ -8,7 +8,8 @@
                 "maxLambdaSize": "15mb",
                 "runtime": "python3.9",
                 "includeFiles": [
-                    "api/**"
+                    "api/**",
+                    ".env"
                 ]
             }
         },
@@ -20,7 +21,13 @@
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/api/index.py"
+            "dest": "/api/index.py",
+            "methods": ["GET", "POST", "OPTIONS"],
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type, Accept"
+            }
         },
         {
             "src": "/(.*)",
@@ -28,6 +35,8 @@
         }
     ],
     "env": {
-        "PYTHONPATH": "."
+        "PYTHONPATH": ".",
+        "FLASK_ENV": "production",
+        "FLASK_DEBUG": "0"
     }
 }

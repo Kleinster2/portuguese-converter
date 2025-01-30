@@ -275,14 +275,27 @@ def handler(event, context):
                     # Already parsed by Vercel
                     pass
                 else:
-                    raise ValueError(f"Unexpected body type: {type(body)}")
+                    logger.error(f"Unexpected body type: {type(body)}")
+                    return {
+                        'statusCode': 400,
+                        'headers': {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
+                        'body': json.dumps({
+                            'error': 'Invalid request format',
+                            'details': f'Unexpected body type: {type(body)}'
+                        })
+                    }
                     
                 # Re-serialize to ensure valid JSON
-                body = json.dumps(body)
+                if not isinstance(body, dict):
+                    body = json.loads(body)
                 logger.debug(f"Parsed JSON body: {body}")
                 
-            except (json.JSONDecodeError, ValueError) as e:
+            except (json.JSONDecodeError, ValueError, TypeError) as e:
                 logger.error(f"Failed to parse JSON body: {e}")
+                logger.error(f"Raw body: {body}")
                 return {
                     'statusCode': 400,
                     'headers': {
@@ -291,7 +304,7 @@ def handler(event, context):
                     },
                     'body': json.dumps({
                         'error': 'Invalid request format',
-                        'details': 'Invalid JSON data'
+                        'details': f'Invalid JSON data: {str(e)}'
                     })
                 }
         
@@ -300,12 +313,16 @@ def handler(event, context):
             path=path,
             method=method,
             headers=headers,
-            data=body,
+            data=json.dumps(body) if isinstance(body, dict) else body,
             environ_base={'REMOTE_ADDR': event.get('ip', '')}
         ):
             try:
                 # Dispatch request to Flask app
                 response = app.full_dispatch_request()
+                
+                # Get response data
+                response_data = response.get_data(as_text=True)
+                logger.debug(f"Response data: {response_data}")
                 
                 # Convert Flask response to Vercel format
                 return {
@@ -315,7 +332,7 @@ def handler(event, context):
                         'Access-Control-Allow-Origin': '*',
                         **dict(response.headers)
                     },
-                    'body': response.get_data(as_text=True)
+                    'body': response_data
                 }
                 
             except Exception as e:
@@ -335,6 +352,9 @@ def handler(event, context):
     except Exception as e:
         logger.error(f"Error in handler: {str(e)}")
         traceback.print_exc()
+        error_message = str(e)
+        error_details = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+        logger.error(f"Error details: {error_details}")
         return {
             'statusCode': 500,
             'headers': {
@@ -343,7 +363,8 @@ def handler(event, context):
             },
             'body': json.dumps({
                 'error': 'Internal server error',
-                'details': str(e)
+                'message': error_message,
+                'details': error_details
             })
         }
 
