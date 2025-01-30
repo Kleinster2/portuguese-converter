@@ -240,5 +240,13 @@ def convert_new():
 # Vercel requires the app to be named 'app'
 app.debug = True
 
+# Create a new route that matches Vercel's function pattern
+@app.route('/', defaults={'path': ''}, methods=['GET', 'POST'])
+@app.route('/<path:path>', methods=['GET', 'POST'])
+def catch_all(path):
+    if request.method == 'POST':
+        return convert()
+    return home()
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)

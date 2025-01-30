@@ -6,26 +6,17 @@
             "use": "@vercel/python",
             "config": {
                 "runtime": "python3.9",
-                "maxLambdaSize": "15mb",
-                "handler": "app.py"
+                "maxLambdaSize": "15mb"
             }
-        },
-        {
-            "src": "*.html",
-            "use": "@vercel/static"
         }
     ],
     "routes": [
         {
-            "src": "/api/(.*)",
-            "dest": "api/app.py"
-        },
-        {
             "src": "/(.*)",
-            "dest": "/$1"
+            "dest": "api/app.py"
         }
     ],
     "env": {
-        "PYTHONPATH": "/var/task/api"
+        "PYTHONPATH": "/var/task"
     }
 }
