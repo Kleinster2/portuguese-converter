@@ -3,8 +3,6 @@ from flask_cors import CORS
 from portuguese_converter import convert_text
 from spell_checker import SpellChecker, SpellCheckError, RateLimitError, APIError
 from config import SpellCheckConfig
-import sys
-import os
 import traceback
 import logging
 import asyncio
@@ -15,11 +13,22 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Initialize Flask app
+app = Flask(__name__)
+CORS(app)
+
+# Initialize spell checker globally
+try:
+    config = SpellCheckConfig.from_env()
+    spell_checker = SpellChecker(config)
+    logger.info("Spell checker initialized successfully")
+except Exception as e:
+    logger.error(f"Error initializing spell checker: {str(e)}")
+    logger.error(traceback.format_exc())
+    spell_checker = None
 
 # Debug log environment variables
 logger.info(f"OPENAI_API_KEY set: {bool(os.getenv('OPENAI_API_KEY'))}")
@@ -30,21 +39,6 @@ api_dir = os.path.dirname(os.path.abspath(__file__))
 if api_dir not in sys.path:
     sys.path.append(api_dir)
     logger.info(f"Added {api_dir} to Python path")
-
-app = Flask(__name__)
-CORS(app)
-
-# Initialize configuration and spell checker
-config = SpellCheckConfig.from_env()
-spell_checker = None
-if config.api_key:
-    try:
-        spell_checker = SpellChecker(config)
-        logger.info("Spell checker initialized")
-    except Exception as e:
-        logger.error(f"Failed to initialize spell checker: {str(e)}")
-else:
-    logger.warning("Spell checker not available - OPENAI_API_KEY not set")
 
 def async_route(f):
     """Decorator to handle async routes."""
@@ -237,16 +231,32 @@ def convert_new():
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
-# Vercel requires the app to be named 'app'
-app.debug = True
+# Helper function to get or create event loop
+def get_or_create_eventloop():
+    try:
+        return asyncio.get_event_loop()
+    except RuntimeError as ex:
+        if "There is no current event loop in thread" in str(ex):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            return loop
+        raise
 
-# Create a new route that matches Vercel's function pattern
 @app.route('/', defaults={'path': ''}, methods=['GET', 'POST'])
 @app.route('/<path:path>', methods=['GET', 'POST'])
 def catch_all(path):
-    if request.method == 'POST':
-        return convert()
-    return home()
+    try:
+        if request.method == 'POST':
+            return convert()
+        return home()
+    except Exception as e:
+        logger.error(f"Error in catch_all: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'error': 'Internal server error',
+            'details': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
