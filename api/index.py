@@ -44,10 +44,11 @@ app = Flask(__name__)
 
 # Enable CORS for all routes
 CORS(app, resources={
-    r"/api/*": {
+    r"/*": {
         "origins": "*",
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Accept"]
+        "allow_headers": ["Content-Type", "Accept", "Origin"],
+        "max_age": 86400
     }
 })
 
@@ -66,8 +67,25 @@ def create_error_response(error_msg, details=None, status_code=500):
         'details': details or str(error_msg)
     })
     response.status_code = status_code
-    response.headers['Content-Type'] = 'application/json'
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers.update({
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Accept, Origin',
+        'Access-Control-Max-Age': '86400'
+    })
+    return response
+
+def create_success_response(data):
+    """Create a standardized success response"""
+    response = jsonify(data)
+    response.headers.update({
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Accept, Origin',
+        'Access-Control-Max-Age': '86400'
+    })
     return response
 
 @app.route('/', defaults={'path': ''}, methods=['GET', 'POST', 'OPTIONS'])
@@ -81,18 +99,20 @@ def catch_all(path):
     # Handle preflight requests
     if request.method == 'OPTIONS':
         response = Response()
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Accept'
-        response.headers['Access-Control-Max-Age'] = '86400'  # 24 hours
+        response.headers.update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Accept, Origin',
+            'Access-Control-Max-Age': '86400'
+        })
         return response
         
     # Handle root path
     if not path:
-        response = jsonify({'status': 'ok', 'message': 'Portuguese Converter API is running'})
-        response.headers['Content-Type'] = 'application/json'
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        return response
+        return create_success_response({
+            'status': 'ok',
+            'message': 'Portuguese Converter API is running'
+        })
         
     # Handle /api/convert
     if path == 'api/convert' and request.method == 'POST':
@@ -216,10 +236,7 @@ def catch_all(path):
                     response_data['spell_explanation'] = spell_explanation
                 
                 logger.debug(f"Sending response: {response_data}")
-                response = jsonify(response_data)
-                response.headers['Content-Type'] = 'application/json'
-                response.headers['Access-Control-Allow-Origin'] = '*'
-                return response
+                return create_success_response(response_data)
                 
             except ValueError as e:
                 logger.error(f"Value error during conversion: {str(e)}")
@@ -254,9 +271,12 @@ def catch_all(path):
 @app.after_request
 def after_request(response):
     """Ensure CORS headers are set on all responses"""
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Accept'
+    response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Accept, Origin',
+        'Access-Control-Max-Age': '86400'
+    })
     return response
 
 # Vercel requires a handler function
