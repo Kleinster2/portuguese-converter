@@ -34,7 +34,7 @@ def convert():
         
         if isinstance(result, dict):
             return jsonify({
-                'before': result.get('original', text),
+                'before': result.get('before', text),
                 'after': result.get('after', text),
                 'explanations': result.get('explanations', []),
                 'combinations': result.get('combinations', [])
