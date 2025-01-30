@@ -21,20 +21,22 @@ class SpellCheckConfig:
             load_dotenv()
             logger.info("Loaded environment variables from .env file")
         except ImportError:
-            logger.warning("python-dotenv not available, using OS environment variables")
-
-        enabled_str = os.getenv('SPELL_CHECK_ENABLED', 'false').lower()
-        enabled = enabled_str == 'true'
+            logger.warning("python-dotenv not installed, skipping .env file")
         
-        api_key = os.getenv('OPENAI_API_KEY')
+        enabled = os.getenv("SPELL_CHECK_ENABLED", "false").lower() == "true"
+        api_key = os.getenv("openai_api_key")
+        rate_limit = int(os.getenv("SPELL_CHECK_RATE_LIMIT", "60"))
+        cache_size = int(os.getenv("SPELL_CHECK_CACHE_SIZE", "1000"))
+        cache_ttl = int(os.getenv("SPELL_CHECK_CACHE_TTL", "3600"))
+        
         if not api_key and enabled:
-            logger.warning("OpenAI API key not found, disabling spell check")
+            logger.warning("No OpenAI API key found, spell checking will be disabled")
             enabled = False
         
         return cls(
             enabled=enabled,
             api_key=api_key,
-            rate_limit=int(os.getenv('SPELL_CHECK_RATE_LIMIT', '60')),
-            cache_size=int(os.getenv('SPELL_CHECK_CACHE_SIZE', '1000')),
-            cache_ttl=int(os.getenv('SPELL_CHECK_CACHE_TTL', '3600'))
+            rate_limit=rate_limit,
+            cache_size=cache_size,
+            cache_ttl=cache_ttl
         )
