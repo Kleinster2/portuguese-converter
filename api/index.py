@@ -30,17 +30,22 @@ def convert():
             return jsonify({'error': 'No text provided'}), 400
         
         result = convert_text(text)
-        logging.debug(f"Converted text: {result}")
+        logging.debug(f"Converted text result: {result}")
         
-        # Extract the after text from the result
-        after_text = result.get('after', '')
-        if not after_text and isinstance(result, str):
-            after_text = result
+        if isinstance(result, dict):
+            return jsonify({
+                'before': result.get('original', text),
+                'after': result.get('after', text),
+                'explanations': result.get('explanations', []),
+                'combinations': result.get('combinations', [])
+            })
+        else:
+            # Fallback for string result
+            return jsonify({
+                'before': text,
+                'after': result
+            })
             
-        return jsonify({
-            'before': text,
-            'after': after_text
-        })
     except Exception as e:
         logging.error(f"Error during conversion: {str(e)}")
         return jsonify({'error': str(e)}), 500
