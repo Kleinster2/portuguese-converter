@@ -28,11 +28,18 @@ def convert():
         if not text:
             logging.warning("No text provided in request")
             return jsonify({'error': 'No text provided'}), 400
-        converted_text = convert_text(text)
-        logging.debug(f"Converted text: {converted_text}")
+        
+        result = convert_text(text)
+        logging.debug(f"Converted text: {result}")
+        
+        # Extract the after text from the result
+        after_text = result.get('after', '')
+        if not after_text and isinstance(result, str):
+            after_text = result
+            
         return jsonify({
             'before': text,
-            'after': converted_text
+            'after': after_text
         })
     except Exception as e:
         logging.error(f"Error during conversion: {str(e)}")
