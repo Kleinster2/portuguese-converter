@@ -1,2 +1,4 @@
 python-json-logger==2.0.7
 flask==3.0.1
+fastapi==0.109.0
+python-multipart==0.0.6
