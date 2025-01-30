@@ -1,7 +1,8 @@
-from openai import OpenAI
+import openai
 import logging
-from typing import Dict, Optional, Tuple
-from api.config import SpellCheckConfig
+from typing import Dict, Optional, Tuple, Any, List
+from functools import lru_cache
+from .spellcheck_config import SpellCheckConfig
 from api.cache import TTLCache
 
 logger = logging.getLogger(__name__)
@@ -10,7 +11,8 @@ class SpellChecker:
     def __init__(self, config: SpellCheckConfig):
         self.config = config
         self.cache = TTLCache(max_size=config.cache_size, ttl=config.cache_ttl)
-        self.client = OpenAI(api_key=config.api_key)
+        if config.api_key:
+            openai.api_key = config.api_key
 
     def check_text(self, text: str) -> Tuple[str, Optional[str]]:
         """
@@ -45,7 +47,7 @@ class SpellChecker:
                 {"role": "user", "content": f"Check this Portuguese text: {text}"}
             ]
 
-            response = self.client.chat.completions.create(
+            response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=messages,
                 temperature=0.1,  # Low temperature for more consistent corrections
@@ -69,13 +71,13 @@ class SpellChecker:
             return text, f"Error during spellcheck: {str(e)}"
 
 # Global instance
-_instance: Optional[SpellChecker] = None
+_spellchecker: Optional[SpellChecker] = None
 
-def init_spellchecker(config: SpellCheckConfig):
+def init_spellchecker(config: SpellCheckConfig) -> None:
     """Initialize the global spellchecker instance."""
-    global _instance
-    _instance = SpellChecker(config)
+    global _spellchecker
+    _spellchecker = SpellChecker(config)
 
 def get_spellchecker() -> Optional[SpellChecker]:
     """Get the global spellchecker instance."""
-    return _instance
+    return _spellchecker

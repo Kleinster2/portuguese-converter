@@ -27,14 +27,14 @@ sys.path.insert(0, parent_dir)
 
 try:
     from portuguese_converter import convert_text
-    from config import SpellCheckConfig
+    from spellcheck_config import SpellCheckConfig
     from spellcheck import init_spellchecker, get_spellchecker
     logger.debug("Successfully imported local modules")
 except ImportError as e:
     logger.error(f"Failed to import local modules: {e}")
     try:
         from api.portuguese_converter import convert_text
-        from api.config import SpellCheckConfig
+        from api.spellcheck_config import SpellCheckConfig
         from api.spellcheck import init_spellchecker, get_spellchecker
         logger.debug("Successfully imported modules with api prefix")
     except ImportError as e:
