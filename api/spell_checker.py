@@ -1,4 +1,3 @@
-import asyncio
 from openai import OpenAI, OpenAIError
 from cachetools import TTLCache
 import logging
@@ -40,8 +39,8 @@ class SpellChecker:
         """
         logger.info("SpellChecker initialized successfully")
 
-    async def correct_text(self, text, timeout=10):
-        """Correct spelling in Portuguese text with timeout."""
+    def correct_text(self, text):
+        """Correct spelling in Portuguese text."""
         if not self.config.enabled:
             return text
 
@@ -55,28 +54,16 @@ class SpellChecker:
             raise RateLimitError("Rate limit exceeded")
 
         try:
-            # Create a task for the API call
-            async def api_call():
-                loop = asyncio.get_event_loop()
-                return await loop.run_in_executor(
-                    None,
-                    lambda: self.client.chat.completions.create(
-                        model="gpt-4",
-                        messages=[
-                            {"role": "system", "content": self.system_prompt},
-                            {"role": "user", "content": text}
-                        ],
-                        temperature=0.0,
-                        timeout=timeout  # Set OpenAI client timeout
-                    )
-                )
-
-            # Run with timeout
-            try:
-                response = await asyncio.wait_for(api_call(), timeout=timeout)
-            except asyncio.TimeoutError:
-                logger.error(f"OpenAI API call timed out after {timeout} seconds")
-                raise TimeoutError(f"OpenAI API call timed out after {timeout} seconds")
+            # Make API call
+            response = self.client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": self.system_prompt},
+                    {"role": "user", "content": text}
+                ],
+                temperature=0.0,
+                timeout=30  # 30 second timeout
+            )
 
             # Extract corrected text
             corrected_text = response.choices[0].message.content.strip()

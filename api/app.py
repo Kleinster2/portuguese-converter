@@ -5,10 +5,6 @@ from spell_checker import SpellChecker, SpellCheckError, RateLimitError, APIErro
 from config import SpellCheckConfig
 import traceback
 import logging
-import asyncio
-import concurrent.futures
-import functools
-import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -17,9 +13,6 @@ logger = logging.getLogger(__name__)
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
-
-# Initialize thread pool for async operations
-thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 
 # Initialize spell checker globally
 try:
@@ -30,13 +23,6 @@ except Exception as e:
     logger.error(f"Error initializing spell checker: {str(e)}")
     logger.error(traceback.format_exc())
     spell_checker = None
-
-def run_in_executor(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        future = thread_pool.submit(func, *args, **kwargs)
-        return future.result()
-    return wrapper
 
 @app.route('/', methods=['GET'])
 def home():
@@ -65,16 +51,7 @@ def convert():
         # Apply spell checking if enabled
         if use_spell_check and spell_checker:
             try:
-                @run_in_executor
-                def do_spell_check():
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    try:
-                        return loop.run_until_complete(spell_checker.correct_text(text))
-                    finally:
-                        loop.close()
-
-                spell_checked_text = do_spell_check()
+                spell_checked_text = spell_checker.correct_text(text)
                 logger.info("Spell check completed successfully")
             except Exception as e:
                 logger.error(f"Spell check error: {str(e)}")
