@@ -1,17 +1,14 @@
 from flask import Flask, request, jsonify, Response
+from flask_cors import CORS
 import os
 import sys
 import logging
 import traceback
-from flask_cors import CORS
 import json
 from typing import Dict, Any, Optional
 
 # Configure logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Log Python path and current directory for debugging
@@ -19,26 +16,22 @@ logger.debug(f"Python path: {sys.path}")
 logger.debug(f"Current directory: {os.getcwd()}")
 logger.debug(f"Parent directory: {os.path.dirname(os.getcwd())}")
 
-# Add the api directory to the Python path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, current_dir)  # Insert at beginning to ensure our modules are found first
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)
-
+# Try to import local modules
 try:
     from portuguese_converter import convert_text
     from spellcheck_config import SpellCheckConfig
     from spellcheck import init_spellchecker, get_spellchecker
     logger.debug("Successfully imported local modules")
 except ImportError as e:
-    logger.error(f"Failed to import local modules: {e}")
+    logger.error(f"Failed to import local modules: {str(e)}")
+    # Try with api prefix
     try:
         from api.portuguese_converter import convert_text
         from api.spellcheck_config import SpellCheckConfig
         from api.spellcheck import init_spellchecker, get_spellchecker
         logger.debug("Successfully imported modules with api prefix")
     except ImportError as e:
-        logger.error(f"Failed to import modules with api prefix: {e}")
+        logger.error(f"Failed to import modules with api prefix: {str(e)}")
         # Create a minimal SpellCheckConfig class if import fails
         from dataclasses import dataclass
         @dataclass
