@@ -91,23 +91,39 @@ def convert():
     try:
         logger.debug("Received POST request for conversion")
         logger.debug(f"Request headers: {dict(request.headers)}")
-        logger.debug(f"Request data: {request.get_data(as_text=True)}")
         
+        # Get raw request data for debugging
+        raw_data = request.get_data(as_text=True)
+        logger.debug(f"Raw request data: {raw_data}")
+        
+        # Check content type
+        content_type = request.headers.get('Content-Type', '')
+        logger.debug(f"Content-Type: {content_type}")
+        if not content_type.startswith('application/json'):
+            logger.error(f"Invalid Content-Type: {content_type}")
+            return create_error_response(
+                'Invalid request format',
+                'Content-Type must be application/json',
+                400
+            )
+            
         if not request.is_json:
             logger.error("Request data is not JSON")
             return create_error_response(
                 'Invalid request format',
-                'Request must be JSON',
+                f'Request must be JSON. Raw data: {raw_data}',
                 400
             )
             
         try:
             data = request.get_json()
+            logger.debug(f"Parsed JSON data: {data}")
         except Exception as e:
             logger.error(f"Failed to parse JSON data: {str(e)}")
+            logger.error(f"Raw data that failed to parse: {raw_data}")
             return create_error_response(
                 'Invalid request format',
-                'Invalid JSON data',
+                f'Invalid JSON data: {str(e)}. Raw data: {raw_data}',
                 400
             )
             
@@ -115,7 +131,7 @@ def convert():
             logger.error("JSON data is None")
             return create_error_response(
                 'Invalid request format',
-                'Empty JSON data',
+                f'Empty JSON data. Raw data: {raw_data}',
                 400
             )
             
@@ -141,7 +157,7 @@ def convert():
                 spell_explanation = f"Error during spellcheck: {str(e)}"
             except Exception as e:
                 logger.error(f"Unexpected error during spellcheck: {str(e)}")
-                traceback.print_exc()
+                logger.error(traceback.format_exc())
                 spell_explanation = f"Internal server error during spellcheck: {str(e)}"
         else:
             logger.warning("Spellchecker not initialized")
@@ -155,7 +171,8 @@ def convert():
                 logger.error(f"Invalid result type: {type(result)}")
                 return create_error_response(
                     'Conversion error',
-                    'Invalid conversion result format'
+                    f'Invalid conversion result format: {result}',
+                    500
                 )
             
             # Check for error in result
@@ -174,7 +191,8 @@ def convert():
                 logger.error(f"Missing fields in result: {missing_fields}")
                 return create_error_response(
                     'Conversion error',
-                    f'Missing required fields: {", ".join(missing_fields)}'
+                    f'Missing required fields: {", ".join(missing_fields)}. Result: {result}',
+                    500
                 )
             
             # Build response
@@ -197,6 +215,7 @@ def convert():
             
         except ValueError as e:
             logger.error(f"Value error during conversion: {str(e)}")
+            logger.error(traceback.format_exc())
             return create_error_response(
                 'Conversion error',
                 str(e),
@@ -205,18 +224,20 @@ def convert():
             
         except Exception as e:
             logger.error(f"Unexpected error during conversion: {str(e)}")
-            traceback.print_exc()
+            logger.error(traceback.format_exc())
             return create_error_response(
                 'Internal server error',
-                str(e)
+                str(e),
+                500
             )
             
     except Exception as e:
         logger.error(f"Server error: {str(e)}")
-        traceback.print_exc()
+        logger.error(traceback.format_exc())
         return create_error_response(
             'Internal server error',
-            str(e)
+            str(e),
+            500
         )
 
 @app.after_request
