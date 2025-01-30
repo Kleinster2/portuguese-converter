@@ -5,6 +5,7 @@ import logging
 import traceback
 from flask_cors import CORS
 import json
+from typing import Dict, Any, Optional
 
 # Configure logging
 logging.basicConfig(
@@ -13,15 +14,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Log Python path and current directory for debugging
+logger.debug(f"Python path: {sys.path}")
+logger.debug(f"Current directory: {os.getcwd()}")
+logger.debug(f"Parent directory: {os.path.dirname(os.getcwd())}")
+
 # Add the api directory to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)  # Insert at beginning to ensure our modules are found first
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-logger.debug(f"Python path: {sys.path}")
-logger.debug(f"Current directory: {current_dir}")
-logger.debug(f"Parent directory: {parent_dir}")
+# Try to load environment variables from .env
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    logger.info("Loaded environment variables from .env file")
+except ImportError:
+    logger.warning("python-dotenv not available, using OS environment variables")
 
 try:
     from portuguese_converter import convert_text
@@ -37,7 +47,16 @@ except ImportError as e:
         logger.debug("Successfully imported modules with api prefix")
     except ImportError as e:
         logger.error(f"Failed to import modules with api prefix: {e}")
-        raise
+        # Create a minimal SpellCheckConfig class if import fails
+        from dataclasses import dataclass
+        @dataclass
+        class SpellCheckConfig:
+            enabled: bool = False
+            api_key: Optional[str] = None
+            
+            @classmethod
+            def from_env(cls) -> 'SpellCheckConfig':
+                return cls(enabled=False, api_key=None)
 
 # Initialize Flask app
 app = Flask(__name__)
