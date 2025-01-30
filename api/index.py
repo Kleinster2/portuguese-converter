@@ -1,4 +1,3 @@
-from http.server import BaseHTTPRequestHandler
 import json
 import os
 import sys
@@ -10,77 +9,133 @@ if current_dir not in sys.path:
 
 from portuguese_converter import convert_to_phonetic
 
-class handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        """Handle GET requests - return API info"""
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-        
-        response = {
-            'message': 'Portuguese Converter API',
-            'endpoints': {
-                'GET /': 'API information',
-                'POST /api/convert': 'Convert Portuguese text to phonetic'
-            }
-        }
-        self.wfile.write(json.dumps(response).encode())
+def handle_request(request):
+    """Process the request and return appropriate response"""
+    method = request.get('method', '')
+    
+    # Common headers
+    headers = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+    }
 
-    def do_POST(self):
-        """Handle POST requests - convert text"""
+    # Handle OPTIONS (CORS preflight)
+    if method == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': ''
+        }
+
+    # Handle GET (API info)
+    if method == 'GET':
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'message': 'Portuguese Converter API',
+                'endpoints': {
+                    'GET /': 'API information',
+                    'POST /api/convert': 'Convert Portuguese text to phonetic'
+                }
+            })
+        }
+
+    # Handle POST (text conversion)
+    if method == 'POST':
         try:
-            # Read and parse request body
-            content_length = int(self.headers.get('Content-Length', 0))
-            body = self.rfile.read(content_length)
-            data = json.loads(body)
+            # Parse request body
+            body = json.loads(request.get('body', '{}'))
             
             # Validate input
-            if not data or 'text' not in data:
-                self._send_error('Missing required field: text', 400)
-                return
-                
-            text = data['text']
+            if not body or 'text' not in body:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({
+                        'success': False,
+                        'error': 'Missing required field: text'
+                    })
+                }
+            
+            text = body['text']
             if not isinstance(text, str):
-                self._send_error('Text must be a string', 400)
-                return
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({
+                        'success': False,
+                        'error': 'Text must be a string'
+                    })
+                }
             
             # Convert text
             try:
                 result = convert_to_phonetic(text)
-                self._send_response({
-                    'success': True,
-                    'original': text,
-                    'result': result
-                })
+                return {
+                    'statusCode': 200,
+                    'headers': headers,
+                    'body': json.dumps({
+                        'success': True,
+                        'original': text,
+                        'result': result
+                    })
+                }
             except Exception as e:
-                self._send_error(f'Conversion error: {str(e)}', 500)
+                return {
+                    'statusCode': 500,
+                    'headers': headers,
+                    'body': json.dumps({
+                        'success': False,
+                        'error': f'Conversion error: {str(e)}'
+                    })
+                }
                 
         except json.JSONDecodeError:
-            self._send_error('Invalid JSON payload', 400)
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': False,
+                    'error': 'Invalid JSON payload'
+                })
+            }
         except Exception as e:
-            self._send_error(f'Internal server error: {str(e)}', 500)
+            return {
+                'statusCode': 500,
+                'headers': headers,
+                'body': json.dumps({
+                    'success': False,
+                    'error': f'Internal server error: {str(e)}'
+                })
+            }
 
-    def do_OPTIONS(self):
-        """Handle OPTIONS requests - CORS preflight"""
-        self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        self.end_headers()
-        self.wfile.write(''.encode())
-
-    def _send_response(self, data, status=200):
-        """Helper to send JSON response"""
-        self.send_response(status)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-        self.wfile.write(json.dumps(data).encode())
-
-    def _send_error(self, message, status):
-        """Helper to send error response"""
-        self._send_response({
+    # Handle unsupported methods
+    return {
+        'statusCode': 405,
+        'headers': headers,
+        'body': json.dumps({
             'success': False,
-            'error': message
-        }, status)
+            'error': 'Method not allowed'
+        })
+    }
+
+def handler(request):
+    """Main handler function"""
+    try:
+        return handle_request(request)
+    except Exception as e:
+        # Last resort error handling
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({
+                'success': False,
+                'error': f'Unexpected error: {str(e)}'
+            })
+        }
