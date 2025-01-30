@@ -204,20 +204,27 @@
                 
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({ error: `HTTP error! status: ${response.status}` }));
-                    const errorMessage = errorData.error || errorData.message || JSON.stringify(errorData);
+                    const errorMessage = typeof errorData === 'object' ? 
+                        (errorData.error || errorData.message || JSON.stringify(errorData)) : 
+                        String(errorData);
                     throw new Error(errorMessage);
                 }
                 
                 const data = await response.json();
+                if (!data || typeof data !== 'object') {
+                    throw new Error('Invalid response format');
+                }
+
                 const output = document.getElementById('output');
                 const result = document.getElementById('result');
                 
                 // Clear previous content
                 output.innerHTML = '';
                 
-                if (data.error) {
+                if (data.error || (data.explanations && data.explanations[0] && data.explanations[0].startsWith('Error'))) {
+                    const errorMessage = data.error || data.explanations[0];
                     output.innerHTML = `<div style="color: #d32f2f; padding: 10px; border: 1px solid #d32f2f; border-radius: 4px; background-color: #ffebee;">
-                        Error: ${data.error}
+                        ${errorMessage}
                     </div>`;
                     result.style.display = 'block';
                     return;
@@ -274,8 +281,11 @@
                 console.error('Error:', error);
                 const output = document.getElementById('output');
                 const result = document.getElementById('result');
+                const errorMessage = typeof error === 'object' ? 
+                    (error.message || JSON.stringify(error)) : 
+                    String(error);
                 output.innerHTML = `<div style="color: #d32f2f; padding: 10px; border: 1px solid #d32f2f; border-radius: 4px; background-color: #ffebee;">
-                    Error: ${error.message || JSON.stringify(error)}
+                    Error: ${errorMessage}
                 </div>`;
                 result.style.display = 'block';
             } finally {

@@ -1151,7 +1151,6 @@ def transform_text(text):
         after_combinations = reassemble_tokens_smartly(transformed_tokens)
 
         return {
-            'original': text,
             'before': before_combinations,
             'after': after_combinations,
             'explanations': explanations,
@@ -1161,7 +1160,6 @@ def transform_text(text):
     except Exception as e:
         traceback.print_exc()  # Print full traceback for debugging
         return {
-            'original': text,
             'before': text,
             'after': text,
             'explanations': [f"Error during text transformation: {str(e)}"],
@@ -1172,7 +1170,6 @@ def convert_text(text):
     """Convert Portuguese text to its phonetic representation with explanations."""
     if not text or not isinstance(text, str):
         return {
-            'original': text if text else '',
             'before': text if text else '',
             'after': text if text else '',
             'explanations': ["Error: Invalid input text"],
@@ -1180,11 +1177,18 @@ def convert_text(text):
         }
     
     try:
-        return transform_text(text)
+        result = transform_text(text)
+        if not isinstance(result, dict):
+            return {
+                'before': text,
+                'after': text,
+                'explanations': ["Error: Invalid transformation result"],
+                'combinations': []
+            }
+        return result
     except Exception as e:
         traceback.print_exc()  # Print full traceback for debugging
         return {
-            'original': text,
             'before': text,
             'after': text,
             'explanations': [f"Error during text conversion: {str(e)}"],
