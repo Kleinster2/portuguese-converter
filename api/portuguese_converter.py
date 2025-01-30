@@ -1148,23 +1148,20 @@ def transform_text(text):
         # ---------------------------------------------------------------------
         # 6) Reassemble the final text
         # ---------------------------------------------------------------------
-        after_combinations = reassemble_tokens_smartly(transformed_tokens)
+        final_text = reassemble_tokens_smartly(transformed_tokens)
 
+        # Return a dictionary with all the information
         return {
-            'before': before_combinations,
-            'after': after_combinations,
+            'before': text,
+            'after': final_text,
             'explanations': explanations,
             'combinations': combination_explanations
         }
 
     except Exception as e:
-        traceback.print_exc()  # Print full traceback for debugging
-        return {
-            'before': text,
-            'after': text,
-            'explanations': [f"Error during text transformation: {str(e)}"],
-            'combinations': []
-        }
+        print(f"DEBUG: Error in transform_text: {str(e)}")
+        traceback.print_exc()
+        raise  # Re-raise to be caught by convert_text
 
 def convert_text(text):
     """Convert Portuguese text to its phonetic representation with explanations."""
