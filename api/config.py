@@ -1,10 +1,13 @@
 from typing import Optional
 import os
+import logging
 from dataclasses import dataclass
 import time
 import threading
 
 # Load environment variables from .env file
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class SpellCheckConfig:
@@ -25,17 +28,36 @@ class SpellCheckConfig:
     @classmethod
     def from_env(cls) -> 'SpellCheckConfig':
         """Create config from environment variables."""
-        api_key = os.getenv('OPENAI_API_KEY')
-        if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is required")
-            
-        return cls(
-            enabled=os.getenv('SPELL_CHECK_ENABLED', 'true').lower() == 'true',
-            rate_limit=int(os.getenv('SPELL_CHECK_RATE_LIMIT', '60')),
-            cache_size=int(os.getenv('SPELL_CHECK_CACHE_SIZE', '1000')),
-            cache_ttl=int(os.getenv('SPELL_CHECK_CACHE_TTL', '3600')),
-            api_key=api_key
-        )
+        try:
+            api_key = os.environ.get('OPENAI_API_KEY')
+            if not api_key:
+                logger.error("OPENAI_API_KEY not found in environment variables")
+                raise ValueError("OPENAI_API_KEY environment variable is required")
+
+            enabled = os.environ.get('SPELL_CHECK_ENABLED', 'true').lower() == 'true'
+            rate_limit = int(os.environ.get('SPELL_CHECK_RATE_LIMIT', '60'))
+            cache_size = int(os.environ.get('SPELL_CHECK_CACHE_SIZE', '1000'))
+            cache_ttl = int(os.environ.get('SPELL_CHECK_CACHE_TTL', '3600'))
+
+            logger.info("Successfully loaded configuration from environment variables")
+            logger.info(f"Spell check enabled: {enabled}")
+            logger.info(f"Rate limit: {rate_limit}")
+            logger.info(f"Cache size: {cache_size}")
+            logger.info(f"Cache TTL: {cache_ttl}")
+
+            return cls(
+                api_key=api_key,
+                enabled=enabled,
+                rate_limit=rate_limit,
+                cache_size=cache_size,
+                cache_ttl=cache_ttl
+            )
+        except ValueError as e:
+            logger.error(f"Error loading configuration: {str(e)}")
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error loading configuration: {str(e)}")
+            raise ValueError(f"Failed to load configuration: {str(e)}")
 
     def to_dict(self) -> dict:
         """Convert config to dictionary, excluding sensitive data."""
