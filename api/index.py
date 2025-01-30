@@ -15,15 +15,29 @@ logger = logging.getLogger(__name__)
 
 # Add the api directory to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.append(current_dir)
+sys.path.insert(0, current_dir)  # Insert at beginning to ensure our modules are found first
 parent_dir = os.path.dirname(current_dir)
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
+sys.path.insert(0, parent_dir)
 
-from api.portuguese_converter import convert_text
-from api.config import SpellCheckConfig
-from api.spellcheck import init_spellchecker, get_spellchecker
+logger.debug(f"Python path: {sys.path}")
+logger.debug(f"Current directory: {current_dir}")
+logger.debug(f"Parent directory: {parent_dir}")
+
+try:
+    from portuguese_converter import convert_text
+    from config import SpellCheckConfig
+    from spellcheck import init_spellchecker, get_spellchecker
+    logger.debug("Successfully imported local modules")
+except ImportError as e:
+    logger.error(f"Failed to import local modules: {e}")
+    try:
+        from api.portuguese_converter import convert_text
+        from api.config import SpellCheckConfig
+        from api.spellcheck import init_spellchecker, get_spellchecker
+        logger.debug("Successfully imported modules with api prefix")
+    except ImportError as e:
+        logger.error(f"Failed to import modules with api prefix: {e}")
+        raise
 
 # Initialize Flask app
 app = Flask(__name__)
