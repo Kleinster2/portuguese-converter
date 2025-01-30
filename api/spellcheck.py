@@ -2,14 +2,14 @@ from openai import OpenAI
 import logging
 from typing import Dict, Optional, Tuple
 from .config import SpellCheckConfig
-from .cache import Cache
+from .cache import TTLCache
 
 logger = logging.getLogger(__name__)
 
 class SpellChecker:
     def __init__(self, config: SpellCheckConfig):
         self.config = config
-        self.cache = Cache(max_size=config.cache_size, ttl=config.cache_ttl)
+        self.cache = TTLCache(max_size=config.cache_size, ttl=config.cache_ttl)
         self.client = OpenAI(api_key=config.api_key)
 
     def check_text(self, text: str) -> Tuple[str, Optional[str]]:
