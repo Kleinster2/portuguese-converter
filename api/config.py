@@ -1,15 +1,21 @@
 from typing import Optional, List
 import os
 import logging
-from dotenv import load_dotenv
 from dataclasses import dataclass, field
 import time
 import threading
 
-# Load environment variables
-load_dotenv()
-
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+# Try to load environment variables from .env, but don't fail if not available
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    logger.info("Loaded environment variables from .env file")
+except ImportError:
+    logger.warning("python-dotenv not available, using OS environment variables")
 
 @dataclass
 class SpellCheckConfig:
@@ -39,8 +45,8 @@ class SpellCheckConfig:
 
             api_key = os.getenv('OPENAI_API_KEY')
             if not api_key:
-                logger.error("OPENAI_API_KEY not found in environment variables")
-                raise ValueError("OPENAI_API_KEY environment variable is required")
+                logger.warning("OPENAI_API_KEY not found - spellcheck will be disabled")
+                return cls(enabled=False, api_key=None)
 
             enabled = os.getenv('SPELL_CHECK_ENABLED', 'true').lower() == 'true'
             rate_limit = int(os.getenv('SPELL_CHECK_RATE_LIMIT', '60'))
@@ -49,23 +55,17 @@ class SpellCheckConfig:
 
             logger.info("Successfully loaded configuration from environment variables")
             logger.info(f"Spell check enabled: {enabled}")
-            logger.info(f"Rate limit: {rate_limit}")
-            logger.info(f"Cache size: {cache_size}")
-            logger.info(f"Cache TTL: {cache_ttl}")
-
             return cls(
-                api_key=api_key,
                 enabled=enabled,
                 rate_limit=rate_limit,
                 cache_size=cache_size,
-                cache_ttl=cache_ttl
+                cache_ttl=cache_ttl,
+                api_key=api_key
             )
-        except ValueError as e:
-            logger.error(f"Error loading configuration: {str(e)}")
-            raise
         except Exception as e:
-            logger.error(f"Unexpected error loading configuration: {str(e)}")
-            raise ValueError(f"Failed to load configuration: {str(e)}")
+            logger.error(f"Error loading config: {str(e)}")
+            logger.warning("Using default configuration with spellcheck disabled")
+            return cls(enabled=False, api_key=None)
 
     def to_dict(self) -> dict:
         """Convert config to dictionary, excluding sensitive data."""

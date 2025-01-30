@@ -6,11 +6,13 @@
             "use": "@vercel/python",
             "config": {
                 "maxLambdaSize": "15mb",
-                "runtime": "python3.9",
+                "runtime": "python3.12",
                 "includeFiles": [
                     "api/**",
-                    ".env"
-                ]
+                    ".env",
+                    "requirements.txt"
+                ],
+                "installCommand": "pip install -r requirements.txt"
             }
         },
         {
@@ -49,13 +51,6 @@
         }
     },
     "env": {
-        "PYTHONPATH": ".",
-        "FLASK_ENV": "production",
-        "FLASK_DEBUG": "0",
-        "OPENAI_API_KEY": "@openai_api_key",
-        "SPELL_CHECK_ENABLED": "true",
-        "SPELL_CHECK_RATE_LIMIT": "60",
-        "SPELL_CHECK_CACHE_SIZE": "1000",
-        "SPELL_CHECK_CACHE_TTL": "3600"
+        "PYTHONPATH": "/var/task:/var/task/api"
     }
 }
