@@ -60,7 +60,7 @@ class SpellChecker:
             explanation = data.get('explanation', None)
 
             # Cache the result
-            self.cache.set(text, (corrected, explanation))
+            self.cache.put(text, (corrected, explanation))
 
             return corrected, explanation
 
