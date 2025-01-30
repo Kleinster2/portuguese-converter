@@ -1,9 +1,10 @@
-from http.server import BaseHTTPRequestHandler
-
-class handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-type','text/plain')
-        self.end_headers()
-        self.wfile.write('Hello, world!'.encode('utf-8'))
-        return
+def handler(request):
+    if request.get('method') == 'GET':
+        return {
+            'statusCode': 200,
+            'body': 'Hello from Python!'
+        }
+    return {
+        'statusCode': 405,
+        'body': 'Method not allowed'
+    }
