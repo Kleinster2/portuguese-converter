@@ -76,34 +76,42 @@ def convert():
             spell_explanation = None
         
         # Then convert the text
-        result = convert_text(text)
-        logger.debug(f"Converted text result: {result}")
-        
-        if isinstance(result, dict):
+        try:
+            result = convert_text(text)
+            logger.debug(f"Converted text result: {result}")
+            
+            if not isinstance(result, dict):
+                logger.error(f"Invalid result type: {type(result)}")
+                return jsonify({
+                    'error': 'Invalid conversion result format'
+                }), 500
+            
             response = {
                 'before': result.get('before', text),
                 'after': result.get('after', text),
                 'explanations': result.get('explanations', []),
                 'combinations': result.get('combinations', [])
             }
+            
             # Add spellcheck explanation if available
             if spell_explanation:
                 response['spell_corrections'] = spell_explanation
-            return jsonify(response)
-        else:
-            # Fallback for string result
-            response = {
-                'before': text,
-                'after': result
-            }
-            if spell_explanation:
-                response['spell_corrections'] = spell_explanation
+                
             return jsonify(response)
             
+        except Exception as e:
+            error_msg = f"Error during conversion: {str(e)}"
+            logger.error(f"{error_msg}\n{traceback.format_exc()}")
+            return jsonify({
+                'error': error_msg
+            }), 500
+            
     except Exception as e:
-        error_msg = f"Error during conversion: {str(e)}\n{traceback.format_exc()}"
-        logger.error(error_msg)
-        return jsonify({'error': error_msg}), 500
+        error_msg = f"Server error: {str(e)}"
+        logger.error(f"{error_msg}\n{traceback.format_exc()}")
+        return jsonify({
+            'error': error_msg
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
