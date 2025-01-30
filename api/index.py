@@ -11,6 +11,11 @@ from typing import Dict, Any, Optional
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+# Add current directory to Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 # Log Python path and current directory for debugging
 logger.debug(f"Python path: {sys.path}")
 logger.debug(f"Current directory: {os.getcwd()}")
