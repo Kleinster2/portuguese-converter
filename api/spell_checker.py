@@ -1,60 +1,71 @@
-from openai import OpenAI, OpenAIError
-from cachetools import TTLCache
 import logging
-import traceback
+from openai import OpenAI
+from cachetools import TTLCache
+import time
 
 logger = logging.getLogger(__name__)
 
 class SpellCheckError(Exception):
+    """Base class for spell check errors."""
     pass
 
 class RateLimitError(SpellCheckError):
+    """Raised when rate limit is exceeded."""
     pass
 
 class APIError(SpellCheckError):
+    """Raised when API request fails."""
     pass
 
 class SpellChecker:
     def __init__(self, config):
-        if not config.api_key:
-            raise ValueError("OpenAI API key is required")
-        
-        self.config = config
-        self.client = OpenAI(api_key=config.api_key)
-        self.cache = TTLCache(
-            maxsize=config.cache_size,
-            ttl=config.cache_ttl
-        )
-        self.system_prompt = """
-        You are a Portuguese text corrector. Your task is to:
-        1. Fix spelling mistakes
-        2. Add missing accents
-        3. Correct grammar errors
-        4. Maintain the original meaning
-        5. Return ONLY the corrected text, nothing else
-        
-        Example:
-        Input: "vc naum vai fazer isso hj?"
-        Output: "você não vai fazer isso hoje?"
-        """
-        logger.info("SpellChecker initialized successfully")
+        """Initialize spell checker with configuration."""
+        try:
+            self.config = config
+            self.cache = TTLCache(
+                maxsize=config.cache_size,
+                ttl=config.cache_ttl
+            )
+            logger.info("Initializing OpenAI client...")
+            self.client = OpenAI(
+                api_key=config.api_key,
+                timeout=30.0  # 30 second timeout
+            )
+            self.system_prompt = """
+            You are a Portuguese text corrector. Your task is to:
+            1. Fix spelling mistakes
+            2. Add missing accents
+            3. Correct grammar errors
+            4. Maintain the original meaning
+            5. Return ONLY the corrected text, nothing else
+            
+            Example:
+            Input: "vc naum vai fazer isso hj?"
+            Output: "você não vai fazer isso hoje?"
+            """
+            logger.info("OpenAI client initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize SpellChecker: {str(e)}")
+            raise
 
     def correct_text(self, text):
         """Correct spelling in Portuguese text."""
-        if not self.config.enabled:
-            return text
-
-        # Check cache first
-        if text in self.cache:
-            logger.info("Cache hit for text")
-            return self.cache[text]
-
-        # Check rate limit
-        if not self.config.is_within_rate_limit():
-            raise RateLimitError("Rate limit exceeded")
-
         try:
-            # Make API call
+            if not self.config.enabled:
+                return text
+
+            # Check cache first
+            if text in self.cache:
+                logger.info("Cache hit - returning cached result")
+                return self.cache[text]
+
+            logger.info("Cache miss - calling OpenAI API")
+            
+            # Check rate limit
+            if not self.config.is_within_rate_limit():
+                raise RateLimitError("Rate limit exceeded")
+
+            # Call OpenAI API
             response = self.client.chat.completions.create(
                 model="gpt-4",
                 messages=[
@@ -62,7 +73,7 @@ class SpellChecker:
                     {"role": "user", "content": text}
                 ],
                 temperature=0.0,
-                timeout=30  # 30 second timeout
+                max_tokens=1000
             )
 
             # Extract corrected text
@@ -71,13 +82,10 @@ class SpellChecker:
             # Cache the result
             self.cache[text] = corrected_text
             
+            logger.info("Successfully corrected text")
             return corrected_text
 
-        except OpenAIError as e:
-            logger.error(f"OpenAI API error: {str(e)}")
-            logger.error(traceback.format_exc())
-            raise APIError(f"OpenAI API error: {str(e)}")
         except Exception as e:
-            logger.error(f"Unexpected error in spell checker: {str(e)}")
-            logger.error(traceback.format_exc())
-            raise SpellCheckError(f"Spell check failed: {str(e)}")
+            logger.error(f"Error in correct_text: {str(e)}")
+            logger.error(f"Error type: {type(e)}")
+            raise APIError(f"Failed to correct text: {str(e)}")
