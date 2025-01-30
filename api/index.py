@@ -18,16 +18,16 @@ logger.debug(f"Parent directory: {os.path.dirname(os.getcwd())}")
 
 # Try to import local modules
 try:
-    from portuguese_converter import convert_text
     from spellcheck_config import SpellCheckConfig
+    from portuguese_converter import convert_text
     from spellcheck import init_spellchecker, get_spellchecker
     logger.debug("Successfully imported local modules")
 except ImportError as e:
     logger.error(f"Failed to import local modules: {str(e)}")
     # Try with api prefix
     try:
-        from api.portuguese_converter import convert_text
         from api.spellcheck_config import SpellCheckConfig
+        from api.portuguese_converter import convert_text
         from api.spellcheck import init_spellchecker, get_spellchecker
         logger.debug("Successfully imported modules with api prefix")
     except ImportError as e:
