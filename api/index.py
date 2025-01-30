@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 import os
 import sys
 import logging
@@ -41,7 +41,15 @@ except ImportError as e:
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+
+# Enable CORS for all routes
+CORS(app, resources={
+    r"/api/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Accept"]
+    }
+})
 
 # Initialize spellchecker
 try:
@@ -58,20 +66,26 @@ def create_error_response(error_msg, details=None, status_code=500):
         'details': details or str(error_msg)
     })
     response.status_code = status_code
+    response.headers['Content-Type'] = 'application/json'
+    response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 @app.route('/api/', methods=['GET'])
 def home():
-    return jsonify({'message': 'Portuguese Converter API is running'})
+    response = jsonify({'message': 'Portuguese Converter API is running'})
+    response.headers['Content-Type'] = 'application/json'
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 @app.route('/api/convert', methods=['POST', 'OPTIONS'])
 def convert():
     # Handle preflight request
     if request.method == 'OPTIONS':
-        response = jsonify({'status': 'ok'})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.add('Access-Control-Allow-Methods', 'POST')
+        response = Response()
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Accept'
+        response.headers['Access-Control-Max-Age'] = '86400'  # 24 hours
         return response
 
     try:
@@ -164,7 +178,7 @@ def convert():
                 )
             
             # Build response
-            response = {
+            response_data = {
                 'before': result['before'],
                 'after': result['after'],
                 'explanations': result['explanations'],
@@ -173,10 +187,13 @@ def convert():
             
             # Add spellcheck explanation if available
             if spell_explanation:
-                response['spell_explanation'] = spell_explanation
+                response_data['spell_explanation'] = spell_explanation
             
-            logger.debug(f"Sending response: {response}")
-            return jsonify(response)
+            logger.debug(f"Sending response: {response_data}")
+            response = jsonify(response_data)
+            response.headers['Content-Type'] = 'application/json'
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            return response
             
         except ValueError as e:
             logger.error(f"Value error during conversion: {str(e)}")
@@ -201,6 +218,14 @@ def convert():
             'Internal server error',
             str(e)
         )
+
+@app.after_request
+def after_request(response):
+    """Ensure CORS headers are set on all responses"""
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Accept'
+    return response
 
 # Vercel requires a handler function
 def handler(event, context):
