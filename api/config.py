@@ -1,11 +1,13 @@
 from typing import Optional
 import os
 import logging
+from dotenv import load_dotenv
 from dataclasses import dataclass
 import time
 import threading
 
-# Load environment variables from .env file
+# Load environment variables
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -29,15 +31,21 @@ class SpellCheckConfig:
     def from_env(cls) -> 'SpellCheckConfig':
         """Create config from environment variables."""
         try:
-            api_key = os.environ.get('OPENAI_API_KEY')
+            # Log all non-sensitive environment variables
+            env_vars = {k: '***' if k == 'OPENAI_API_KEY' else v 
+                       for k, v in os.environ.items() 
+                       if k.startswith('SPELL_CHECK_') or k == 'OPENAI_API_KEY'}
+            logger.info(f"Environment variables: {env_vars}")
+
+            api_key = os.getenv('OPENAI_API_KEY')
             if not api_key:
                 logger.error("OPENAI_API_KEY not found in environment variables")
                 raise ValueError("OPENAI_API_KEY environment variable is required")
 
-            enabled = os.environ.get('SPELL_CHECK_ENABLED', 'true').lower() == 'true'
-            rate_limit = int(os.environ.get('SPELL_CHECK_RATE_LIMIT', '60'))
-            cache_size = int(os.environ.get('SPELL_CHECK_CACHE_SIZE', '1000'))
-            cache_ttl = int(os.environ.get('SPELL_CHECK_CACHE_TTL', '3600'))
+            enabled = os.getenv('SPELL_CHECK_ENABLED', 'true').lower() == 'true'
+            rate_limit = int(os.getenv('SPELL_CHECK_RATE_LIMIT', '60'))
+            cache_size = int(os.getenv('SPELL_CHECK_CACHE_SIZE', '1000'))
+            cache_ttl = int(os.getenv('SPELL_CHECK_CACHE_TTL', '3600'))
 
             logger.info("Successfully loaded configuration from environment variables")
             logger.info(f"Spell check enabled: {enabled}")
