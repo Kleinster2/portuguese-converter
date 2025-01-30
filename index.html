@@ -214,8 +214,10 @@
             const resultDiv = document.getElementById('result');
             const explanationsDiv = document.getElementById('explanations');
             const errorDiv = document.getElementById('error');
+            const loadingDiv = document.getElementById('loading');
             
             // Clear previous results and errors
+            resultDiv.style.display = 'none';
             resultDiv.innerHTML = '';
             explanationsDiv.innerHTML = '';
             errorDiv.innerHTML = '';
@@ -225,22 +227,41 @@
                 return;
             }
             
+            // Show loading indicator
+            loadingDiv.style.display = 'block';
+            
             try {
                 const response = await fetch('/api/convert', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'Cache-Control': 'no-cache'
                     },
-                    body: JSON.stringify({ text: inputText })
+                    body: JSON.stringify({ text: inputText }),
+                    credentials: 'same-origin'
                 });
                 
                 let data;
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+                
                 try {
-                    data = await response.json();
+                    data = JSON.parse(responseText);
                 } catch (e) {
                     console.error('Error parsing response:', e);
+                    console.error('Response text:', responseText);
                     displayError('Server returned invalid JSON response');
+                    return;
+                } finally {
+                    // Hide loading indicator
+                    loadingDiv.style.display = 'none';
+                }
+                
+                // Check if response was not OK (HTTP error)
+                if (!response.ok) {
+                    const errorMessage = data.details || data.error || `HTTP error! status: ${response.status}`;
+                    displayError(errorMessage);
                     return;
                 }
                 
@@ -251,15 +272,9 @@
                     return;
                 }
                 
-                // Check if response was not OK (HTTP error)
-                if (!response.ok) {
-                    const errorMessage = data.details || data.error || `HTTP error! status: ${response.status}`;
-                    displayError(errorMessage);
-                    return;
-                }
-                
                 // Display successful results
                 if (data.after) {
+                    resultDiv.style.display = 'block';
                     resultDiv.innerHTML = `<div class="alert alert-success">${escapeHtml(data.after)}</div>`;
                 }
                 
@@ -287,6 +302,9 @@
             } catch (error) {
                 console.error('Error:', error);
                 displayError(error.message || 'An error occurred while processing your request');
+            } finally {
+                // Hide loading indicator
+                loadingDiv.style.display = 'none';
             }
         }
         
