@@ -30,7 +30,10 @@ def convert():
             return jsonify({'error': 'No text provided'}), 400
         converted_text = convert_text(text)
         logging.debug(f"Converted text: {converted_text}")
-        return jsonify({'converted_text': converted_text})
+        return jsonify({
+            'before': text,
+            'after': converted_text
+        })
     except Exception as e:
         logging.error(f"Error during conversion: {str(e)}")
         return jsonify({'error': str(e)}), 500
