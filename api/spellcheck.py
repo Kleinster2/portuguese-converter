@@ -1,8 +1,8 @@
 from openai import OpenAI
 import logging
 from typing import Dict, Optional, Tuple
-from .config import SpellCheckConfig
-from .cache import TTLCache
+from api.config import SpellCheckConfig
+from api.cache import TTLCache
 
 logger = logging.getLogger(__name__)
 
