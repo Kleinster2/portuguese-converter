@@ -60,7 +60,7 @@ def convert():
         text = data.get('text', '')
         if not text:
             logger.warning("No text provided in request")
-            return jsonify({'error': 'No text provided'}), 400
+            return jsonify({'error': 'No text provided', 'details': 'The request must include a "text" field'}), 400
         
         # First, try to spellcheck the text
         spellchecker = get_spellchecker()
@@ -68,9 +68,13 @@ def convert():
             try:
                 text, spell_explanation = spellchecker.check_text(text)
                 logger.debug(f"Spellcheck result: {spell_explanation}")
-            except Exception as e:
-                logger.error(f"Spellcheck error: {str(e)}\n{traceback.format_exc()}")
+            except ValueError as e:
+                logger.error(f"Error during spellcheck: {str(e)}")
                 spell_explanation = f"Error during spellcheck: {str(e)}"
+            except Exception as e:
+                logger.error(f"Unexpected error during spellcheck: {str(e)}")
+                traceback.print_exc()
+                spell_explanation = f"Internal server error during spellcheck: {str(e)}"
         else:
             logger.warning("Spellchecker not initialized")
             spell_explanation = None
@@ -99,18 +103,26 @@ def convert():
                 
             return jsonify(response)
             
-        except Exception as e:
-            error_msg = f"Error during conversion: {str(e)}"
-            logger.error(f"{error_msg}\n{traceback.format_exc()}")
+        except ValueError as e:
+            logger.error(f"Error converting text: {str(e)}")
             return jsonify({
-                'error': error_msg
+                'error': 'Invalid text',
+                'details': str(e)
+            }), 400
+        except Exception as e:
+            logger.error(f"Unexpected error converting text: {str(e)}")
+            traceback.print_exc()
+            return jsonify({
+                'error': 'Internal server error',
+                'details': str(e)
             }), 500
             
     except Exception as e:
-        error_msg = f"Server error: {str(e)}"
-        logger.error(f"{error_msg}\n{traceback.format_exc()}")
+        logger.error(f"Server error: {str(e)}")
+        traceback.print_exc()
         return jsonify({
-            'error': error_msg
+            'error': 'Internal server error',
+            'details': str(e)
         }), 500
 
 if __name__ == '__main__':

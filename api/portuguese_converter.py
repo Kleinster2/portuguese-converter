@@ -6,6 +6,13 @@ import sys
 import traceback
 import io
 import unicodedata
+import json
+import logging
+from typing import List, Tuple, Dict, Optional, Union
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Words ending in 'l' that have special accent patterns
 ACCENTED_L_SUFFIXES = {
@@ -421,7 +428,7 @@ ALL_ENDINGS = [
     "u", "íssemos"
 ]
 
-def is_verb(word):
+def is_verb(word: str) -> bool:
     """
     Check if a word is a verb by:
     1. Checking if it's in the irregular verbs dictionary
@@ -439,7 +446,7 @@ def is_verb(word):
                 return True
     return False
 
-def remove_accents(text):
+def remove_accents(text: str) -> str:
     """
     Remove all accents from text while preserving case.
     Uses Unicode normalization to handle both precomposed and combining characters.
@@ -451,7 +458,7 @@ def remove_accents(text):
     # Re-normalize back to NFC for consistency
     return unicodedata.normalize('NFC', text)
 
-def restore_accents(word, template):
+def restore_accents(word: str, template: str) -> str:
     """
     Restore accents to a word based on a template word.
     For example:
@@ -488,7 +495,7 @@ def restore_accents(word, template):
     # Convert back to NFC (composed form)
     return unicodedata.normalize('NFC', ''.join(result))
 
-def merge_word_pairs(tokens):
+def merge_word_pairs(tokens: List[Tuple[str, str]]) -> Tuple[List[Tuple[str, str]], List[str]]:
     """
     Merge only if two adjacent tokens are both words (no punctuation in between)
     and the exact pair (in lowercase) is in WORD_PAIRS.
@@ -505,7 +512,7 @@ def merge_word_pairs(tokens):
             try:
                 word1, punct1 = tokens[i]
             except (ValueError, TypeError) as e:
-                print(f"DEBUG: Invalid token at index {i}: {tokens[i]}")
+                logger.error(f"Invalid token at index {i}: {tokens[i]}")
                 raise ValueError(f"Invalid token format at index {i}: {tokens[i]}") from e
 
             # If this token is punctuation, just keep it and move on
@@ -519,7 +526,7 @@ def merge_word_pairs(tokens):
                 try:
                     word2, punct2 = tokens[i + 1]
                 except (ValueError, TypeError) as e:
-                    print(f"DEBUG: Invalid next token at index {i+1}: {tokens[i+1]}")
+                    logger.error(f"Invalid next token at index {i+1}: {tokens[i+1]}")
                     raise ValueError(f"Invalid token format at index {i+1}: {tokens[i+1]}") from e
 
                 # If the next token is actually punctuation, we cannot form a pair
@@ -533,7 +540,7 @@ def merge_word_pairs(tokens):
                 try:
                     pair = f"{word1.lower().strip()} {word2.lower().strip()}"
                 except AttributeError as e:
-                    print(f"DEBUG: Error creating pair from '{word1}' and '{word2}'")
+                    logger.error(f"Error creating pair from '{word1}' and '{word2}'")
                     raise ValueError(f"Invalid word format: word1='{word1}', word2='{word2}'") from e
 
                 # Try an exact match against WORD_PAIRS
@@ -559,11 +566,11 @@ def merge_word_pairs(tokens):
         return new_tokens, explanations
         
     except Exception as e:
-        print(f"DEBUG: Error in merge_word_pairs: {str(e)}")
+        logger.error(f"Error in merge_word_pairs: {str(e)}")
         traceback.print_exc()
-        raise  # Re-raise to be caught by transform_text
+        raise ValueError(f"Failed to merge word pairs: {str(e)}") from e
 
-def apply_phonetic_rules(word, next_word=None, next_next_word=None):
+def apply_phonetic_rules(word: str, next_word: Optional[str] = None, next_next_word: Optional[str] = None) -> Tuple[str, str]:
     """
     Apply Portuguese phonetic rules to transform a word.
     First checks a dictionary of pre-defined transformations,
@@ -853,7 +860,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     explanation = " + ".join(explanations) if explanations else "No changes needed"
     return transformed, explanation
 
-def preserve_capital(original, transformed):
+def preserve_capital(original: str, transformed: str) -> str:
     """
     Preserve capitalization from the original word in the transformed word.
     If the original starts with uppercase, transform the new word similarly.
@@ -864,7 +871,7 @@ def preserve_capital(original, transformed):
         return transformed[0].upper() + transformed[1:]
     return transformed
 
-def handle_word_combination(first, second):
+def handle_word_combination(first: str, second: str) -> Tuple[str, str]:
     """
     Handle word combinations between adjacent words according to Portuguese pronunciation rules.
     Rules Rule 1c - Rule 7c:
@@ -974,7 +981,7 @@ def handle_word_combination(first, second):
 
     return first, second
 
-def tokenize_text(text):
+def tokenize_text(text: str) -> List[Tuple[str, str]]:
     """
     Capture words vs. punctuation lumps in a single pass.
     - ([A-Za-zÀ-ÖØ-öø-ÿ0-9]+): words (including accented or numeric characters).
@@ -997,7 +1004,7 @@ def tokenize_text(text):
             # If there's a gap between matches, it's unmatched text
             if start > last_end:
                 unmatched = text[last_end:start]
-                print(f"DEBUG: Found unmatched text: '{unmatched}'")
+                logger.warning(f"Found unmatched text: '{unmatched}'")
             
             word = match.group(1)
             punct = match.group(2)
@@ -1014,15 +1021,15 @@ def tokenize_text(text):
         # Check for any remaining unmatched text at the end
         if last_end < len(text):
             unmatched = text[last_end:]
-            print(f"DEBUG: Found unmatched text at end: '{unmatched}'")
+            logger.warning(f"Found unmatched text at end: '{unmatched}'")
         
         return tokens
     except Exception as e:
-        print(f"DEBUG: Error in tokenize_text: {str(e)}")
+        logger.error(f"Error in tokenize_text: {str(e)}")
         traceback.print_exc()
-        raise  # Re-raise to be caught by transform_text
+        raise ValueError(f"Failed to tokenize text: {str(e)}") from e
 
-def reassemble_tokens_smartly(final_tokens):
+def reassemble_tokens_smartly(final_tokens: List[Tuple[str, str]]) -> str:
     """
     Reassemble (word, punct) tokens into a single string without
     introducing extra spaces before punctuation.
@@ -1052,7 +1059,7 @@ def reassemble_tokens_smartly(final_tokens):
     # Join everything into a single string
     return "".join(output)
 
-def transform_text(text):
+def transform_text(text: str) -> Dict[str, Union[str, List[str]]]:
     """
     1) Tokenize the input.
     2) Merge known word pairs from WORD_PAIRS before single-word phonetic rules.
@@ -1061,7 +1068,7 @@ def transform_text(text):
        for 'r' + vowel, 'a' + vowel, 'sz' + vowel, etc.).
     5) Reassemble into the final text.
     """
-    print("DEBUG: Input text =", repr(text))
+    logger.debug(f"Input text = {repr(text)}")
     try:
         # ---------------------------------------------------------------------
         # 1) Normalize non-breaking spaces (optional)
@@ -1176,7 +1183,7 @@ def transform_text(text):
                         # If we set 'combined', we do a merge => skip the second token
                         # -------------------------------------------------------------------------
                         if combined is not None:
-                            print(f"DEBUG: Found combination: {rule_explanation}")  # Debug line
+                            logger.debug(f"Found combination: {rule_explanation}")  # Debug line
                             combination_explanations.append(rule_explanation)
                             new_tokens.append((combined, punct2))
                             i += 2
@@ -1208,11 +1215,11 @@ def transform_text(text):
         }
 
     except Exception as e:
-        print(f"DEBUG: Error in transform_text: {str(e)}")
+        logger.error(f"Error in transform_text: {str(e)}")
         traceback.print_exc()
-        raise  # Re-raise to be caught by convert_text
+        raise ValueError(f"Failed to transform text: {str(e)}") from e
 
-def convert_text(text):
+def convert_text(text: str) -> Dict[str, Union[str, List[str]]]:
     """Convert Portuguese text to its phonetic representation with explanations."""
     if not text or not isinstance(text, str):
         return {

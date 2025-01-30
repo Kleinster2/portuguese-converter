@@ -145,6 +145,31 @@
         .transformation-section {
             margin-top: 20px;
         }
+        
+        .alert {
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .alert-danger {
+            background-color: #ffebee;
+            border: 1px solid #d32f2f;
+            color: #d32f2f;
+        }
+        .alert-success {
+            background-color: #e8f5e9;
+            border: 1px solid #4CAF50;
+            color: #4CAF50;
+        }
+        .alert-info {
+            background-color: #e1f5fe;
+            border: 1px solid #03A9F4;
+            color: #03A9F4;
+        }
+        .alert-warning {
+            background-color: #fff8e1;
+            border: 1px solid #FFC107;
+            color: #FFC107;
+        }
     </style>
 </head>
 <body>
@@ -160,6 +185,8 @@
         <div id="result" class="result" style="display: none;">
             <div id="output"></div>
         </div>
+        <div id="explanations"></div>
+        <div id="error"></div>
         
     </div>
 
@@ -168,129 +195,69 @@
         let va = window.va || null;
 
         async function convertText() {
-            const input = document.getElementById('input').value;
-            if (!input.trim()) return;
+            const inputText = document.getElementById('input').value;
+            const resultDiv = document.getElementById('result');
+            const explanationsDiv = document.getElementById('explanations');
+            const errorDiv = document.getElementById('error');
             
-            // Track conversion event safely - only if analytics is available
-            try {
-                if (typeof window.va?.track === 'function') {
-                    window.va.track('text_conversion', {
-                        input_length: input.length,
-                        contains_special_chars: /[áéíóúâêîôûãõñç]/i.test(input)
-                    });
-                }
-            } catch (e) {
-                console.log('Analytics error:', e);
-            }
-            
-            const btn = document.getElementById('convertBtn');
-            const loading = document.getElementById('loading');
-            const result = document.getElementById('result');
-            
-            btn.disabled = true;
-            loading.style.display = 'block';
-            result.style.display = 'none';
+            // Clear previous results and errors
+            resultDiv.innerHTML = '';
+            explanationsDiv.innerHTML = '';
+            errorDiv.innerHTML = '';
             
             try {
                 const response = await fetch('/api/convert', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ text: input }),
-                    credentials: 'same-origin'
+                    body: JSON.stringify({ text: inputText })
                 });
                 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ error: `HTTP error! status: ${response.status}` }));
-                    const errorMessage = typeof errorData === 'object' ? 
-                        (errorData.error || errorData.message || JSON.stringify(errorData)) : 
-                        String(errorData);
-                    throw new Error(errorMessage);
-                }
-                
                 const data = await response.json();
-                if (!data || typeof data !== 'object') {
-                    throw new Error('Invalid response format');
-                }
-
-                const output = document.getElementById('output');
-                const result = document.getElementById('result');
                 
-                // Clear previous content
-                output.innerHTML = '';
-                
-                if (data.error || (data.explanations && data.explanations[0] && data.explanations[0].startsWith('Error'))) {
-                    const errorMessage = data.error || data.explanations[0];
-                    output.innerHTML = `<div style="color: #d32f2f; padding: 10px; border: 1px solid #d32f2f; border-radius: 4px; background-color: #ffebee;">
-                        ${errorMessage}
-                    </div>`;
-                    result.style.display = 'block';
+                if (!response.ok) {
+                    // Handle HTTP error responses (4xx, 5xx)
+                    const errorMessage = data.details || data.error || 'Unknown error occurred';
+                    errorDiv.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
                     return;
                 }
                 
-                // Add the converted text
-                const beforeAfter = document.createElement('div');
-                beforeAfter.className = 'transformation-section';
-                beforeAfter.innerHTML = `
-                    <pre>${data.before || input}</pre>
-                    <pre style="color: #4CAF50;">${data.after || ''}</pre>
-                `;
-                output.appendChild(beforeAfter);
-                
-                // Add spell check corrections if available
-                if (data.spell_corrections) {
-                    const spellSection = document.createElement('div');
-                    spellSection.className = 'explanation-section';
-                    spellSection.innerHTML = `
-                        <div class="explanation-title">Spell Check</div>
-                        <div class="explanation-item">${data.spell_corrections}</div>
-                    `;
-                    output.appendChild(spellSection);
+                if (data.error) {
+                    // Handle application-level errors
+                    errorDiv.innerHTML = `<div class="alert alert-danger">${data.error}: ${data.details || ''}</div>`;
+                    return;
                 }
                 
-                // Add explanations if available
+                // Display successful results
+                if (data.after) {
+                    resultDiv.innerHTML = `<div class="alert alert-success">${data.after}</div>`;
+                }
+                
+                // Display explanations if any
                 if (data.explanations && data.explanations.length > 0) {
-                    const explSection = document.createElement('div');
-                    explSection.className = 'explanation-section';
-                    explSection.innerHTML = `
-                        <div class="explanation-title">Transformations</div>
-                        ${data.explanations.map(expl => 
-                            `<div class="explanation-item">${expl}</div>`
-                        ).join('')}
-                    `;
-                    output.appendChild(explSection);
+                    const explanationsList = data.explanations
+                        .map(exp => `<li>${exp}</li>`)
+                        .join('');
+                    explanationsDiv.innerHTML = `
+                        <div class="alert alert-info">
+                            <h5>Transformations Applied:</h5>
+                            <ul>${explanationsList}</ul>
+                        </div>`;
                 }
                 
-                // Add combinations if available
-                if (data.combinations && data.combinations.length > 0) {
-                    const combSection = document.createElement('div');
-                    combSection.className = 'explanation-section';
-                    combSection.innerHTML = `
-                        <div class="explanation-title">Word Combinations</div>
-                        ${data.combinations.map(comb => 
-                            `<div class="explanation-item">${comb}</div>`
-                        ).join('')}
-                    `;
-                    output.appendChild(combSection);
+                // Display spell check results if any
+                if (data.spell_explanation) {
+                    explanationsDiv.innerHTML += `
+                        <div class="alert alert-warning">
+                            <h5>Spell Check:</h5>
+                            <p>${data.spell_explanation}</p>
+                        </div>`;
                 }
                 
-                result.style.display = 'block';
             } catch (error) {
                 console.error('Error:', error);
-                const output = document.getElementById('output');
-                const result = document.getElementById('result');
-                const errorMessage = typeof error === 'object' ? 
-                    (error.message || JSON.stringify(error)) : 
-                    String(error);
-                output.innerHTML = `<div style="color: #d32f2f; padding: 10px; border: 1px solid #d32f2f; border-radius: 4px; background-color: #ffebee;">
-                    Error: ${errorMessage}
-                </div>`;
-                result.style.display = 'block';
-            } finally {
-                btn.disabled = false;
-                loading.style.display = 'none';
+                errorDiv.innerHTML = `<div class="alert alert-danger">Network error: ${error.message}</div>`;
             }
         }
         
