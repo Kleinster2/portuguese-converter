@@ -493,53 +493,75 @@ def merge_word_pairs(tokens):
     Merge only if two adjacent tokens are both words (no punctuation in between)
     and the exact pair (in lowercase) is in WORD_PAIRS.
     """
-    new_tokens = []
-    i = 0
-    explanations = []  # Move explanations list up here
-    while i < len(tokens):
-        word1, punct1 = tokens[i]
+    if not tokens:
+        return [], []
 
-        # If this token is punctuation, just keep it and move on
-        if not word1:
-            new_tokens.append((word1, punct1))
-            i += 1
-            continue
+    try:
+        new_tokens = []
+        i = 0
+        explanations = []  # Move explanations list up here
+        
+        while i < len(tokens):
+            try:
+                word1, punct1 = tokens[i]
+            except (ValueError, TypeError) as e:
+                print(f"DEBUG: Invalid token at index {i}: {tokens[i]}")
+                raise ValueError(f"Invalid token format at index {i}: {tokens[i]}") from e
 
-        # Check if there is a "next" token to form a pair
-        if i + 1 < len(tokens):
-            word2, punct2 = tokens[i + 1]
-
-            # If the next token is actually punctuation, we cannot form a pair
-            if not word2:
-                # Keep the current token (word1)
+            # If this token is punctuation, just keep it and move on
+            if not word1:
                 new_tokens.append((word1, punct1))
                 i += 1
                 continue
 
-            # Build a pair string in lowercase
-            pair = f"{word1.lower().strip()} {word2.lower().strip()}"
+            # Check if there is a "next" token to form a pair
+            if i + 1 < len(tokens):
+                try:
+                    word2, punct2 = tokens[i + 1]
+                except (ValueError, TypeError) as e:
+                    print(f"DEBUG: Invalid next token at index {i+1}: {tokens[i+1]}")
+                    raise ValueError(f"Invalid token format at index {i+1}: {tokens[i+1]}") from e
 
-            # Try an exact match against WORD_PAIRS
-            if pair in WORD_PAIRS:
-                # If matched, create a single merged token
-                replacement = WORD_PAIRS[pair]
-                # Merge punctuation from both tokens
-                merged_punct = punct1 + punct2
-                # Add to new_tokens
-                new_tokens.append((replacement, merged_punct))
-                explanations.append(f"Common pronunciation and usage: {pair} → {replacement}")
-                # Skip the second token in the pair
-                i += 2
+                # If the next token is actually punctuation, we cannot form a pair
+                if not word2:
+                    # Keep the current token (word1)
+                    new_tokens.append((word1, punct1))
+                    i += 1
+                    continue
+
+                # Build a pair string in lowercase
+                try:
+                    pair = f"{word1.lower().strip()} {word2.lower().strip()}"
+                except AttributeError as e:
+                    print(f"DEBUG: Error creating pair from '{word1}' and '{word2}'")
+                    raise ValueError(f"Invalid word format: word1='{word1}', word2='{word2}'") from e
+
+                # Try an exact match against WORD_PAIRS
+                if pair in WORD_PAIRS:
+                    # If matched, create a single merged token
+                    replacement = WORD_PAIRS[pair]
+                    # Merge punctuation from both tokens
+                    merged_punct = punct1 + punct2
+                    # Add to new_tokens
+                    new_tokens.append((replacement, merged_punct))
+                    explanations.append(f"Common pronunciation and usage: {pair} → {replacement}")
+                    # Skip the second token in the pair
+                    i += 2
+                else:
+                    # No match, keep word1 as-is
+                    new_tokens.append((word1, punct1))
+                    i += 1
             else:
-                # No match, keep word1 as-is
+                # Last token, no pair to form
                 new_tokens.append((word1, punct1))
                 i += 1
-        else:
-            # Last token, no pair to form
-            new_tokens.append((word1, punct1))
-            i += 1
 
-    return new_tokens, explanations
+        return new_tokens, explanations
+        
+    except Exception as e:
+        print(f"DEBUG: Error in merge_word_pairs: {str(e)}")
+        traceback.print_exc()
+        raise  # Re-raise to be caught by transform_text
 
 def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     """
