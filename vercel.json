@@ -22,7 +22,6 @@
         {
             "src": "/api/(.*)",
             "dest": "api/index.py",
-            "methods": ["GET", "POST", "OPTIONS"],
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -35,6 +34,12 @@
             "dest": "/$1"
         }
     ],
+    "functions": {
+        "api/index.py": {
+            "memory": 1024,
+            "maxDuration": 10
+        }
+    },
     "env": {
         "PYTHONPATH": ".",
         "FLASK_ENV": "production",

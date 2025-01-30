@@ -70,162 +70,177 @@ def create_error_response(error_msg, details=None, status_code=500):
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
-@app.route('/', methods=['GET'])
-def home():
-    """Root endpoint for health check"""
-    response = jsonify({'status': 'ok', 'message': 'Portuguese Converter API is running'})
-    response.headers['Content-Type'] = 'application/json'
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    return response
-
-@app.route('/api/convert', methods=['POST', 'OPTIONS'])
-def convert():
-    """Convert Portuguese text endpoint"""
-    # Handle preflight request
+@app.route('/', defaults={'path': ''}, methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/<path:path>', methods=['GET', 'POST', 'OPTIONS'])
+def catch_all(path):
+    """Handle all routes"""
+    logger.debug(f"Received request for path: {path}")
+    logger.debug(f"Method: {request.method}")
+    logger.debug(f"Headers: {dict(request.headers)}")
+    
+    # Handle preflight requests
     if request.method == 'OPTIONS':
         response = Response()
         response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Accept'
         response.headers['Access-Control-Max-Age'] = '86400'  # 24 hours
         return response
-
-    try:
-        logger.debug("Received POST request for conversion")
-        logger.debug(f"Request headers: {dict(request.headers)}")
         
-        # Get raw request data for debugging
-        raw_data = request.get_data(as_text=True)
-        logger.debug(f"Raw request data: {raw_data}")
+    # Handle root path
+    if not path:
+        response = jsonify({'status': 'ok', 'message': 'Portuguese Converter API is running'})
+        response.headers['Content-Type'] = 'application/json'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
         
-        # Check content type
-        content_type = request.headers.get('Content-Type', '')
-        logger.debug(f"Content-Type: {content_type}")
-        if not content_type.startswith('application/json'):
-            logger.error(f"Invalid Content-Type: {content_type}")
-            return create_error_response(
-                'Invalid request format',
-                'Content-Type must be application/json',
-                400
-            )
-            
-        if not request.is_json:
-            logger.error("Request data is not JSON")
-            return create_error_response(
-                'Invalid request format',
-                f'Request must be JSON. Raw data: {raw_data}',
-                400
-            )
-            
+    # Handle /api/convert
+    if path == 'api/convert' and request.method == 'POST':
         try:
-            data = request.get_json()
-            logger.debug(f"Parsed JSON data: {data}")
-        except Exception as e:
-            logger.error(f"Failed to parse JSON data: {str(e)}")
-            logger.error(f"Raw data that failed to parse: {raw_data}")
-            return create_error_response(
-                'Invalid request format',
-                f'Invalid JSON data: {str(e)}. Raw data: {raw_data}',
-                400
-            )
+            logger.debug("Received POST request for conversion")
+            logger.debug(f"Request headers: {dict(request.headers)}")
             
-        if data is None:
-            logger.error("JSON data is None")
-            return create_error_response(
-                'Invalid request format',
-                f'Empty JSON data. Raw data: {raw_data}',
-                400
-            )
+            # Get raw request data for debugging
+            raw_data = request.get_data(as_text=True)
+            logger.debug(f"Raw request data: {raw_data}")
             
-        logger.debug(f"Parsed request data: {data}")
-        text = data.get('text', '')
-        if not text:
-            logger.warning("No text provided in request")
-            return create_error_response(
-                'Invalid request',
-                'The request must include a "text" field',
-                400
-            )
-        
-        # First, try to spellcheck the text
-        spellchecker = get_spellchecker()
-        spell_explanation = None
-        if spellchecker:
-            try:
-                text, spell_explanation = spellchecker.check_text(text)
-                logger.debug(f"Spellcheck result: {spell_explanation}")
-            except ValueError as e:
-                logger.error(f"Error during spellcheck: {str(e)}")
-                spell_explanation = f"Error during spellcheck: {str(e)}"
-            except Exception as e:
-                logger.error(f"Unexpected error during spellcheck: {str(e)}")
-                logger.error(traceback.format_exc())
-                spell_explanation = f"Internal server error during spellcheck: {str(e)}"
-        else:
-            logger.warning("Spellchecker not initialized")
-        
-        # Then convert the text
-        try:
-            result = convert_text(text)
-            logger.debug(f"Converted text result: {result}")
-            
-            if not isinstance(result, dict):
-                logger.error(f"Invalid result type: {type(result)}")
+            # Check content type
+            content_type = request.headers.get('Content-Type', '')
+            logger.debug(f"Content-Type: {content_type}")
+            if not content_type.startswith('application/json'):
+                logger.error(f"Invalid Content-Type: {content_type}")
                 return create_error_response(
-                    'Conversion error',
-                    f'Invalid conversion result format: {result}',
-                    500
+                    'Invalid request format',
+                    'Content-Type must be application/json',
+                    400
                 )
-            
-            # Check for error in result
-            if 'error' in result:
-                logger.error(f"Error from convert_text: {result['error']}")
+                
+            if not request.is_json:
+                logger.error("Request data is not JSON")
                 return create_error_response(
-                    result['error'],
-                    result.get('details', 'Unknown error'),
+                    'Invalid request format',
+                    f'Request must be JSON. Raw data: {raw_data}',
+                    400
+                )
+                
+            try:
+                data = request.get_json()
+                logger.debug(f"Parsed JSON data: {data}")
+            except Exception as e:
+                logger.error(f"Failed to parse JSON data: {str(e)}")
+                logger.error(f"Raw data that failed to parse: {raw_data}")
+                return create_error_response(
+                    'Invalid request format',
+                    f'Invalid JSON data: {str(e)}. Raw data: {raw_data}',
+                    400
+                )
+                
+            if data is None:
+                logger.error("JSON data is None")
+                return create_error_response(
+                    'Invalid request format',
+                    f'Empty JSON data. Raw data: {raw_data}',
+                    400
+                )
+                
+            logger.debug(f"Parsed request data: {data}")
+            text = data.get('text', '')
+            if not text:
+                logger.warning("No text provided in request")
+                return create_error_response(
+                    'Invalid request',
+                    'The request must include a "text" field',
                     400
                 )
             
-            # Validate required fields
-            required_fields = {'before', 'after', 'explanations', 'combinations'}
-            missing_fields = required_fields - set(result.keys())
-            if missing_fields:
-                logger.error(f"Missing fields in result: {missing_fields}")
+            # First, try to spellcheck the text
+            spellchecker = get_spellchecker()
+            spell_explanation = None
+            if spellchecker:
+                try:
+                    text, spell_explanation = spellchecker.check_text(text)
+                    logger.debug(f"Spellcheck result: {spell_explanation}")
+                except ValueError as e:
+                    logger.error(f"Error during spellcheck: {str(e)}")
+                    spell_explanation = f"Error during spellcheck: {str(e)}"
+                except Exception as e:
+                    logger.error(f"Unexpected error during spellcheck: {str(e)}")
+                    logger.error(traceback.format_exc())
+                    spell_explanation = f"Internal server error during spellcheck: {str(e)}"
+            else:
+                logger.warning("Spellchecker not initialized")
+            
+            # Then convert the text
+            try:
+                result = convert_text(text)
+                logger.debug(f"Converted text result: {result}")
+                
+                if not isinstance(result, dict):
+                    logger.error(f"Invalid result type: {type(result)}")
+                    return create_error_response(
+                        'Conversion error',
+                        f'Invalid conversion result format: {result}',
+                        500
+                    )
+                
+                # Check for error in result
+                if 'error' in result:
+                    logger.error(f"Error from convert_text: {result['error']}")
+                    return create_error_response(
+                        result['error'],
+                        result.get('details', 'Unknown error'),
+                        400
+                    )
+                
+                # Validate required fields
+                required_fields = {'before', 'after', 'explanations', 'combinations'}
+                missing_fields = required_fields - set(result.keys())
+                if missing_fields:
+                    logger.error(f"Missing fields in result: {missing_fields}")
+                    return create_error_response(
+                        'Conversion error',
+                        f'Missing required fields: {", ".join(missing_fields)}. Result: {result}',
+                        500
+                    )
+                
+                # Build response
+                response_data = {
+                    'before': result['before'],
+                    'after': result['after'],
+                    'explanations': result['explanations'],
+                    'combinations': result['combinations']
+                }
+                
+                # Add spellcheck explanation if available
+                if spell_explanation:
+                    response_data['spell_explanation'] = spell_explanation
+                
+                logger.debug(f"Sending response: {response_data}")
+                response = jsonify(response_data)
+                response.headers['Content-Type'] = 'application/json'
+                response.headers['Access-Control-Allow-Origin'] = '*'
+                return response
+                
+            except ValueError as e:
+                logger.error(f"Value error during conversion: {str(e)}")
+                logger.error(traceback.format_exc())
                 return create_error_response(
                     'Conversion error',
-                    f'Missing required fields: {", ".join(missing_fields)}. Result: {result}',
+                    str(e),
+                    400
+                )
+                
+            except Exception as e:
+                logger.error(f"Unexpected error during conversion: {str(e)}")
+                logger.error(traceback.format_exc())
+                return create_error_response(
+                    'Internal server error',
+                    str(e),
                     500
                 )
-            
-            # Build response
-            response_data = {
-                'before': result['before'],
-                'after': result['after'],
-                'explanations': result['explanations'],
-                'combinations': result['combinations']
-            }
-            
-            # Add spellcheck explanation if available
-            if spell_explanation:
-                response_data['spell_explanation'] = spell_explanation
-            
-            logger.debug(f"Sending response: {response_data}")
-            response = jsonify(response_data)
-            response.headers['Content-Type'] = 'application/json'
-            response.headers['Access-Control-Allow-Origin'] = '*'
-            return response
-            
-        except ValueError as e:
-            logger.error(f"Value error during conversion: {str(e)}")
-            logger.error(traceback.format_exc())
-            return create_error_response(
-                'Conversion error',
-                str(e),
-                400
-            )
-            
+                
         except Exception as e:
-            logger.error(f"Unexpected error during conversion: {str(e)}")
+            logger.error(f"Server error: {str(e)}")
             logger.error(traceback.format_exc())
             return create_error_response(
                 'Internal server error',
@@ -233,14 +248,8 @@ def convert():
                 500
             )
             
-    except Exception as e:
-        logger.error(f"Server error: {str(e)}")
-        logger.error(traceback.format_exc())
-        return create_error_response(
-            'Internal server error',
-            str(e),
-            500
-        )
+    # Handle unknown paths
+    return create_error_response('Not found', f'Path not found: {path}', 404)
 
 @app.after_request
 def after_request(response):
