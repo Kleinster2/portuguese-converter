@@ -307,7 +307,7 @@ WORD_PAIRS = {
     'onde voce': 'ond\'cê',
     'onde voces': 'ond\'cêys',
     'para de': 'para di',
-    'vai voce': 'cê vai',   
+    'vai voce': 'cê vai',
     'vai você': 'cê vai',
     'vao voces': 'cêys vãu',
     'vão vocês': 'cêys vãu',
@@ -1159,19 +1159,37 @@ def transform_text(text):
         }
 
     except Exception as e:
-        print(f"Error in transform_text: {str(e)}")
+        traceback.print_exc()  # Print full traceback for debugging
         return {
             'original': text,
             'before': text,
             'after': text,
-            'explanations': [f"Error: {str(e)}"],
+            'explanations': [f"Error during text transformation: {str(e)}"],
             'combinations': []
         }
 
 def convert_text(text):
     """Convert Portuguese text to its phonetic representation with explanations."""
-    result = transform_text(text)
-    return result
+    if not text or not isinstance(text, str):
+        return {
+            'original': text if text else '',
+            'before': text if text else '',
+            'after': text if text else '',
+            'explanations': ["Error: Invalid input text"],
+            'combinations': []
+        }
+    
+    try:
+        return transform_text(text)
+    except Exception as e:
+        traceback.print_exc()  # Print full traceback for debugging
+        return {
+            'original': text,
+            'before': text,
+            'after': text,
+            'explanations': [f"Error during text conversion: {str(e)}"],
+            'combinations': []
+        }
 
 def main():
     # Set UTF-8 encoding for stdout
