@@ -7,12 +7,8 @@
             "config": {
                 "maxLambdaSize": "15mb",
                 "runtime": "python3.9",
-                "includeFiles": [
-                    "api/**",
-                    ".env",
-                    "requirements.txt"
-                ],
-                "installCommand": "pip install -r requirements.txt"
+                "includeFiles": ["api/**"],
+                "installCommand": "pip install -r api/requirements.txt"
             }
         },
         {
@@ -24,11 +20,7 @@
         {
             "src": "/api/(.*)",
             "dest": "/api/index.py",
-            "methods": [
-                "GET",
-                "POST",
-                "OPTIONS"
-            ],
+            "methods": ["GET", "POST", "OPTIONS"],
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
