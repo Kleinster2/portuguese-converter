@@ -1222,29 +1222,66 @@ def transform_text(text: str) -> Dict[str, Union[str, List[str]]]:
 def convert_text(text: str) -> Dict[str, Union[str, List[str]]]:
     """Convert Portuguese text to its phonetic representation with explanations."""
     if not text or not isinstance(text, str):
+        logger.warning(f"Invalid input text: {repr(text)}")
         return {
+            'error': 'Invalid input',
+            'details': 'Text must be a non-empty string',
             'before': text if text else '',
             'after': text if text else '',
-            'explanations': ["Error: Invalid input text"],
+            'explanations': [],
             'combinations': []
         }
     
     try:
         result = transform_text(text)
         if not isinstance(result, dict):
+            logger.error(f"Invalid transformation result type: {type(result)}")
             return {
+                'error': 'Invalid transformation result',
+                'details': f'Expected dict, got {type(result).__name__}',
                 'before': text,
                 'after': text,
-                'explanations': ["Error: Invalid transformation result"],
+                'explanations': [],
                 'combinations': []
             }
+        
+        # Validate result structure
+        required_keys = {'before', 'after', 'explanations', 'combinations'}
+        if not all(key in result for key in required_keys):
+            missing = required_keys - set(result.keys())
+            logger.error(f"Missing required keys in result: {missing}")
+            return {
+                'error': 'Invalid transformation result',
+                'details': f'Missing required keys: {", ".join(missing)}',
+                'before': text,
+                'after': text,
+                'explanations': [],
+                'combinations': []
+            }
+        
         return result
-    except Exception as e:
-        traceback.print_exc()  # Print full traceback for debugging
+        
+    except ValueError as e:
+        # Handle expected errors with details
+        logger.error(f"Value error in convert_text: {str(e)}")
         return {
+            'error': 'Conversion error',
+            'details': str(e),
             'before': text,
             'after': text,
-            'explanations': [f"Error during text conversion: {str(e)}"],
+            'explanations': [],
+            'combinations': []
+        }
+    except Exception as e:
+        # Handle unexpected errors
+        logger.error(f"Unexpected error in convert_text: {str(e)}")
+        traceback.print_exc()
+        return {
+            'error': 'Internal server error',
+            'details': str(e),
+            'before': text,
+            'after': text,
+            'explanations': [],
             'combinations': []
         }
 
