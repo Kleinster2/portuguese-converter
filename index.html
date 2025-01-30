@@ -198,73 +198,80 @@
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ text: input })
+                    body: JSON.stringify({ text: input }),
+                    credentials: 'same-origin'
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error occurred' }));
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
                 }
                 
                 const data = await response.json();
-                result.style.display = 'block';
+                const output = document.getElementById('output');
+                const result = document.getElementById('result');
                 
-                if (data.error || data.details) {
-                    const errorMessage = data.details || data.error || 'Unknown error occurred';
-                    document.getElementById('output').textContent = 'Error: ' + errorMessage;
-                    console.error('API Error:', errorMessage);
-                } else if (data && typeof data.before === 'string' && typeof data.after === 'string') {
-                    // Split the text into lines and format each line
-                    const beforeLines = data.before.split('\n');
-                    const afterLines = data.after.split('\n');
-                    
-                    // Create the output HTML
-                    let outputHtml = '';
-                    
-                    // Add spell check section if available
-                    if (data.spell_corrections) {
-                        outputHtml += '<div class="transformation-section">';
-                        outputHtml += '<div class="explanation-title">Spell Check:</div>';
-                        outputHtml += `<div class="explanation-item">${data.spell_corrections}</div>`;
-                        outputHtml += '</div>';
-                    }
-                    
-                    // Add word transformations section
-                    outputHtml += '<div class="transformation-section">';
-                    outputHtml += '<div class="explanation-title">Word Transformations:</div>';
-                    outputHtml += `<pre>${data.before}</pre>`;
-                    
-                    // Add explanations directly under transformations
-                    if (data.explanations && data.explanations.length > 0) {
-                        data.explanations.forEach(explanation => {
-                            outputHtml += `<div class="explanation-item">${explanation}</div>`;
-                        });
-                    }
-                    outputHtml += '</div>';
-                    
-                    // Add combinations section
-                    if (data.combinations && data.combinations.length > 0) {
-                        outputHtml += '<div class="transformation-section">';
-                        outputHtml += '<div class="explanation-title">Word Combinations:</div>';
-                        outputHtml += `<pre>${data.after}</pre>`;
-                        data.combinations.forEach(combination => {
-                            outputHtml += `<div class="explanation-item">${combination}</div>`;
-                        });
-                        outputHtml += '</div>';
-                    }
-                    
-                    document.getElementById('output').innerHTML = outputHtml;
-                } else {
-                    const errorMessage = 'Invalid response format from server';
-                    document.getElementById('output').textContent = 'Error: ' + errorMessage;
-                    console.error('Invalid API response format:', JSON.stringify(data, null, 2));
+                // Clear previous content
+                output.innerHTML = '';
+                
+                // Add the converted text
+                const beforeAfter = document.createElement('div');
+                beforeAfter.className = 'transformation-section';
+                beforeAfter.innerHTML = `
+                    <pre>${data.before || input}</pre>
+                    <pre style="color: #4CAF50;">${data.after || ''}</pre>
+                `;
+                output.appendChild(beforeAfter);
+                
+                // Add spell check corrections if available
+                if (data.spell_corrections) {
+                    const spellSection = document.createElement('div');
+                    spellSection.className = 'explanation-section';
+                    spellSection.innerHTML = `
+                        <div class="explanation-title">Spell Check</div>
+                        <div class="explanation-item">${data.spell_corrections}</div>
+                    `;
+                    output.appendChild(spellSection);
                 }
-            } catch (error) {
+                
+                // Add explanations if available
+                if (data.explanations && data.explanations.length > 0) {
+                    const explSection = document.createElement('div');
+                    explSection.className = 'explanation-section';
+                    explSection.innerHTML = `
+                        <div class="explanation-title">Transformations</div>
+                        ${data.explanations.map(expl => 
+                            `<div class="explanation-item">${expl}</div>`
+                        ).join('')}
+                    `;
+                    output.appendChild(explSection);
+                }
+                
+                // Add combinations if available
+                if (data.combinations && data.combinations.length > 0) {
+                    const combSection = document.createElement('div');
+                    combSection.className = 'explanation-section';
+                    combSection.innerHTML = `
+                        <div class="explanation-title">Word Combinations</div>
+                        ${data.combinations.map(comb => 
+                            `<div class="explanation-item">${comb}</div>`
+                        ).join('')}
+                    `;
+                    output.appendChild(combSection);
+                }
+                
                 result.style.display = 'block';
-                document.getElementById('output').textContent = 'Error: ' + (error.message || 'Failed to convert text');
-                console.error('Conversion error:', error);
+            } catch (error) {
+                console.error('Error:', error);
+                const output = document.getElementById('output');
+                const result = document.getElementById('result');
+                output.innerHTML = `<div style="color: #d32f2f; padding: 10px; border: 1px solid #d32f2f; border-radius: 4px; background-color: #ffebee;">
+                    Error: ${error.message}
+                </div>`;
+                result.style.display = 'block';
             } finally {
-                loading.style.display = 'none';
                 btn.disabled = false;
+                loading.style.display = 'none';
             }
         }
         
