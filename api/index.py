@@ -23,30 +23,22 @@ logger.debug(f"Parent directory: {os.path.dirname(os.getcwd())}")
 
 # Try to import local modules
 try:
-    from spellcheck_config import SpellCheckConfig
-    from portuguese_converter import convert_text
-    from spellcheck import init_spellchecker, get_spellchecker
+    from api.spellcheck_config import SpellCheckConfig
+    from api.portuguese_converter import convert_text
+    from api.spellcheck import init_spellchecker, get_spellchecker
     logger.debug("Successfully imported local modules")
 except ImportError as e:
-    logger.error(f"Failed to import local modules: {str(e)}")
-    # Try with api prefix
-    try:
-        from api.spellcheck_config import SpellCheckConfig
-        from api.portuguese_converter import convert_text
-        from api.spellcheck import init_spellchecker, get_spellchecker
-        logger.debug("Successfully imported modules with api prefix")
-    except ImportError as e:
-        logger.error(f"Failed to import modules with api prefix: {str(e)}")
-        # Create a minimal SpellCheckConfig class if import fails
-        from dataclasses import dataclass
-        @dataclass
-        class SpellCheckConfig:
-            enabled: bool = False
-            api_key: Optional[str] = None
-            
-            @classmethod
-            def from_env(cls) -> 'SpellCheckConfig':
-                return cls(enabled=False, api_key=None)
+    logger.error(f"Failed to import modules: {str(e)}")
+    # Create a minimal SpellCheckConfig class if import fails
+    from dataclasses import dataclass
+    @dataclass
+    class SpellCheckConfig:
+        enabled: bool = False
+        api_key: Optional[str] = None
+        
+        @classmethod
+        def from_env(cls) -> 'SpellCheckConfig':
+            return cls(enabled=False, api_key=None)
 
 # Initialize Flask app
 app = Flask(__name__)
