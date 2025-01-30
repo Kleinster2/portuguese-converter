@@ -960,18 +960,45 @@ def tokenize_text(text):
     Returns a list of (word, punct) tuples, e.g.:
         "Olá, mundo!" => [("Olá", ""), ("", ","), ("mundo", ""), ("", "!")]
     """
-    pattern = r'([A-Za-zÀ-ÖØ-öø-ÿ0-9]+)|([.,!?;:]+)'
-    tokens = []
-    
-    for match in re.finditer(pattern, text):
-        word = match.group(1)
-        punct = match.group(2)
-        if word:
-            tokens.append((word, ''))     # (word, "")
-        elif punct:
-            tokens.append(('', punct))    # ("", punctuation)
-    
-    return tokens
+    if not text:
+        return []
+
+    try:
+        # Handle spaces and punctuation
+        pattern = r'([A-Za-zÀ-ÖØ-öø-ÿ0-9]+)|([.,!?;:]+)|(\s+)'
+        tokens = []
+        last_end = 0
+        
+        for match in re.finditer(pattern, text):
+            start = match.start()
+            
+            # If there's a gap between matches, it's unmatched text
+            if start > last_end:
+                unmatched = text[last_end:start]
+                print(f"DEBUG: Found unmatched text: '{unmatched}'")
+            
+            word = match.group(1)
+            punct = match.group(2)
+            space = match.group(3)
+            
+            if word:
+                tokens.append((word, ''))     # (word, "")
+            elif punct:
+                tokens.append(('', punct))    # ("", punctuation)
+            # Ignore spaces - they'll be handled by reassemble_tokens_smartly
+            
+            last_end = match.end()
+        
+        # Check for any remaining unmatched text at the end
+        if last_end < len(text):
+            unmatched = text[last_end:]
+            print(f"DEBUG: Found unmatched text at end: '{unmatched}'")
+        
+        return tokens
+    except Exception as e:
+        print(f"DEBUG: Error in tokenize_text: {str(e)}")
+        traceback.print_exc()
+        raise  # Re-raise to be caught by transform_text
 
 def reassemble_tokens_smartly(final_tokens):
     """
