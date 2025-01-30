@@ -4,6 +4,7 @@ import sys
 import logging
 import traceback
 from flask_cors import CORS
+import json
 
 # Add the api directory to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -180,31 +181,85 @@ def convert():
         )
 
 # Vercel requires a handler function
-def handler(request, context):
+def handler(event, context):
     """Handle requests in Vercel serverless environment"""
-    with app.test_request_context(
-        path=request.get('path', '/'),
-        method=request.get('method', 'GET'),
-        headers=request.get('headers', {}),
-        data=request.get('body', ''),
-        environ_base={'REMOTE_ADDR': request.get('ip', '')}
-    ):
-        try:
-            response = app.full_dispatch_request()
-            return {
-                'statusCode': response.status_code,
-                'headers': dict(response.headers),
-                'body': response.get_data(as_text=True)
+    # Parse request data from event
+    try:
+        path = event.get('path', '/')
+        if not path.startswith('/'):
+            path = '/' + path
+            
+        # Get request method
+        method = event.get('method', 'GET')
+        if method == 'OPTIONS':
+            # Handle CORS preflight
+            headers = {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Accept',
+                'Access-Control-Max-Age': '86400',  # 24 hours
             }
-        except Exception as e:
-            logger.error(f"Error in handler: {str(e)}")
-            traceback.print_exc()
-            error_response = create_error_response('Internal server error', str(e))
             return {
-                'statusCode': error_response.status_code,
-                'headers': dict(error_response.headers),
-                'body': error_response.get_data(as_text=True)
+                'statusCode': 204,
+                'headers': headers,
+                'body': ''
             }
+            
+        # Get headers and body
+        headers = event.get('headers', {})
+        body = event.get('body', '')
+        
+        # Create test request context
+        with app.test_request_context(
+            path=path,
+            method=method,
+            headers=headers,
+            data=body,
+            environ_base={'REMOTE_ADDR': event.get('ip', '')}
+        ):
+            try:
+                # Dispatch request to Flask app
+                response = app.full_dispatch_request()
+                
+                # Convert Flask response to Vercel format
+                return {
+                    'statusCode': response.status_code,
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                        **dict(response.headers)
+                    },
+                    'body': response.get_data(as_text=True)
+                }
+                
+            except Exception as e:
+                logger.error(f"Error in request dispatch: {str(e)}")
+                traceback.print_exc()
+                error_response = create_error_response('Internal server error', str(e))
+                return {
+                    'statusCode': error_response.status_code,
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                        **dict(error_response.headers)
+                    },
+                    'body': error_response.get_data(as_text=True)
+                }
+                
+    except Exception as e:
+        logger.error(f"Error in handler: {str(e)}")
+        traceback.print_exc()
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({
+                'error': 'Internal server error',
+                'details': str(e)
+            })
+        }
 
 if __name__ == '__main__':
     app.run(debug=True)
