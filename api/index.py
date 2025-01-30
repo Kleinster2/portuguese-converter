@@ -49,21 +49,31 @@ def convert():
         logger.debug("Received POST request for conversion")
         if not request.is_json:
             logger.error("Request data is not JSON")
-            return jsonify({'error': 'Request must be JSON'}), 400
+            return jsonify({
+                'error': 'Invalid request format',
+                'details': 'Request must be JSON'
+            }), 400
             
         data = request.get_json()
         if data is None:
             logger.error("Failed to parse JSON data")
-            return jsonify({'error': 'Invalid JSON data'}), 400
+            return jsonify({
+                'error': 'Invalid request format',
+                'details': 'Invalid JSON data'
+            }), 400
             
         logger.debug(f"Request data: {data}")
         text = data.get('text', '')
         if not text:
             logger.warning("No text provided in request")
-            return jsonify({'error': 'No text provided', 'details': 'The request must include a "text" field'}), 400
+            return jsonify({
+                'error': 'Invalid request',
+                'details': 'The request must include a "text" field'
+            }), 400
         
         # First, try to spellcheck the text
         spellchecker = get_spellchecker()
+        spell_explanation = None
         if spellchecker:
             try:
                 text, spell_explanation = spellchecker.check_text(text)
@@ -77,7 +87,6 @@ def convert():
                 spell_explanation = f"Internal server error during spellcheck: {str(e)}"
         else:
             logger.warning("Spellchecker not initialized")
-            spell_explanation = None
         
         # Then convert the text
         try:
@@ -87,30 +96,49 @@ def convert():
             if not isinstance(result, dict):
                 logger.error(f"Invalid result type: {type(result)}")
                 return jsonify({
-                    'error': 'Invalid conversion result format'
+                    'error': 'Conversion error',
+                    'details': 'Invalid conversion result format'
                 }), 500
             
+            # Check for error in result
+            if 'error' in result:
+                logger.error(f"Error from convert_text: {result['error']}")
+                return jsonify(result), 400
+            
+            # Validate required fields
+            required_fields = {'before', 'after', 'explanations', 'combinations'}
+            missing_fields = required_fields - set(result.keys())
+            if missing_fields:
+                logger.error(f"Missing fields in result: {missing_fields}")
+                return jsonify({
+                    'error': 'Conversion error',
+                    'details': f'Missing required fields: {", ".join(missing_fields)}'
+                }), 500
+            
+            # Build response
             response = {
-                'before': result.get('before', text),
-                'after': result.get('after', text),
-                'explanations': result.get('explanations', []),
-                'combinations': result.get('combinations', [])
+                'before': result['before'],
+                'after': result['after'],
+                'explanations': result['explanations'],
+                'combinations': result['combinations']
             }
             
             # Add spellcheck explanation if available
             if spell_explanation:
-                response['spell_corrections'] = spell_explanation
-                
+                response['spell_explanation'] = spell_explanation
+            
+            logger.debug(f"Sending response: {response}")
             return jsonify(response)
             
         except ValueError as e:
-            logger.error(f"Error converting text: {str(e)}")
+            logger.error(f"Value error during conversion: {str(e)}")
             return jsonify({
-                'error': 'Invalid text',
+                'error': 'Conversion error',
                 'details': str(e)
             }), 400
+            
         except Exception as e:
-            logger.error(f"Unexpected error converting text: {str(e)}")
+            logger.error(f"Unexpected error during conversion: {str(e)}")
             traceback.print_exc()
             return jsonify({
                 'error': 'Internal server error',
