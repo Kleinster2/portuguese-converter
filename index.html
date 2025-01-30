@@ -233,7 +233,7 @@
             try {
                 const apiUrl = window.location.hostname === 'localhost' 
                     ? 'http://localhost:3000/api/convert'
-                    : '/api/convert';
+                    : 'https://portuguese-converter.vercel.app/api/convert';
                     
                 console.log('Making request to:', apiUrl);
                 console.log('Request payload:', { text: inputText });
@@ -242,8 +242,11 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'Origin': window.location.origin
                     },
+                    mode: 'cors',
+                    credentials: 'omit',
                     body: JSON.stringify({ text: inputText })
                 });
                 
@@ -263,7 +266,7 @@
                 } catch (e) {
                     console.error('Error parsing response:', e);
                     console.error('Response text:', responseText);
-                    displayError(`Server returned invalid JSON response: ${responseText}`);
+                    displayError(`Server error. Please try again later. Details: ${responseText}`);
                     return;
                 } finally {
                     // Hide loading indicator
@@ -272,7 +275,7 @@
                 
                 // Check if response was not OK (HTTP error)
                 if (!response.ok) {
-                    const errorMessage = data?.details || data?.error || `HTTP error! status: ${response.status}`;
+                    const errorMessage = data?.details || data?.error || `Server error (${response.status}). Please try again later.`;
                     console.error('HTTP error:', errorMessage);
                     displayError(errorMessage);
                     return;
@@ -299,23 +302,22 @@
                         .join('');
                     explanationsDiv.innerHTML = `
                         <div class="alert alert-info">
-                            <h5>Transformations Applied:</h5>
+                            <h3>Explanations:</h3>
                             <ul>${explanationsList}</ul>
                         </div>`;
                 }
                 
-                // Display spell check results if any
-                if (data.spell_explanation) {
-                    explanationsDiv.innerHTML += `
-                        <div class="alert alert-warning">
-                            <h5>Spell Check:</h5>
-                            <p>${escapeHtml(data.spell_explanation)}</p>
-                        </div>`;
+                // Track successful conversion with Vercel Analytics
+                if (va) {
+                    va.track('text_converted', {
+                        textLength: inputText.length,
+                        hasExplanations: data.explanations?.length > 0
+                    });
                 }
                 
             } catch (error) {
-                console.error('Network error:', error);
-                displayError(`Network error: ${error.message}`);
+                console.error('Error:', error);
+                displayError(`Network error. Please check your connection and try again. Details: ${error.message}`);
             } finally {
                 // Hide loading indicator
                 loadingDiv.style.display = 'none';
