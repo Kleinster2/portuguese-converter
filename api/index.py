@@ -31,6 +31,15 @@ try:
 except Exception as e:
     logger.error(f"Failed to initialize spellchecker: {str(e)}\n{traceback.format_exc()}")
 
+def create_error_response(error_msg, details=None, status_code=500):
+    """Create a standardized error response"""
+    response = jsonify({
+        'error': error_msg,
+        'details': details or str(error_msg)
+    })
+    response.status_code = status_code
+    return response
+
 @app.route('/api/', methods=['GET'])
 def home():
     return jsonify({'message': 'Portuguese Converter API is running'})
@@ -49,27 +58,39 @@ def convert():
         logger.debug("Received POST request for conversion")
         if not request.is_json:
             logger.error("Request data is not JSON")
-            return jsonify({
-                'error': 'Invalid request format',
-                'details': 'Request must be JSON'
-            }), 400
+            return create_error_response(
+                'Invalid request format',
+                'Request must be JSON',
+                400
+            )
             
-        data = request.get_json()
+        try:
+            data = request.get_json()
+        except Exception as e:
+            logger.error(f"Failed to parse JSON data: {str(e)}")
+            return create_error_response(
+                'Invalid request format',
+                'Invalid JSON data',
+                400
+            )
+            
         if data is None:
-            logger.error("Failed to parse JSON data")
-            return jsonify({
-                'error': 'Invalid request format',
-                'details': 'Invalid JSON data'
-            }), 400
+            logger.error("JSON data is None")
+            return create_error_response(
+                'Invalid request format',
+                'Empty JSON data',
+                400
+            )
             
         logger.debug(f"Request data: {data}")
         text = data.get('text', '')
         if not text:
             logger.warning("No text provided in request")
-            return jsonify({
-                'error': 'Invalid request',
-                'details': 'The request must include a "text" field'
-            }), 400
+            return create_error_response(
+                'Invalid request',
+                'The request must include a "text" field',
+                400
+            )
         
         # First, try to spellcheck the text
         spellchecker = get_spellchecker()
@@ -95,25 +116,29 @@ def convert():
             
             if not isinstance(result, dict):
                 logger.error(f"Invalid result type: {type(result)}")
-                return jsonify({
-                    'error': 'Conversion error',
-                    'details': 'Invalid conversion result format'
-                }), 500
+                return create_error_response(
+                    'Conversion error',
+                    'Invalid conversion result format'
+                )
             
             # Check for error in result
             if 'error' in result:
                 logger.error(f"Error from convert_text: {result['error']}")
-                return jsonify(result), 400
+                return create_error_response(
+                    result['error'],
+                    result.get('details', 'Unknown error'),
+                    400
+                )
             
             # Validate required fields
             required_fields = {'before', 'after', 'explanations', 'combinations'}
             missing_fields = required_fields - set(result.keys())
             if missing_fields:
                 logger.error(f"Missing fields in result: {missing_fields}")
-                return jsonify({
-                    'error': 'Conversion error',
-                    'details': f'Missing required fields: {", ".join(missing_fields)}'
-                }), 500
+                return create_error_response(
+                    'Conversion error',
+                    f'Missing required fields: {", ".join(missing_fields)}'
+                )
             
             # Build response
             response = {
@@ -132,26 +157,54 @@ def convert():
             
         except ValueError as e:
             logger.error(f"Value error during conversion: {str(e)}")
-            return jsonify({
-                'error': 'Conversion error',
-                'details': str(e)
-            }), 400
+            return create_error_response(
+                'Conversion error',
+                str(e),
+                400
+            )
             
         except Exception as e:
             logger.error(f"Unexpected error during conversion: {str(e)}")
             traceback.print_exc()
-            return jsonify({
-                'error': 'Internal server error',
-                'details': str(e)
-            }), 500
+            return create_error_response(
+                'Internal server error',
+                str(e)
+            )
             
     except Exception as e:
         logger.error(f"Server error: {str(e)}")
         traceback.print_exc()
-        return jsonify({
-            'error': 'Internal server error',
-            'details': str(e)
-        }), 500
+        return create_error_response(
+            'Internal server error',
+            str(e)
+        )
+
+# Vercel requires a handler function
+def handler(request, context):
+    """Handle requests in Vercel serverless environment"""
+    with app.test_request_context(
+        path=request.get('path', '/'),
+        method=request.get('method', 'GET'),
+        headers=request.get('headers', {}),
+        data=request.get('body', ''),
+        environ_base={'REMOTE_ADDR': request.get('ip', '')}
+    ):
+        try:
+            response = app.full_dispatch_request()
+            return {
+                'statusCode': response.status_code,
+                'headers': dict(response.headers),
+                'body': response.get_data(as_text=True)
+            }
+        except Exception as e:
+            logger.error(f"Error in handler: {str(e)}")
+            traceback.print_exc()
+            error_response = create_error_response('Internal server error', str(e))
+            return {
+                'statusCode': error_response.status_code,
+                'headers': dict(error_response.headers),
+                'body': error_response.get_data(as_text=True)
+            }
 
 if __name__ == '__main__':
     app.run(debug=True)
