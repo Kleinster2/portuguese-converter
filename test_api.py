@@ -1,6 +1,37 @@
 # -*- coding: utf-8 -*-
 import requests
 import json
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+
+# Load environment variables
+load_dotenv()
+
+# Get API key from environment
+api_key = os.getenv('OPENAI_API_KEY')
+org_id = "org-Y523VzNzWZ8wEGgYYVjhBBHw"  # Organization ID from project API key
+
+client = OpenAI(
+    api_key=api_key,
+    organization=org_id
+)
+
+try:
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Hello, can you confirm my API key is working?"}]
+    )
+    print("Success! API key is working.")
+    print("Response:", response)
+except Exception as e:
+    print("Error:", e)
+    if hasattr(e, 'response'):
+        try:
+            error_msg = e.response.json().get('error', {}).get('message', str(e))
+            print("Full error message:", error_msg)
+        except:
+            pass
 
 def test_conversion(text):
     url = "https://portuguese-converter.vercel.app/api/portuguese_converter"
