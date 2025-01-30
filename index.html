@@ -215,27 +215,26 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({ text: inputText })
                 });
                 
-                let data;
-                try {
-                    data = await response.json();
-                } catch (e) {
-                    console.error('Error parsing response:', e);
-                    errorDiv.innerHTML = `<div class="alert alert-danger">Error parsing server response</div>`;
-                    return;
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Response was not JSON");
                 }
                 
-                // First check if we have an error in the response data
+                const data = await response.json();
+                
+                // Check for error in the response
                 if (data.error) {
                     const errorMessage = data.details ? `${data.error}: ${data.details}` : data.error;
                     errorDiv.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
                     return;
                 }
                 
-                // Then check if the response was not OK (HTTP error)
+                // Check if response was not OK (HTTP error)
                 if (!response.ok) {
                     const errorMessage = data.details || data.error || `HTTP error! status: ${response.status}`;
                     errorDiv.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
@@ -269,8 +268,8 @@
                 }
                 
             } catch (error) {
-                console.error('Network error:', error);
-                errorDiv.innerHTML = `<div class="alert alert-danger">Network error: ${error.message}</div>`;
+                console.error('Error:', error);
+                errorDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
             }
         }
         
