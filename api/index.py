@@ -1,5 +1,14 @@
 from http.server import BaseHTTPRequestHandler
 import json
+import os
+import sys
+
+# Add the api directory to the Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
+from portuguese_converter import convert_to_phonetic
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -37,8 +46,13 @@ class handler(BaseHTTPRequestHandler):
                 self._send_error(400, 'Text must be a string')
                 return
             
-            # For now, just echo back the text
-            # We'll add conversion later
+            # Convert the text
+            try:
+                result = convert_to_phonetic(text)
+            except Exception as e:
+                self._send_error(500, f'Conversion error: {str(e)}')
+                return
+            
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
@@ -47,7 +61,7 @@ class handler(BaseHTTPRequestHandler):
             response = {
                 'success': True,
                 'original': text,
-                'result': f'Echo: {text}'
+                'result': result
             }
             self.wfile.write(json.dumps(response).encode())
             
