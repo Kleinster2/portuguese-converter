@@ -194,6 +194,21 @@
         // Initialize Vercel Analytics
         let va = window.va || null;
 
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function displayError(message) {
+            const errorDiv = document.getElementById('error');
+            const escapedMessage = escapeHtml(String(message));
+            errorDiv.innerHTML = `<div class="alert alert-danger">${escapedMessage}</div>`;
+        }
+
         async function convertText() {
             const inputText = document.getElementById('input').value;
             const resultDiv = document.getElementById('result');
@@ -206,7 +221,7 @@
             errorDiv.innerHTML = '';
             
             if (!inputText.trim()) {
-                errorDiv.innerHTML = `<div class="alert alert-warning">Please enter some text to convert.</div>`;
+                displayError('Please enter some text to convert.');
                 return;
             }
             
@@ -220,36 +235,38 @@
                     body: JSON.stringify({ text: inputText })
                 });
                 
-                const contentType = response.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) {
-                    throw new Error("Response was not JSON");
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    console.error('Error parsing response:', e);
+                    displayError('Server returned invalid JSON response');
+                    return;
                 }
-                
-                const data = await response.json();
                 
                 // Check for error in the response
                 if (data.error) {
                     const errorMessage = data.details ? `${data.error}: ${data.details}` : data.error;
-                    errorDiv.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+                    displayError(errorMessage);
                     return;
                 }
                 
                 // Check if response was not OK (HTTP error)
                 if (!response.ok) {
                     const errorMessage = data.details || data.error || `HTTP error! status: ${response.status}`;
-                    errorDiv.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+                    displayError(errorMessage);
                     return;
                 }
                 
                 // Display successful results
                 if (data.after) {
-                    resultDiv.innerHTML = `<div class="alert alert-success">${data.after}</div>`;
+                    resultDiv.innerHTML = `<div class="alert alert-success">${escapeHtml(data.after)}</div>`;
                 }
                 
                 // Display explanations if any
                 if (data.explanations && data.explanations.length > 0) {
                     const explanationsList = data.explanations
-                        .map(exp => `<li>${exp}</li>`)
+                        .map(exp => `<li>${escapeHtml(exp)}</li>`)
                         .join('');
                     explanationsDiv.innerHTML = `
                         <div class="alert alert-info">
@@ -263,13 +280,13 @@
                     explanationsDiv.innerHTML += `
                         <div class="alert alert-warning">
                             <h5>Spell Check:</h5>
-                            <p>${data.spell_explanation}</p>
+                            <p>${escapeHtml(data.spell_explanation)}</p>
                         </div>`;
                 }
                 
             } catch (error) {
                 console.error('Error:', error);
-                errorDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+                displayError(error.message || 'An error occurred while processing your request');
             }
         }
         
