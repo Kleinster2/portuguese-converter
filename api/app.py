@@ -6,8 +6,10 @@ from config import SpellCheckConfig
 import traceback
 import logging
 import asyncio
-from functools import wraps
-from dotenv import load_dotenv
+import functools
+import concurrent.futures
+import os
+import sys
 
 # Load environment variables
 load_dotenv()
@@ -40,155 +42,83 @@ if api_dir not in sys.path:
     sys.path.append(api_dir)
     logger.info(f"Added {api_dir} to Python path")
 
-def async_route(f):
-    """Decorator to handle async routes."""
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        return asyncio.run(f(*args, **kwargs))
-    return wrapper
+def async_timeout(timeout):
+    def decorator(func):
+        @functools.wraps(func)
+        async def wrapper(*args, **kwargs):
+            try:
+                return await asyncio.wait_for(func(*args, **kwargs), timeout=timeout)
+            except asyncio.TimeoutError:
+                raise TimeoutError(f"Operation timed out after {timeout} seconds")
+        return wrapper
+    return decorator
+
+def get_or_create_eventloop():
+    try:
+        return asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return loop
+
+def run_async(func):
+    loop = get_or_create_eventloop()
+    return loop.run_until_complete(func)
 
 @app.route('/', methods=['GET'])
 def home():
     return jsonify({
-        "status": "running", 
-        "message": "Portuguese Text Converter API is running!",
-        "spell_check_available": spell_checker is not None,
-        "config": config.to_dict() if config else None
+        'message': 'Portuguese Text Converter API',
+        'endpoints': {
+            '/': 'GET - This help message',
+            '/api/portuguese_converter': 'POST - Convert Portuguese text'
+        }
     })
 
-@app.route('/api/config/spell_check', methods=['GET', 'POST'])
-def spell_check_config():
-    """Get or update spell check configuration."""
-    global config, spell_checker
-    
-    if request.method == 'GET':
-        return jsonify(config.to_dict())
-    
-    # POST request to update config
-    try:
-        data = request.get_json()
-        if not data:
-            return jsonify({
-                'error': 'No data provided',
-                'details': 'Request must include JSON data'
-            }), 400
-        
-        # Update config
-        if 'enabled' in data:
-            config.enabled = bool(data['enabled'])
-        if 'rate_limit' in data:
-            config.rate_limit = int(data['rate_limit'])
-        if 'cache_size' in data:
-            config.cache_size = int(data['cache_size'])
-        if 'cache_ttl' in data:
-            config.cache_ttl = int(data['cache_ttl'])
-        
-        # Reinitialize spell checker if needed
-        if spell_checker:
-            spell_checker = SpellChecker(config)
-        
-        return jsonify({
-            'message': 'Configuration updated successfully',
-            'config': config.to_dict()
-        })
-        
-    except (ValueError, TypeError) as e:
-        return jsonify({
-            'error': 'Invalid configuration value',
-            'details': str(e)
-        }), 400
-    except Exception as e:
-        logger.error(f"Error updating config: {str(e)}")
-        logger.error(f"Error type: {type(e)}")
-        logger.error(traceback.format_exc())
-        
-        # Get detailed error info
-        error_details = str(e)
-        if hasattr(e, '__dict__'):
-            error_details = str(e.__dict__)
-        
-        return jsonify({
-            'error': 'Server error',
-            'details': error_details,
-            'traceback': traceback.format_exc()
-        }), 500
-
 @app.route('/api/portuguese_converter', methods=['POST'])
-@async_route
-async def convert():
+def convert():
     try:
-        # Get request data
         data = request.get_json()
-        logger.info(f"Received request data: {data}")
-        
-        if not data:
-            logger.error("No data provided in request")
-            return jsonify({
-                'error': 'No data provided',
-                'details': 'Request must include JSON data'
-            }), 400
-            
-        if 'text' not in data:
-            logger.error("No text field in request data")
-            return jsonify({
-                'error': 'No text provided',
-                'details': 'Request must include "text" field'
-            }), 400
-            
-        text = data['text']
-        logger.info(f"Processing text: {text}")
-        
-        if not isinstance(text, str):
-            logger.error(f"Invalid text format: {type(text)}")
-            return jsonify({
-                'error': 'Invalid text format',
-                'details': 'Text must be a string'
-            }), 400
+        if not data or 'text' not in data:
+            return jsonify({'error': 'No text provided'}), 400
 
-        # Check if spell checking is requested and available
-        use_spell_check = data.get('use_spell_check', False)
-        original_text = text
-        spell_checked_text = None
+        text = data['text']
+        use_spell_check = data.get('use_spell_check', True)
         
-        if use_spell_check:
-            if spell_checker and config.enabled:
-                try:
-                    logger.info("Starting spell check...")
-                    # Run spell check
-                    spell_checked_text = await spell_checker.correct(text)
-                    text = spell_checked_text  # Use corrected text for conversion
-                    logger.info(f"Spell check completed: {spell_checked_text}")
-                except RateLimitError as e:
-                    return jsonify({
-                        'error': 'Rate limit exceeded',
-                        'details': str(e),
-                        'retry_after': 60  # Suggest retry after 60 seconds
-                    }), 429
-                except APIError as e:
-                    return jsonify({
-                        'error': 'OpenAI API error',
-                        'details': str(e)
-                    }), e.status
-                except SpellCheckError as e:
-                    return jsonify({
-                        'error': 'Spell check error',
-                        'details': str(e)
-                    }), 500
-            else:
-                logger.warning("Spell check requested but not available or disabled")
+        # Store original text
+        original_text = text
+        spell_checked_text = text
+
+        # Apply spell checking if enabled
+        if use_spell_check and spell_checker:
+            try:
+                @async_timeout(10)  # 10 second timeout
+                async def spell_check():
+                    return await spell_checker.correct(text)
+                
+                spell_checked_text = run_async(spell_check())
+                logger.info("Spell check completed successfully")
+            except TimeoutError:
+                logger.error("Spell check timed out")
                 return jsonify({
-                    'error': 'Spell check not available',
-                    'details': 'OpenAI API key not configured or spell check disabled'
-                }), 400
+                    'error': 'Spell check timed out',
+                    'message': 'The spell checker took too long to respond'
+                }), 504
+            except Exception as e:
+                logger.error(f"Spell check error: {str(e)}")
+                return jsonify({
+                    'error': 'Spell check failed',
+                    'message': str(e)
+                }), 500
 
         # Convert text using existing pipeline
-        result = convert_text(text)
+        result = convert_text(spell_checked_text)
         
         # Include original and spell-checked text in response
         response = {
             'original': original_text,
             'spell_checked': spell_checked_text,
-            'converted': result['after'],  # Use 'after' instead of 'text'
+            'converted': result['after'],
             'explanations': result['explanations']
         }
         
@@ -196,51 +126,12 @@ async def convert():
 
     except Exception as e:
         logger.error(f"Error processing request: {str(e)}")
-        logger.error(f"Error type: {type(e)}")
         logger.error(traceback.format_exc())
-        
-        # Get detailed error info
-        error_details = str(e)
-        if hasattr(e, '__dict__'):
-            error_details = str(e.__dict__)
-        
         return jsonify({
             'error': 'Internal server error',
-            'details': error_details,
+            'message': str(e),
             'traceback': traceback.format_exc()
         }), 500
-
-@app.route('/convert', methods=['POST'])
-def convert_new():
-    try:
-        data = request.get_json()
-        text = data.get('text', '')
-        print(f"Received text: {text}")  # Debug
-        result = convert_text(text)
-        print(f"Conversion result: {result}")  # Debug
-        return jsonify({
-            'original': result['original'],
-            'before': result['before'],
-            'after': result['after'],
-            'explanations': result['explanations'],
-            'combinations': result['combinations']
-        })
-        
-    except Exception as e:
-        print(f"Error in convert: {str(e)}")  # Debug
-        traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
-
-# Helper function to get or create event loop
-def get_or_create_eventloop():
-    try:
-        return asyncio.get_event_loop()
-    except RuntimeError as ex:
-        if "There is no current event loop in thread" in str(ex):
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            return loop
-        raise
 
 @app.route('/', defaults={'path': ''}, methods=['GET', 'POST'])
 @app.route('/<path:path>', methods=['GET', 'POST'])
@@ -254,7 +145,7 @@ def catch_all(path):
         logger.error(traceback.format_exc())
         return jsonify({
             'error': 'Internal server error',
-            'details': str(e),
+            'message': str(e),
             'traceback': traceback.format_exc()
         }), 500
 
