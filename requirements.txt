@@ -1,1 +1,2 @@
 python-json-logger==2.0.7
+flask==3.0.1
