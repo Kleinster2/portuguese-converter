@@ -6,13 +6,9 @@ from config import SpellCheckConfig
 import traceback
 import logging
 import asyncio
-import functools
 import concurrent.futures
+import functools
 import os
-import sys
-
-# Load environment variables
-load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,6 +17,9 @@ logger = logging.getLogger(__name__)
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
+
+# Initialize thread pool for async operations
+thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 
 # Initialize spell checker globally
 try:
@@ -32,38 +31,12 @@ except Exception as e:
     logger.error(traceback.format_exc())
     spell_checker = None
 
-# Debug log environment variables
-logger.info(f"OPENAI_API_KEY set: {bool(os.getenv('OPENAI_API_KEY'))}")
-logger.info(f"SPELL_CHECK_ENABLED: {os.getenv('SPELL_CHECK_ENABLED')}")
-
-# Ensure api directory is in Python path
-api_dir = os.path.dirname(os.path.abspath(__file__))
-if api_dir not in sys.path:
-    sys.path.append(api_dir)
-    logger.info(f"Added {api_dir} to Python path")
-
-def async_timeout(timeout):
-    def decorator(func):
-        @functools.wraps(func)
-        async def wrapper(*args, **kwargs):
-            try:
-                return await asyncio.wait_for(func(*args, **kwargs), timeout=timeout)
-            except asyncio.TimeoutError:
-                raise TimeoutError(f"Operation timed out after {timeout} seconds")
-        return wrapper
-    return decorator
-
-def get_or_create_eventloop():
-    try:
-        return asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        return loop
-
-def run_async(func):
-    loop = get_or_create_eventloop()
-    return loop.run_until_complete(func)
+def run_in_executor(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        future = thread_pool.submit(func, *args, **kwargs)
+        return future.result()
+    return wrapper
 
 @app.route('/', methods=['GET'])
 def home():
@@ -92,18 +65,17 @@ def convert():
         # Apply spell checking if enabled
         if use_spell_check and spell_checker:
             try:
-                @async_timeout(10)  # 10 second timeout
-                async def spell_check():
-                    return await spell_checker.correct(text)
-                
-                spell_checked_text = run_async(spell_check())
+                @run_in_executor
+                def do_spell_check():
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    try:
+                        return loop.run_until_complete(spell_checker.correct_text(text))
+                    finally:
+                        loop.close()
+
+                spell_checked_text = do_spell_check()
                 logger.info("Spell check completed successfully")
-            except TimeoutError:
-                logger.error("Spell check timed out")
-                return jsonify({
-                    'error': 'Spell check timed out',
-                    'message': 'The spell checker took too long to respond'
-                }), 504
             except Exception as e:
                 logger.error(f"Spell check error: {str(e)}")
                 return jsonify({

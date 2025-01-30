@@ -5,9 +5,9 @@
             "src": "api/app.py",
             "use": "@vercel/python",
             "config": {
-                "runtime": "python3.9",
+                "runtime": "python3.12",
                 "maxLambdaSize": "15mb",
-                "maxDuration": 10
+                "maxDuration": 30
             }
         }
     ],
@@ -18,6 +18,12 @@
             "methods": ["GET", "POST", "OPTIONS"]
         }
     ],
+    "functions": {
+        "api/app.py": {
+            "memory": 1024,
+            "maxDuration": 30
+        }
+    },
     "env": {
         "PYTHONPATH": ".",
         "PYTHONUNBUFFERED": "1"
