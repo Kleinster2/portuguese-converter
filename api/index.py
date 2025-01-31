@@ -7,9 +7,10 @@ import traceback
 import json
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
+from datetime import datetime
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Add current directory to Python path
