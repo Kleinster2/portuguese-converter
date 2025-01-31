@@ -22,7 +22,7 @@ logger.debug(f"Python path: {sys.path}")
 logger.debug(f"Current directory: {os.getcwd()}")
 logger.debug(f"Parent directory: {os.path.dirname(os.getcwd())}")
 
-# Create a minimal SpellCheckConfig class
+# Create SpellCheckConfig class
 @dataclass
 class SpellCheckConfig:
     enabled: bool = False
@@ -54,8 +54,8 @@ class SpellCheckConfig:
 
 # Try to import local modules
 try:
-    from api.portuguese_converter import convert_text
-    from api.spellcheck import init_spellchecker, get_spellchecker
+    from portuguese_converter import convert_text
+    from spellcheck import init_spellchecker, get_spellchecker
     logger.debug("Successfully imported local modules")
 except ImportError as e:
     logger.error(f"Failed to import modules: {str(e)}")
