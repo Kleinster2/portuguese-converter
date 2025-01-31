@@ -2,13 +2,13 @@
     "version": 2,
     "builds": [
         {
-            "src": "api_new/index.py",
+            "src": "api/index.py",
             "use": "@vercel/python",
             "config": {
                 "maxLambdaSize": "15mb",
                 "runtime": "python3.9",
-                "includeFiles": ["api_new/**"],
-                "installCommand": "pip install -r api_new/requirements.txt"
+                "includeFiles": ["api/**"],
+                "installCommand": "pip install -r api/requirements.txt"
             }
         },
         {
@@ -19,7 +19,7 @@
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/api_new/index.py",
+            "dest": "/api/index.py",
             "methods": ["GET", "POST", "OPTIONS"],
             "headers": {
                 "Access-Control-Allow-Origin": "*",
@@ -33,13 +33,13 @@
         }
     ],
     "functions": {
-        "api_new/index.py": {
+        "api/index.py": {
             "memory": 1024,
             "maxDuration": 10
         }
     },
     "env": {
-        "PYTHONPATH": "/var/task:/var/task/api_new",
+        "PYTHONPATH": "/var/task:/var/task/api",
         "openai_api_key": "@openai_api_key",
         "SPELL_CHECK_ENABLED": "true",
         "SPELL_CHECK_RATE_LIMIT": "60",
