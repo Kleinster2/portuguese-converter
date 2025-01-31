@@ -35,7 +35,7 @@ class SpellCheckConfig:
     def from_env(cls) -> 'SpellCheckConfig':
         """Create config from environment variables."""
         enabled = os.getenv("SPELL_CHECK_ENABLED", "false").lower() == "true"
-        api_key = os.getenv("openai_api_key")
+        api_key = os.getenv("openai_api_key")  # Use lowercase to match Vercel env var
         rate_limit = int(os.getenv("SPELL_CHECK_RATE_LIMIT", "60"))
         cache_size = int(os.getenv("SPELL_CHECK_CACHE_SIZE", "1000"))
         cache_ttl = int(os.getenv("SPELL_CHECK_CACHE_TTL", "3600"))
