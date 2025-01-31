@@ -18,9 +18,11 @@ if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
 # Log Python path and current directory for debugging
+logger.debug("=== Starting server with latest code (2024-01-30 20:18) ===")
 logger.debug(f"Python path: {sys.path}")
 logger.debug(f"Current directory: {os.getcwd()}")
 logger.debug(f"Parent directory: {os.path.dirname(os.getcwd())}")
+logger.debug("Starting server with latest code (no dotenv)")
 
 # Create SpellCheckConfig class
 @dataclass
