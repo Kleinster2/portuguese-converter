@@ -28,45 +28,46 @@ app = Flask(__name__)
 CORS(app)
 
 class handler(BaseHTTPRequestHandler):
+    def _set_headers(self, status_code=200, content_type='application/json'):
+        self.send_response(status_code)
+        self.send_header('Content-type', content_type)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+
+    def _send_json_response(self, data, status_code=200):
+        self._set_headers(status_code)
+        self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+
     def do_GET(self):
         if self.path == '/api/test':
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            response = {"message": "API is working!"}
-            self.wfile.write(json.dumps(response).encode())
+            self._send_json_response({"message": "API is working!"})
         else:
-            self.send_response(404)
-            self.end_headers()
+            self._set_headers(404)
             
     def do_POST(self):
         if self.path == '/api/convert':
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            
+            content_length = int(self.headers.get('Content-Length', 0))
             try:
-                data = json.loads(post_data.decode())
+                post_data = self.rfile.read(content_length).decode('utf-8')
+                data = json.loads(post_data)
+                
                 if not data or 'text' not in data:
-                    self.send_error(400, 'No text provided')
+                    self._send_json_response({'error': 'No text provided'}, 400)
                     return
                     
                 text = data['text']
                 if not isinstance(text, str):
-                    self.send_error(400, 'Text must be a string')
+                    self._send_json_response({'error': 'Text must be a string'}, 400)
                     return
                     
                 if not text.strip():
-                    self.send_error(400, 'Text is empty')
+                    self._send_json_response({'error': 'Text is empty'}, 400)
                     return
                     
                 result = convert_text(text)
                 if 'error' in result:
-                    self.send_error(400, result['error'])
+                    self._send_json_response({'error': result['error']}, 400)
                     return
-                
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
                 
                 response = {
                     'converted_text': result['after'],
@@ -74,11 +75,19 @@ class handler(BaseHTTPRequestHandler):
                     'before': result.get('before', text),
                     'combinations': result.get('combinations', [])
                 }
-                self.wfile.write(json.dumps(response).encode())
+                self._send_json_response(response)
                 
+            except UnicodeDecodeError as e:
+                logger.error(f"Unicode decode error: {str(e)}")
+                self._send_json_response({'error': 'Invalid UTF-8 encoding'}, 400)
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON decode error: {str(e)}")
+                self._send_json_response({'error': 'Invalid JSON'}, 400)
             except Exception as e:
                 logger.error(f"Error in /api/convert: {str(e)}")
-                self.send_error(500, str(e))
+                self._send_json_response({'error': str(e)}, 500)
         else:
-            self.send_response(404)
-            self.end_headers()
+            self._set_headers(404)
+
+    def do_OPTIONS(self):
+        self._set_headers()
