@@ -26,6 +26,6 @@
         }
     ],
     "env": {
-        "PYTHONPATH": "/var/task/api"
+        "PYTHONPATH": "/var/task:/var/task/api"
     }
 }
