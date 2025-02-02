@@ -110,6 +110,8 @@ def convert():
 
 # Create handler for serverless function
 def handler(event, context):
+    """Handle serverless function invocation"""
+    logger.debug(f"Received event: {event}")
     return serverless_wsgi.handle_request(app, event, context)
 
 # This is required for local development
