@@ -3,9 +3,6 @@ from flask_cors import CORS
 import os
 import sys
 import logging
-import json
-import traceback
-import serverless_wsgi
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -28,98 +25,41 @@ except ImportError as e:
 app = Flask(__name__)
 CORS(app)
 
-def create_success_response(data):
-    """Create a standardized success response"""
-    response = jsonify(data)
-    response.headers.update({
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Accept, Origin',
-        'Access-Control-Max-Age': '86400'
-    })
-    return response
-
-def create_error_response(error_msg, details=None, status_code=500):
-    """Create a standardized error response"""
-    response = jsonify({
-        'error': error_msg,
-        'details': details or str(error_msg)
-    })
-    response.status_code = status_code
-    response.headers.update({
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Accept, Origin',
-        'Access-Control-Max-Age': '86400'
-    })
-    return response
-
 @app.route('/api/test', methods=['GET'])
 def test():
     """Test endpoint"""
-    logger.debug("Test endpoint called")
-    return create_success_response({"message": "API is working!"})
+    return jsonify({"message": "API is working!"})
 
-@app.route('/api/convert', methods=['POST', 'OPTIONS'])
+@app.route('/api/convert', methods=['POST'])
 def convert():
     """Convert Portuguese text to show natural speech patterns."""
-    if request.method == 'OPTIONS':
-        response = app.make_default_options_response()
-        response.headers.update({
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Accept, Origin',
-            'Access-Control-Max-Age': '86400'
-        })
-        return response
-
     try:
-        # Get request data
         data = request.get_json()
-        logger.debug(f"Received request data: {data}")
-        
         if not data or 'text' not in data:
-            return create_error_response('No text provided', status_code=400)
+            return jsonify({'error': 'No text provided'}), 400
             
         text = data['text']
         if not isinstance(text, str):
-            return create_error_response('Text must be a string', status_code=400)
+            return jsonify({'error': 'Text must be a string'}), 400
             
         if not text.strip():
-            return create_error_response('Text is empty', status_code=400)
+            return jsonify({'error': 'Text is empty'}), 400
             
-        # Convert text
         result = convert_text(text)
-        logger.debug(f"Conversion result: {result}")
-        
-        # Check for error in result
         if 'error' in result:
-            return create_error_response(result['error'], result.get('details', ''), status_code=400)
+            return jsonify({'error': result['error']}), 400
         
-        # Create response
-        response_data = {
-            'converted_text': result['after'],  # Frontend expects 'converted_text'
+        return jsonify({
+            'converted_text': result['after'],
             'explanations': result.get('explanations', []),
             'before': result.get('before', text),
             'combinations': result.get('combinations', [])
-        }
-        logger.debug(f"Response data: {response_data}")
-        
-        return create_success_response(response_data)
+        })
         
     except Exception as e:
         logger.error(f"Error in /api/convert: {str(e)}")
-        logger.error(traceback.format_exc())
-        return create_error_response('Internal server error', str(e))
+        return jsonify({'error': str(e)}), 500
 
-# Create handler for serverless function
 def handler(event, context):
-    """Handle serverless function invocation"""
-    logger.debug(f"Received event: {event}")
-    return serverless_wsgi.handle_request(app, event, context)
-
-# This is required for local development
-if __name__ == '__main__':
-    app.run(debug=True, port=3000)
+    """Vercel handler function"""
+    return app
