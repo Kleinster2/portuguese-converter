@@ -56,6 +56,12 @@ def create_error_response(error_msg, details=None, status_code=500):
     })
     return response
 
+@app.route('/api/test', methods=['GET'])
+def test():
+    """Test endpoint"""
+    logger.debug("Test endpoint called")
+    return create_success_response({"message": "API is working!"})
+
 @app.route('/api/convert', methods=['POST', 'OPTIONS'])
 def convert():
     """Convert Portuguese text to show natural speech patterns."""
