@@ -1,270 +1,130 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Portuguese Text Converter</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script defer src="/_vercel/insights/script.js"></script>
+    <title>Portuguese Text Converter</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
-            padding: 10px;
+            padding: 20px;
             background-color: #f5f5f5;
         }
         .container {
             background-color: white;
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin: 10px;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-            font-size: 24px;
-            margin: 10px 0;
         }
         textarea {
-            width: calc(100% - 20px);
-            height: 120px;
+            width: 100%;
+            min-height: 100px;
             margin: 10px 0;
             padding: 10px;
             border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 4px;
             font-size: 16px;
-            -webkit-appearance: none;
-            appearance: none;
-            resize: vertical;
         }
         button {
-            background-color: #4CAF50;
+            background-color: #007bff;
             color: white;
-            padding: 12px 24px;
             border: none;
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            width: 100%;
-            margin: 10px 0;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
         }
         button:hover {
-            background-color: #45a049;
-        }
-        button:active {
-            background-color: #3d8b40;
+            background-color: #0056b3;
         }
         .result {
             margin-top: 20px;
             padding: 15px;
-            border-left: 4px solid #4CAF50;
-            background-color: #f9f9f9;
-            border-radius: 4px;
-            word-wrap: break-word;
-            font-size: 18px;
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
         }
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 15px 0;
+        .explanations {
+            margin-top: 10px;
+            font-size: 14px;
             color: #666;
         }
-        #speakBtn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-            display: none;
-        }
-        #speakBtn:hover {
-            background-color: #45a049;
-        }
-        #speakBtn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            margin: 0;
-            font-size: 24px;
-            font-family: Arial, sans-serif;
-        }
-        
-        /* Mobile-specific styles */
-        @media (max-width: 600px) {
-            body {
-                padding: 0;
-            }
-            .container {
-                margin: 0;
-                border-radius: 0;
-            }
-            h1 {
-                font-size: 20px;
-            }
-            textarea {
-                font-size: 16px;
-                height: 150px;
-            }
-            button {
-                padding: 15px;
-                font-size: 18px;
-            }
-        }
-        
-        .explanation-section {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #f5f5f5;
-        }
-        
-        .explanation-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-            font-size: 20px;
-        }
-        
-        .explanation-item {
-            margin: 5px 0;
-            padding: 5px;
-            background-color: #fff;
-            border-radius: 3px;
-            font-size: 16px;
-        }
-        
-        .transformation-section {
-            margin-top: 20px;
+        .error {
+            color: #dc3545;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Portuguese Text Converter</h1>
-        <p>Convert Portuguese text into its phonetic form showing natural speech patterns.</p>
+        <p>Enter Portuguese text below to convert it to natural speech patterns:</p>
         
-        <textarea id="input" placeholder="Type or paste Portuguese text here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-        <br>
-        <button onclick="convertText()" id="convertBtn">Convert</button>
-        <div id="loading" class="loading">Converting...</div>
+        <textarea id="inputText" placeholder="Enter Portuguese text here..."></textarea>
+        <button onclick="convertText()">Convert</button>
         
         <div id="result" class="result" style="display: none;">
-            <div id="output"></div>
+            <h3>Result:</h3>
+            <p><strong>Original:</strong> <span id="originalText"></span></p>
+            <p><strong>Converted:</strong> <span id="convertedText"></span></p>
+            <div class="explanations">
+                <h4>Explanations:</h4>
+                <ul id="explanationsList"></ul>
+            </div>
         </div>
         
+        <div id="error" class="error" style="display: none;"></div>
     </div>
 
     <script>
-        // Initialize Vercel Analytics
-        let va = window.va || null;
-
         async function convertText() {
-            const input = document.getElementById('input').value;
-            if (!input.trim()) return;
-            
-            // Track conversion event safely - only if analytics is available
-            try {
-                if (typeof window.va?.track === 'function') {
-                    window.va.track('text_conversion', {
-                        input_length: input.length,
-                        contains_special_chars: /[áéíóúâêîôûãõñç]/i.test(input)
-                    });
-                }
-            } catch (e) {
-                console.log('Analytics error:', e);
+            const inputText = document.getElementById('inputText').value.trim();
+            if (!inputText) {
+                showError('Please enter some text to convert');
+                return;
             }
-            
-            const btn = document.getElementById('convertBtn');
-            const loading = document.getElementById('loading');
-            const result = document.getElementById('result');
-            
-            btn.disabled = true;
-            loading.style.display = 'block';
-            result.style.display = 'none';
-            
+
             try {
-                const response = await fetch('/api/portuguese_converter', {
+                const response = await fetch('/api/convert', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ text: input })
+                    body: JSON.stringify({ text: inputText })
                 });
+
+                const data = await response.json();
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(data.error || 'Failed to convert text');
                 }
+
+                // Show results
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('error').style.display = 'none';
+                document.getElementById('originalText').textContent = data.before;
+                document.getElementById('convertedText').textContent = data.converted_text;
                 
-                const data = await response.json();
-                result.style.display = 'block';
-                
-                if (data.error || data.details) {
-                    const errorMessage = data.details || data.error || 'Unknown error occurred';
-                    document.getElementById('output').textContent = 'Error: ' + errorMessage;
-                    console.error('API Error:', errorMessage);
-                } else if (data && typeof data.before === 'string' && typeof data.after === 'string') {
-                    // Split the text into lines and format each line
-                    const beforeLines = data.before.split('\n');
-                    const afterLines = data.after.split('\n');
-                    
-                    // Create the output HTML
-                    let outputHtml = '<div class="transformation-section">';
-                    outputHtml += '<div class="explanation-title">Word Transformations:</div>';
-                    outputHtml += `<pre>${beforeLines.join('\n')}</pre>`;
-                    
-                    // Add explanations directly under transformations
-                    if (data.explanations && data.explanations.length > 0) {
-                        data.explanations.forEach(explanation => {
-                            outputHtml += `<div class="explanation-item">${explanation}</div>`;
-                        });
-                    }
-                    outputHtml += '</div>';
-                    
-                    // Add combinations section
-                    if (data.combinations && data.combinations.length > 0) {
-                        outputHtml += '<div class="transformation-section">';
-                        outputHtml += '<div class="explanation-title">Word Combinations:</div>';
-                        outputHtml += `<pre>${data.after}</pre>`;
-                        data.combinations.forEach(combination => {
-                            outputHtml += `<div class="explanation-item">${combination}</div>`;
-                        });
-                        outputHtml += '</div>';
-                    }
-                    
-                    document.getElementById('output').innerHTML = outputHtml;
-                } else {
-                    const errorMessage = 'Invalid response format from server';
-                    document.getElementById('output').textContent = 'Error: ' + errorMessage;
-                    console.error('Invalid API response format:', JSON.stringify(data, null, 2));
-                }
+                // Show explanations
+                const explanationsList = document.getElementById('explanationsList');
+                explanationsList.innerHTML = '';
+                data.explanations.forEach(explanation => {
+                    const li = document.createElement('li');
+                    li.textContent = explanation;
+                    explanationsList.appendChild(li);
+                });
             } catch (error) {
-                result.style.display = 'block';
-                document.getElementById('output').textContent = 'Error: ' + (error.message || 'Failed to convert text');
-                console.error('Conversion error:', error);
-            } finally {
-                loading.style.display = 'none';
-                btn.disabled = false;
+                showError(error.message);
             }
         }
-        
-        // Add touch feedback
-        const btn = document.getElementById('convertBtn');
-        btn.addEventListener('touchstart', function() {
-            this.style.backgroundColor = '#3d8b40';
-        }, false);
-        btn.addEventListener('touchend', function() {
-            this.style.backgroundColor = '#4CAF50';
-        }, false);
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+        }
     </script>
 </body>
 </html>
