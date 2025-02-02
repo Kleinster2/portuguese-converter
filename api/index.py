@@ -30,13 +30,22 @@ CORS(app)
 class handler(BaseHTTPRequestHandler):
     def _set_headers(self, status_code=200, content_type='application/json'):
         self.send_response(status_code)
-        self.send_header('Content-type', content_type)
+        self.send_header('Content-type', f'{content_type}; charset=utf-8')
         self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
 
     def _send_json_response(self, data, status_code=200):
-        self._set_headers(status_code)
-        self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+        try:
+            self._set_headers(status_code)
+            response = json.dumps(data, ensure_ascii=False)
+            self.wfile.write(response.encode('utf-8'))
+        except Exception as e:
+            logger.error(f"Error sending response: {str(e)}")
+            self._set_headers(500)
+            error_response = json.dumps({'error': 'Internal server error'}, ensure_ascii=False)
+            self.wfile.write(error_response.encode('utf-8'))
 
     def do_GET(self):
         if self.path == '/api/test':
@@ -63,8 +72,11 @@ class handler(BaseHTTPRequestHandler):
                 if not text.strip():
                     self._send_json_response({'error': 'Text is empty'}, 400)
                     return
-                    
+                
+                logger.debug(f"Input text: {text}")
                 result = convert_text(text)
+                logger.debug(f"Conversion result: {result}")
+                
                 if 'error' in result:
                     self._send_json_response({'error': result['error']}, 400)
                     return
@@ -75,6 +87,7 @@ class handler(BaseHTTPRequestHandler):
                     'before': result.get('before', text),
                     'combinations': result.get('combinations', [])
                 }
+                logger.debug(f"Response data: {response}")
                 self._send_json_response(response)
                 
             except UnicodeDecodeError as e:
