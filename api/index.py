@@ -1,8 +1,10 @@
+from http.server import BaseHTTPRequestHandler
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 import sys
 import logging
+import json
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -19,47 +21,64 @@ try:
     logger.debug("Successfully imported portuguese_converter module")
 except ImportError as e:
     logger.error(f"Failed to import portuguese_converter: {e}")
-    logger.error(traceback.format_exc())
+    logger.error(str(e))
 
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/api/test', methods=['GET'])
-def test():
-    """Test endpoint"""
-    return jsonify({"message": "API is working!"})
-
-@app.route('/api/convert', methods=['POST'])
-def convert():
-    """Convert Portuguese text to show natural speech patterns."""
-    try:
-        data = request.get_json()
-        if not data or 'text' not in data:
-            return jsonify({'error': 'No text provided'}), 400
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/api/test':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            response = {"message": "API is working!"}
+            self.wfile.write(json.dumps(response).encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
             
-        text = data['text']
-        if not isinstance(text, str):
-            return jsonify({'error': 'Text must be a string'}), 400
+    def do_POST(self):
+        if self.path == '/api/convert':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
             
-        if not text.strip():
-            return jsonify({'error': 'Text is empty'}), 400
-            
-        result = convert_text(text)
-        if 'error' in result:
-            return jsonify({'error': result['error']}), 400
-        
-        return jsonify({
-            'converted_text': result['after'],
-            'explanations': result.get('explanations', []),
-            'before': result.get('before', text),
-            'combinations': result.get('combinations', [])
-        })
-        
-    except Exception as e:
-        logger.error(f"Error in /api/convert: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-def handler(event, context):
-    """Vercel handler function"""
-    return app
+            try:
+                data = json.loads(post_data.decode())
+                if not data or 'text' not in data:
+                    self.send_error(400, 'No text provided')
+                    return
+                    
+                text = data['text']
+                if not isinstance(text, str):
+                    self.send_error(400, 'Text must be a string')
+                    return
+                    
+                if not text.strip():
+                    self.send_error(400, 'Text is empty')
+                    return
+                    
+                result = convert_text(text)
+                if 'error' in result:
+                    self.send_error(400, result['error'])
+                    return
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                
+                response = {
+                    'converted_text': result['after'],
+                    'explanations': result.get('explanations', []),
+                    'before': result.get('before', text),
+                    'combinations': result.get('combinations', [])
+                }
+                self.wfile.write(json.dumps(response).encode())
+                
+            except Exception as e:
+                logger.error(f"Error in /api/convert: {str(e)}")
+                self.send_error(500, str(e))
+        else:
+            self.send_response(404)
+            self.end_headers()
