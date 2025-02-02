@@ -7,7 +7,7 @@
             "config": {
                 "runtime": "python3.9",
                 "maxLambdaSize": "15mb",
-                "handler": "wsgi.handler"
+                "handler": "handler"
             }
         },
         {
