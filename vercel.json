@@ -12,7 +12,7 @@
     ],
     "routes": [
         {
-            "src": "/api/(.*)",
+            "src": "/api/convert",
             "dest": "api/index.py"
         },
         {
@@ -21,7 +21,6 @@
         }
     ],
     "env": {
-        "PYTHONPATH": ".",
-        "FORCE_DEPLOY": "1"
+        "PYTHONPATH": "."
     }
 }
