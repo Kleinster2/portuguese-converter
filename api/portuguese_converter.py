@@ -280,10 +280,14 @@ WORD_PAIRS = {
     'com eles': 'cuêlis',
     'com ela': 'cuéla',
     'com elas': 'cuélas',
-    'como você': 'comcê',
-    'como vocês': 'comcêys',
-    'como voce': 'comcê',
-    'como voces': 'comcêys',
+    'com você': 'cucê',
+    'com vocês': 'cucêis',
+    'com voce': 'cucê',
+    'com voces': 'cucêis',
+    'como você': 'comucê',
+    'como vocês': 'comucêis',
+    'como voce': 'comucê',
+    'como voces': 'comucêis',
     'que eu': 'keu',
     'que é': 'ké',
     'esse é': 'êssé',
@@ -999,8 +1003,12 @@ def transform_text(text):
                             rule_explanation = f"{word1} + {word2} → {combined} (Join 'a' with following vowel)"
 
                         elif word1[-1] == 'u' and word2[0] in vowels:
-                            combined = word1 + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
+                            if word1.endswith('eu'):
+                                combined = word1 + word2
+                                rule_explanation = f"{word1} + {word2} → {combined} (Keep 'eu' before vowel)"
+                            else:
+                                combined = word1[:-1] + word2
+                                rule_explanation = f"{word1} + {word2} → {combined} (Drop 'u' before vowel)"
 
                         elif word1[-1] in 'sz' and word2[0] in vowels:
                             combined = word1[:-1] + 'z' + word2
