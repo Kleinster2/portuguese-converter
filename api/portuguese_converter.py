@@ -367,6 +367,7 @@ IRREGULAR_VERBS = {
     "ler": "lê", "leio": "lêiu", "lê": "lê", "lemos": "lêmus",
     "olhar": "olia", "olho": "olho", "olhamos": "olhamus", "olham": "olham", "olharam": "olharam",
     "errar": "erra", "erro": "erro", "erramos": "erramu", "erram": "erram", "errou": "errou", "erraram": "erraram",
+    "experimentar": "isprimenta", "experimento": "isprimentu", "experimentamos": "isprimentamu", "experimentam": "isprimentam", "experimentou": "isprimentou", "experimentaram": "isprimentaram",
 }
 
 # Basic/Essential Verbs
@@ -754,10 +755,10 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = transformed[1:]
         explanations.append("Remove initial h")
     
-    # Rule 20p: Initial 'ex' becomes 'ez'
-    if transformed.startswith('ex'):
-        transformed = 'ez' + transformed[2:]
-        explanations.append("Initial ex → ez")
+    # # Rule 20p: Initial 'ex' becomes 'iz'
+    # if transformed.startswith('ex'):
+    #     transformed = 'iz' + transformed[2:]
+    #     explanations.append("Initial ex → iz")
     
     # Rule 21p: Initial 'pol' becomes 'pul'
     if transformed.startswith('pol'):
@@ -978,42 +979,34 @@ def transform_text(text):
                         # Your inline combination rules: check conditions in order
                         # -------------------------------------------------------------------------
                         if word1.endswith('r') and word2[0].lower() in vowels:
-                            # e.g. "andar amigo" => "andaramigo" (keeping 'r' + vowel)
                             combined = word1 + word2
                             rule_explanation = f"{word1} + {word2} → {combined} (Keep 'r' when joining with vowel)"
 
                         elif word1.endswith('n') and word2.startswith('m'):
-                            # e.g. "un momento" => "umomento" (drop 'n' before 'm')
                             combined = word1[:-1] + word2
                             rule_explanation = f"{word1} + {word2} → {combined} (Drop 'n' before 'm')"
 
                         elif word1[-1].lower() == word2[0].lower() and word1[-1].lower() in vowels:
-                            # e.g. "seu uva" => "seuva" or "boa outra" => "boautra"
                             combined = word1[:-1] + word2
                             rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
 
-                        elif word1[-1] in 'ao' and word2.startswith('e'):
-                            # e.g. "vao ele" => "vaiele" (Replace 'e' with 'i')
-                            combined = word1 + 'i' + word2[1:]
-                            rule_explanation = f"{word1} + {word2} → {combined} (Replace 'e' with 'i')"
+                        # elif word1[-1] in 'ao' and word2.startswith('e'):
+                        #     combined = word1 + 'i' + word2[1:]
+                        #     rule_explanation = f"{word1} + {word2} → {combined} (Replace 'e' with 'i')"
 
                         elif word1[-1] == 'a' and word2[0] in vowels:
-                            # e.g. "esta aqui" => "estaaqui" or drop the 'a': "est" + "aqui" ...
                             combined = word1[:-1] + word2
                             rule_explanation = f"{word1} + {word2} → {combined} (Join 'a' with following vowel)"
 
                         elif word1[-1] == 'u' and word2[0] in vowels:
-                            # e.g. "seu amigo" => "seuamigo"
                             combined = word1 + word2
                             rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
 
                         elif word1[-1] in 'sz' and word2[0] in vowels:
-                            # e.g. "mas eu" => "mazeu" or "faz isso" => "fazisso"
                             combined = word1[:-1] + 'z' + word2
                             rule_explanation = f"{word1} + {word2} → {combined} ('s' between vowels becomes 'z')"
 
                         elif word1[-1] == 'm' and word2[0] in vowels:
-                            # e.g. "tam em" => "tamein"
                             combined = word1 + word2
                             rule_explanation = f"{word1} + {word2} → {combined} (Join 'm' with following vowel)"
 
