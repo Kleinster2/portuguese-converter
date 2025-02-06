@@ -1049,6 +1049,10 @@ def transform_text(text):
                                 combined = word1[:-1] + word2
                                 rule_explanation = f"{word1} + {word2} → {combined} (Drop 'a' before i/e)"
 
+                        elif word1[-1] in vowels and word2[0] in vowels:
+                            combined = word1 + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (Join vowels)"
+
                         elif word1[-1].lower() == word2[0].lower():
                             combined = word1[:-1] + word2
                             rule_explanation = f"{word1} + {word2} → {combined} (Join same letter/sound)"
