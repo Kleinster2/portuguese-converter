@@ -214,6 +214,10 @@ PHONETIC_DICTIONARY = {
     'bonitos': 'bunitus',
     'olho': 'ôliu',
     'olhos': 'ôlius',
+    'menino': 'mininu',
+    'menina': 'minina',
+    'meninas': 'mininas',
+    'meninos': 'mininus'
 }
 
 # Direct transformations that bypass the phonetic rules pipeline
@@ -707,7 +711,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         explanations.append("ou → ô")
     
     # Rule 11p: 'al' followed by a consonant becomes 'au'
-    consonants = 'bcdfghjklmnpqrstvwxz'
+    consonants = 'bcdfgjklmnpqrstvwxz'
     if re.search(r'al[' + consonants + ']', transformed):
         transformed = re.sub(r'al([' + consonants + '])', r'au\1', transformed)
         explanations.append("al+consonant → au")
@@ -759,10 +763,10 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = transformed[1:]
         explanations.append("Remove initial h")
     
-    # # Rule 20p: Initial 'ex' becomes 'iz'
-    # if transformed.startswith('ex'):
-    #     transformed = 'iz' + transformed[2:]
-    #     explanations.append("Initial ex → iz")
+    # Rule 20p: Initial 'ex' becomes 'iz'
+    if transformed.startswith('ex'):
+        transformed = 'iz' + transformed[2:]
+        explanations.append("Initial ex → iz")
     
     # Rule 21p: Initial 'pol' becomes 'pul'
     if transformed.startswith('pol'):
