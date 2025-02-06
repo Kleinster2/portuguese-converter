@@ -211,14 +211,16 @@ PHONETIC_DICTIONARY = {
     'bonito': 'bunitu',
     'bonita': 'bunita',
     'bonitas': 'bunitas',
-    'bonitos': 'bunitus'
+    'bonitos': 'bunitus',
+    'olho': 'ôliu',
+    'olhos': 'ôlius',
 }
 
 # Direct transformations that bypass the phonetic rules pipeline
 DIRECT_TRANSFORMATIONS = {
     'vamos': 'vam',
     'para': 'pra',
-    'nova': 'nóva',
+    'nova': 'nôva',
     'novas': 'nóvas',
     'novamente': 'nóvamenti',
     'otimo': 'ótimu',
@@ -363,6 +365,8 @@ IRREGULAR_VERBS = {
     "trazer": "trazê", "trago": "trago", "traz": "traz", "trazemos": "traizemu", "trazem": "traizeym", "trocar": "troca", "trocamos": "trocamu", "trocam": "trocaum", "trocaram": "trocaum",
     "mentir": "menti", "minto": "minto", "mente": "meinti", "mentimos": "mintimos", "mentem": "mentem", "mentia": "mintia", "mentiamos": "mintiamos", "mentiam": "mintiam", "mentiram": "mintiram",
     "ler": "lê", "leio": "lêiu", "lê": "lê", "lemos": "lêmus",
+    "olhar": "olia", "olho": "olho", "olhamos": "olhamus", "olham": "olham", "olharam": "olharam",
+    "errar": "erra", "erro": "erro", "erramos": "erramu", "erram": "erram", "errou": "errou", "erraram": "erraram",
 }
 
 # Basic/Essential Verbs
@@ -842,116 +846,6 @@ def preserve_capital(original, transformed):
         return transformed[0].upper() + transformed[1:]
     return transformed
 
-def handle_word_combination(first, second):
-    """
-    Handle word combinations between adjacent words according to Portuguese pronunciation rules.
-    Rules Rule 1c - Rule 7c:
-
-    Rule 0c: If word ends in 'r' and next word starts with vowel => merge keeping the 'r'
-    Rule 1c: If the first ends in n and the second starts with m => merge dropping the 'n'
-    Rule 2c: If first ends in 'a' or 'o' and second starts with 'e' => merge with 'i'
-    Rule 3c: If first ends in 'a' and second starts with vowel
-    Rule 4c: If first ends in 'u' and second starts with vowel => add 'w' between
-    Rule 5c: All other vowel combinations - just stitch them together
-    Rule 6c: If first ends in 's' or 'z' and second starts with vowel => merge and use 'z'
-    Rule 7c: If second word is 'y' (from 'e') and third word starts with 'y' or 'i',
-            and first word ends in a vowel that's not 'y' or 'i',
-            then attach the 'y' to the third word
-    """
-    # Special case for 'y' from 'e'
-    if (second == 'y' and  # This is the transformed 'e'
-        first[-1] in 'aáàâãeéèêoóòôuúùû' and  # First word ends in vowel but not y/i
-        len(first) > 0):
-        return first, second  # Keep them separate so 'y' can combine with next word
-        
-    # Don't combine if result would be too long
-    MAX_COMBINED_LENGTH = 20
-    if len(first) + len(second) > MAX_COMBINED_LENGTH:
-        return first, second
-    
-    vowels = 'aeiouáéíóúâêîô úãẽĩõũy'
-    
-    # Rule 0c: If word ends in 'r' and next word starts with vowel => merge keeping the 'r'
-    if first.endswith('r') and second[0].lower() in vowels:
-        return first + second, ''
-
-    # Rule 1c: If first word ends in 'n' and second starts with 'm', drop the 'n'
-    if first.endswith('n') and second.startswith('m'):
-        return first[:-1] + second, ''
-
-    # Special case: 'ia' followed by 'i' becomes just 'i'
-    if first.endswith('ia') and second.startswith('i'):
-        return first[:-2] + second, ''
-
-    # Special case: 'i' followed by 'eéê' drops the 'i'
-    if first.endswith('i') and second.startswith('eéê'):
-        return first[:-1] + second, ''
-        
-    # Special case: 'n' followed by 'n' becomes just 'n'
-    if first.endswith('n') and second.startswith('n'):
-        return first[:-1] + second, ''
-
-    # Special case: 'm' followed by 'm' becomes just 'm'
-    if first.endswith('m') and second.startswith('m'):
-        return first[:-1] + second, ''
-
-    # Special case: 'á' followed by 'a' becomes just 'á'
-    if first.endswith('á') and second.startswith('a'):
-        return first[:-1] + second, ''
-
-    # Special case: 'a' followed by 'u' becomes just 'u'
-    if first.endswith('a') and second.startswith('u'):
-        return first[:-1] + second, ''
-
-    # Special case: 'ê' followed by 'é' becomes just 'é'
-    if first.endswith('ê') and second.startswith('é'):
-        return first[:-1] + second, ''
-
-    # Special case: 's' followed by 's' becomes just 's'
-    if first.endswith('s') and second.startswith('s'):
-        return first[:-1] + second, ''
-
-    # Special case: 'yn' followed by 'm' becomes just 'ym'
-    if first.endswith('yn') and second.startswith('m'):
-        return first[:-2] + 'y' + second, ''
-
-    if (first[-1].lower() in vowels
-        and second[0].lower() in vowels
-        and first[-1].lower() == second[0].lower()):
-        # Preserve case of second word's first letter
-        return first[:-1] + second[0] + second[1:], ''
-    
-    # Rule 2c
-    # if first[-1] in 'ao' and second.startswith('e'):
-    #     return first + 'i' + second[1:], ''
-    
-    # Rule 3c
-    if first[-1] == 'a' and second[0] in 'eiouáéíóúâêîôûãẽĩõũy':
-        if second[0] in 'ie':  # Handle both 'i' and 'e'
-            if first.endswith('ga'):
-                return first[:-2] + 'gu' + second, ''  # Will handle both 'gui' and 'gue'
-            elif first.endswith('ca'):
-                return first[:-2] + 'k' + second, ''   # Will handle both 'ki' and 'ke'
-        return first[:-1] + second, ''
-
-    # Rule 4c
-    # if first.endswith('u') and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-    #     return first[:-1] + second, ''
-
-    # Rule 5c
-    if first[-1] in 'sz' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-        return first[:-1] + 'z' + second, ''
-
-    # Rule 6c - moved after other rules
-    if first[-1] in 'eiouáéíóúâêîôûãẽĩõũy' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-        return first + second, ''
-
-    # Rule 7c: If word ends in 'm' and next word starts with vowel => merge
-    if first[-1] == 'm' and second[0] in 'aeiouáéíóúâêîôûãẽĩõũy':
-        return first + second, ''
-
-    return first, second
-
 def tokenize_text(text):
     """
     Capture words vs. punctuation lumps in a single pass.
@@ -1122,6 +1016,41 @@ def transform_text(text):
                             # e.g. "tam em" => "tamein"
                             combined = word1 + word2
                             rule_explanation = f"{word1} + {word2} → {combined} (Join 'm' with following vowel)"
+
+                        elif word1.endswith('ia') and word2.startswith('i'):
+                            combined = word1[:-2] + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (Drop 'ia' before 'i')"
+
+                        elif word1.endswith('i') and word2[0] in 'eéê':
+                            combined = word1[:-1] + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (Drop 'i' before e/é/ê)"
+
+                        elif word1.endswith('á') and word2.startswith('a'):
+                            combined = word1[:-1] + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (Convert 'á' to 'a')"
+
+                        elif word1.endswith('ê') and word2.startswith('é'):
+                            combined = word1[:-1] + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (Use é)"
+
+                        elif word1.endswith('yn') and word2.startswith('m'):
+                            combined = word1[:-2] + 'y' + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (yn + m → ym)"
+
+                        elif word1.endswith('a') and word2[0] in 'ie':
+                            if word1.endswith('ga'):
+                                combined = word1[:-2] + 'gu' + word2
+                                rule_explanation = f"{word1} + {word2} → {combined} (ga + i/e → gui/gue)"
+                            elif word1.endswith('ca'):
+                                combined = word1[:-2] + 'k' + word2
+                                rule_explanation = f"{word1} + {word2} → {combined} (ca + i/e → ki/ke)"
+                            else:
+                                combined = word1[:-1] + word2
+                                rule_explanation = f"{word1} + {word2} → {combined} (Drop 'a' before i/e)"
+
+                        elif word1[-1].lower() == word2[0].lower() and word1[-1].lower() in vowels:
+                            combined = word1[:-1] + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
 
                         # -------------------------------------------------------------------------
                         # If we set 'combined', we do a merge => skip the second token
