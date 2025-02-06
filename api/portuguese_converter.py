@@ -178,8 +178,8 @@ PHONETIC_DICTIONARY = {
     'muita': 'muynta',
     'muitas': 'muyntas',
     'muitos': 'muyntus',
-    # 'nao': 'nãu',
-    # 'não': 'nãu',
+    'nao': 'nãun',
+    'não': 'nãun',
     'obrigada': 'brigada',
     'obrigado': 'brigadu',
     'que': 'ki',
@@ -578,7 +578,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     explanations = []
 
     # Special handling for não before verbs
-    if lword in ["não", "nao"]:
+    if lword in ["não", "nao", "nãun"]:
         if next_word:
             # Check if the next word is a pronoun
             pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas"]
