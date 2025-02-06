@@ -714,7 +714,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
 
     # Rule 12p: 'on' followed by a consonant becomes 'oun'
     if re.search(r'on[' + consonants + ']', transformed):
-        transformed = re.sub(r'on([' + consonants + '])', r'oun\1', transformed)
+        transformed = re.sub(r'on(?!h)([' + consonants + '])', r'oun\1', transformed)
         explanations.append("on+consonant → oun")
 
     # Rule 13p: Final 'am' becomes 'aun'
