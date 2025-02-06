@@ -367,7 +367,7 @@ IRREGULAR_VERBS = {
     "ler": "lê", "leio": "lêiu", "lê": "lê", "lemos": "lêmus",
     "olhar": "olia", "olho": "olho", "olhamos": "olhamus", "olham": "olham", "olharam": "olharam",
     "errar": "erra", "erro": "erro", "erramos": "erramu", "erram": "erram", "errou": "errou", "erraram": "erraram",
-    "experimentar": "isprimentá", "experimento": "isprimentu", "experimentamos": "isprimentamu", "experimentam": "isprimentam", "experimentou": "isprimentou", "experimentaram": "isprimentaram",
+    "experimentar": "isprimentá", "experimento": "isprimentu", "experimenta": "isprimenta", "experimentamos": "isprimentãmu", "experimentam": "isprimentam", "experimentei": "isprimentei", "experimentou": "isprimentou", "experimentaram": "isprimentaram",
 }
 
 # Basic/Essential Verbs
@@ -1041,9 +1041,9 @@ def transform_text(text):
                                 combined = word1[:-1] + word2
                                 rule_explanation = f"{word1} + {word2} → {combined} (Drop 'a' before i/e)"
 
-                        elif word1[-1].lower() == word2[0].lower() and word1[-1].lower() in vowels:
+                        elif word1[-1].lower() == word2[0].lower():
                             combined = word1[:-1] + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Join vowel or same letter/sound)"
+                            rule_explanation = f"{word1} + {word2} → {combined} (Join same letter/sound)"
 
                         # -------------------------------------------------------------------------
                         # If we set 'combined', we do a merge => skip the second token
