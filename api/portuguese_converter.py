@@ -1003,9 +1003,9 @@ def transform_text(text):
                             rule_explanation = f"{word1} + {word2} → {combined} (Join 'a' with following vowel)"
 
                         elif word1[-1] == 'u' and word2[0] in vowels:
-                            if word1.endswith('eu'):
+                            if word1.endswith(('eu', 'êu')):
                                 combined = word1 + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Keep 'eu' before vowel)"
+                                rule_explanation = f"{word1} + {word2} → {combined} (Keep 'eu/êu' before vowel)"
                             else:
                                 combined = word1[:-1] + word2
                                 rule_explanation = f"{word1} + {word2} → {combined} (Drop 'u' before vowel)"
