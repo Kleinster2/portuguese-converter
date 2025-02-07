@@ -586,7 +586,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     explanations = []
 
     # Special handling for não before verbs
-    if lword in ["não", "nao", "nãun"]:
+    if lword in ["não", "nao", "nãun", "nãu"]:
         if next_word:
             # Check if the next word is a pronoun
             pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas"]
@@ -732,8 +732,8 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
 
     # Rule 15p: Final 'am' becomes 'aun'
     if transformed.endswith('am'):
-        transformed = transformed[:-2] + 'ãun'
-        explanations.append("Final am → ãun")
+        transformed = transformed[:-2] + 'ãu'
+        explanations.append("Final am → ãu")
     
     # Rule 16p: Final 'em' becomes 'êin'
     if transformed.endswith('em'):
@@ -741,9 +741,9 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         explanations.append("Final em →êin")
     
     # Rule 17p: Final 'im' becomes 'in'
-    if transformed.endswith('im'):
-        transformed = transformed[:-2] + 'in'
-        explanations.append("Final im → in")
+    #if transformed.endswith('im'):
+    #    transformed = transformed[:-2] + 'in'
+    #    explanations.append("Final im → in")
     
     # Rule 18p: Final 'om' becomes 'ôun'
     if transformed.endswith('om'):
