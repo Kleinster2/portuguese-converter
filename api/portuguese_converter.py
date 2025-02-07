@@ -1036,9 +1036,9 @@ def transform_text(text):
                                     # Record this combination for explanation
                                     combinations.append((i, rule_explanation))
                                     # Update the tokens list
-                                    tokens[i] = combined
+                                    transformed_tokens[i] = (combined, punct2)
                                     # Remove the second token since we merged it
-                                    tokens.pop(i + 1)
+                                    transformed_tokens.pop(i + 1)
                                     # Flag that we made a change
                                     made_changes = True
                                 continue
