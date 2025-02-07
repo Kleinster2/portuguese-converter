@@ -641,17 +641,8 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = PHONETIC_DICTIONARY[lword].lower()
         explanations.append(f"Dictionary: {word} → {transformed}")
 
-    # Rule 1p: Transform initial 'en' to 'in'
-    if transformed.startswith('en'):
-        transformed = 'in' + transformed[2:]
-        explanations.append("Initial en → in")
-    
-    # Rule 2p: Transform initial 'des' to 'dis'
-    if transformed.startswith('des'):
-        transformed = 'dis' + transformed[3:]
-        explanations.append("Transform initial 'des' to 'dis'")
-
-    # Rule 3p: Transform 'ovo' and 'ovos' endings to 'ôvo' and 'óvos'
+    # Apply all phonetic rules
+    # Rule 1p: Transform 'ovo' and 'ovos' endings to 'ôvo' and 'óvos'
     if word.endswith('ovo'):
         transformed = word[:-3] + 'ôvo'
         explanations.append("Transform ending 'ovo' to 'ôvo'")
@@ -659,7 +650,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = word[:-4] + 'óvos'
         explanations.append("Transform ending 'ovos' to 'óvos'")
     
-    # Rule 4p: Transform 'ogo' and 'ogos' endings to 'ôgo' and 'ógos'
+    # Rule 2p: Transform 'ogo' and 'ogos' endings to 'ôgo' and 'ógos'
     if word.endswith('ogo'):
         transformed = word[:-3] + 'ôgo'
         explanations.append("Transform ending 'ogo' to 'ôgo'")
@@ -667,7 +658,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = word[:-4] + 'ógos'
         explanations.append("Transform ending 'ogos' to 'ógos'")
 
-    # Rule 5p: Transform 'oso' and 'osos' endings to 'ôso' and 'óso'
+    # Rule 3p: Transform 'oso' and 'osos' endings to 'ôso' and 'óso'
     if word.endswith('oso'):
         transformed = word[:-3] + 'ôso'
         explanations.append("Transform ending 'oso' to 'ôso'")
@@ -675,7 +666,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = word[:-4] + 'óso'
         explanations.append("Transform ending 'osos' to 'ósos'")
 
-    # Rule 6p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', 'e'->'i', 'es'->'is')
+    # Rule 4p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', 'e'->'i', 'es'->'is')
     if transformed.endswith('o'):
         transformed = transformed[:-1] + 'u'
         explanations.append("Final o → u")
@@ -689,73 +680,73 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = transformed[:-2] + 'is'
         explanations.append("Final es → is")
     
-    # Rule 7p: Initial 'es' becomes 'is'
+    # Rule 5p: Initial 'es' becomes 'is'
     if transformed.startswith('es'):
         transformed = 'is' + transformed[2:]
         explanations.append("Initial es → is")
     
-    # Rule 8p: 'ão' at the end becomes 'aum'
+    # Rule 6p: 'ão' at the end becomes 'aum'
     if transformed.endswith('ão'):
         transformed = transformed[:-2] + 'ãun'
         explanations.append("ão → ãun")
     
-    # Rule 9p: 's' between vowels becomes 'z'
+    # Rule 7p: 's' between vowels becomes 'z'
     if re.search(r'([aeiouáéíóúâêîô úãẽĩõũ])s([aeiouáéíóúâêîô úãẽĩõũ])', transformed, re.IGNORECASE):
         transformed = re.sub(r'([aeiouáéíóúâêîô úãẽĩõũ])s([aeiouáéíóúâêîô úãẽĩõũ])', r'\1z\2', transformed, flags=re.IGNORECASE)
         explanations.append("s → z between vowels")
     
-    # Rule 10p: Transform 'olh' to 'ôly'
+    # Rule 8p: Transform 'olh' to 'ôly'
     if not is_verb(word) and 'olh' in transformed:
         transformed = transformed.replace('olh', 'ôly')
         explanations.append("olh → ôly")
     
-    # Rule 11p: 'lh' => 'ly'
+    # Rule 9p: 'lh' => 'ly'
     if 'lh' in transformed:
         transformed = transformed.replace('lh', 'ly')
         explanations.append("lh → ly")
     
-    # Rule 12p: Final 'ou' becomes 'ô'
+    # Rule 10p: Final 'ou' becomes 'ô'
     if transformed.endswith('ou'):
         transformed = transformed[:-2] + 'ô'
         explanations.append("ou → ô")
     
-    # Rule 13p: 'al' followed by a consonant becomes 'au'
-    consonants = 'bcdfgjklmnpqrstvwxz'
+    # Rule 11p: 'al' followed by a consonant becomes 'au'
+    consonants = 'bcdfghjklmnpqrstvwxz'
     if re.search(r'al[' + consonants + ']', transformed):
         transformed = re.sub(r'al([' + consonants + '])', r'au\1', transformed)
         explanations.append("al+consonant → au")
 
-    # Rule 14p: 'on' followed by a consonant becomes 'oun'
+    # Rule 12p: 'on' followed by a consonant becomes 'oun'
     if re.search(r'on[' + consonants + ']', transformed):
-        transformed = re.sub(r'on(?!h)([' + consonants + '])', r'oun\1', transformed)
+        transformed = re.sub(r'on([' + consonants + '])', r'oun\1', transformed)
         explanations.append("on+consonant → oun")
 
-    # Rule 15p: Final 'am' becomes 'aun'
+    # Rule 13p: Final 'am' becomes 'aun'
     if transformed.endswith('am'):
         transformed = transformed[:-2] + 'ãun'
         explanations.append("Final am → ãun")
     
-    # Rule 16p: Final 'em' becomes 'êin'
+    # Rule 14p: Final 'em' becomes 'êin'
     if transformed.endswith('em'):
         transformed = transformed[:-2] + 'êin'
         explanations.append("Final em →êin")
     
-    # Rule 17p: Final 'im' becomes 'in'
+    # Rule 15p: Final 'im' becomes 'in'
     if transformed.endswith('im'):
         transformed = transformed[:-2] + 'in'
         explanations.append("Final im → in")
     
-    # Rule 18p: Final 'om' becomes 'ôun'
+    # Rule 16p: Final 'om' becomes 'ôun'
     if transformed.endswith('om'):
         transformed = transformed[:-2] + 'ôun'
         explanations.append("Final om → ôun")
 
-    # Rule 19p: Final 'um' becomes 'un'
+    # Rule 17p: Final 'um' becomes 'un'
     if transformed.endswith('um'):
         transformed = transformed[:-2] + 'un'
         explanations.append("Final um → un")
     
-    # Rule 20p: Infinitive endings
+    # Rule 18p: Infinitive endings
     if is_verb(word):
         if transformed.endswith('ar'):
             transformed = transformed[:-2] + 'á'
@@ -767,79 +758,79 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             transformed = transformed[:-2] + 'í'
             explanations.append("Infinitive ending: ir → í")
     
-    # Rule 21p: Remove initial 'h'
+    # Rule 19p: Remove initial 'h'
     if transformed.startswith('h'):
         transformed = transformed[1:]
         explanations.append("Remove initial h")
     
-    # Rule 22p: Initial 'ex' becomes 'iz'
-    if transformed.startswith('ex'):
-        transformed = 'iz' + transformed[2:]
-        explanations.append("Initial ex → iz")
+    # # Rule 20p: Initial 'ex' becomes 'iz'
+    # if transformed.startswith('ex'):
+    #     transformed = 'iz' + transformed[2:]
+    #     explanations.append("Initial ex → iz")
     
-    # Rule 23p: Initial 'pol' becomes 'pul'
+    # Rule 21p: Initial 'pol' becomes 'pul'
     if transformed.startswith('pol'):
         transformed = 'pul' + transformed[3:]
         explanations.append("Initial pol → pul")
     
-    # Rule 24p: Final 'ol' => 'óu'
+    # Rule 22p: Final 'ol' => 'óu'
     if transformed.endswith('ol'):
         transformed = transformed[:-2] + 'óu'
         explanations.append("Final ol → óu")
     
-    # Rule 25p: Final 'l' => 'u'
+    # Rule 23p: Final 'l' => 'u'
     if transformed.endswith('l'):
         transformed = transformed[:-1] + 'u'
         explanations.append("Final l → u")
     
-    # Rule 26p: 'l' before consonant becomes 'u'
+    # Rule 24p: 'l' before consonant becomes 'u'
     consonants = 'bcdfgjklmnpqrstvwxz'
     if re.search(f'l[{consonants}]', transformed):
         transformed = re.sub(f'l([{consonants}])', r'u\1', transformed)
         explanations.append("l before consonant → u")
 
-    # Rule 27p: Insert 'i' between specific consonant pairs
+    # Rule 25p: Insert 'i' between specific consonant pairs
     for p in ['bs', 'ps', 'pn', 'dv', 'pt', 'pç', 'dm', 'gn', 'tm', 'tn']:
         if p in transformed:
             transformed = transformed.replace(p, p[0] + 'i' + p[1])
             explanations.append(f"Insert i: {p} → {p[0]}i{p[1]}")
     
-    # Rule 28p: Append 'i' to words ending in specific consonants
+    # Rule 26p: Append 'i' to words ending in specific consonants
     if transformed.endswith(('d', 't', 'b', 'f', 'j', 'k', 'p', 'v')):
         transformed = transformed + 'i'
         explanations.append(f"Append i after final consonant")
     
-    # Rule 29p: Replace final 'c' with 'ki'
+    # Rule 27p: Replace final 'c' with 'ki'
     if transformed.endswith('c'):
         transformed = transformed[:-1] + 'ki'
         explanations.append("Final c → ki")
     
-    # Rule 30p: Append 'ui' to words ending in 'g'
+    # Rule 28p: Append 'ui' to words ending in 'g'
     if transformed.endswith('g'):
         transformed = transformed + 'ui'
         explanations.append("Append ui after final g")
     
-    # Rule 31p: Transform 'eir' to 'er'
+    # Rule 29p: Transform 'eir' to 'er'
     if 'eir' in transformed:
         transformed = transformed.replace('eir', 'êr')
         explanations.append("eir →êr")
     
-    # Rule 32p: Transform initial 'ou' to 'ô'
+    # Rule 30p: Transform initial 'ou' to 'ô'
     if transformed.startswith('ou'):
         transformed = 'ô' + transformed[2:]
         explanations.append("Transform initial 'ou' to 'ô'")
     
-    # Rule 33p: Transform initial 'sou' to 'sô'
+    # Rule 31p: Transform initial 'sou' to 'sô'
     if transformed.startswith('sou'):
         transformed = 'sô' + transformed[3:]
         explanations.append("Transform initial 'sou' to 'sô'")
     
-    # Rule 34p: Transform initial 'des' to 'dis'
+    # Rule 32p: Transform initial 'des' to 'dis'
     if transformed.startswith('des'):
         transformed = 'dis' + transformed[3:]
         explanations.append("Transform initial 'des' to 'dis'")
     
-    # Rule 35p: Transform 'ora' and 'oras' endings to 'óra' and 'óras'
+    # Rule 33p: Transform 'ora' and 'oras' endings to 'óra' and 'óras'
     if transformed.endswith('ora'):
         transformed = transformed[:-3] + 'óra'
         explanations.append("Transform ending 'ora' to 'óra'")
@@ -915,6 +906,30 @@ def reassemble_tokens_smartly(final_tokens):
     # Join everything into a single string
     return "".join(output)
 
+def apply_second_pass_combinations(text):
+    """
+    Apply second pass of combinations that stitch words with matching syllables.
+    """
+    tokens = text.split()
+    result = []
+    explanations = []
+    i = 0
+    
+    while i < len(tokens):
+        word1 = tokens[i]
+        word2 = tokens[i + 1] if i + 1 < len(tokens) else None
+        
+        if word2 and len(word1) >= 2 and len(word2) >= 2 and word1[-2:].lower() == word2[:2].lower():
+            combined = word1 + word2
+            result.append(combined)
+            explanations.append(f"{word1} + {word2} → {combined} (Join same syllable)")
+            i += 2
+        else:
+            result.append(word1)
+            i += 1
+    
+    return ' '.join(result), explanations
+
 def transform_text(text):
     """
     1) Tokenize the input.
@@ -972,148 +987,144 @@ def transform_text(text):
         #    (the big if/elif checks for 'r'+vowel, 'a'+vowel, 'sz'+vowel, etc.)
         # ---------------------------------------------------------------------
         combination_explanations = []
-        made_combination = True  # Start as True to enter the loop
+        transformed_tokens = []
+        i = 0
+        while i < len(tokens):
+            # Get current token and next token (if exists)
+            word1, punct1 = tokens[i]
+            word2, punct2 = tokens[i + 1] if i + 1 < len(tokens) else ('', '')
+            
+            # Only try to combine if both tokens are words (no punctuation)
+            if word1 and word2 and not punct1:
+                made_combination = False
+                
+                # Try each combination rule
+                if not made_combination:
+                    combined = None
+                    rule_explanation = None
+                    
+                    # Rules for combining words
+                    if word1[-1] == 'r' and word2[0] in vowels:
+                        combined = word1 + word2
+                        rule_explanation = f"{word1} + {word2} → {combined} (Keep 'r' before vowel)"
 
-        while made_combination:
-            made_combination = False  # Reset for this iteration
-            new_tokens = []
-            i = 0
+                    elif word1[-1] == 'n' and word2.startswith('m'):
+                        combined = word1[:-1] + word2
+                        rule_explanation = f"{word1} + {word2} → {combined} (Drop 'n' before 'm')"
 
-            while i < len(transformed_tokens):
-                if i < len(transformed_tokens) - 1:
-                    word1, punct1 = transformed_tokens[i]
-                    word2, punct2 = transformed_tokens[i + 1]
+                    elif word1[-1].lower() == word2[0].lower():
+                        combined = word1[:-1] + word2
+                        rule_explanation = f"{word1} + {word2} → {combined} (Join same letter/sound)"
 
-                    # Only try to combine if both tokens are real words
-                    if word1 and word2 and word1.strip():
-                        # We'll define a small helper string of vowels
-                        vowels = 'aeiouáéíóúâêîô úãẽĩõũy'
+                    # elif word1[-1] in 'ao' and word2.startswith('e'):
+                    #     combined = word1 + 'i' + word2[1:]
+                    #     rule_explanation = f"{word1} + {word2} → {combined} (Replace 'e' with 'i')"
 
-                        combined = None  # We'll set this if a merge happens
-                        rule_explanation = ""
+                    elif word1[-1] == 'a' and word2[0] in vowels:
+                        combined = word1[:-1] + word2
+                        rule_explanation = f"{word1} + {word2} → {combined} (Join 'a' with following vowel)"
 
-                        # -------------------------------------------------------------------------
-                        # Your inline combination rules: check conditions in order
-                        # -------------------------------------------------------------------------
-                        if word1.endswith('r') and word2[0].lower() in vowels:
+                    elif word1[-1] == 'u' and word2[0] in vowels:
+                        if word1.endswith('eu', 'êu'):
                             combined = word1 + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Keep 'r' when joining with vowel)"
-
-                        elif word1.endswith('n') and word2.startswith('m'):
+                            rule_explanation = f"{word1} + {word2} → {combined} (Keep 'eu' before vowel)"
+                        else:
                             combined = word1[:-1] + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Drop 'n' before 'm')"
+                            rule_explanation = f"{word1} + {word2} → {combined} (Drop 'u' before vowel)"
 
-                        elif word1[-1].lower() == word2[0].lower():
+                    elif word1[-1] in 'sz' and word2[0] in vowels:
+                        combined = word1[:-1] + 'z' + word2
+                        rule_explanation = f"{word1} + {word2} → {combined} ('s' between vowels becomes 'z')"
+
+                    elif word1[-1] == 'm' and word2[0] in vowels:
+                        combined = word1 + word2
+                        rule_explanation = f"{word1} + {word2} → {combined} (Join 'm' with following vowel)"
+
+                    elif word1.endswith('ia') and word2.startswith('i'):
+                        combined = word1[:-2] + word2
+                        rule_explanation = f"{word1} + {word2} → {combined} (Drop 'ia' before 'i')"
+
+                    elif word1.endswith('i') and word2[0] in 'eéê':
+                        combined = word1[:-1] + word2
+                        rule_explanation = f"{word1} + {word2} → {combined} (Drop 'i' before e/é/ê)"
+
+                    elif word1.endswith('á') and word2.startswith('a'):
+                        combined = word1[:-1] + word2
+                        rule_explanation = f"{word1} + {word2} → {combined} (Convert 'á' to 'a')"
+
+                    elif word1.endswith('ê') and word2.startswith('é'):
+                        combined = word1[:-1] + word2
+                        rule_explanation = f"{word1} + {word2} → {combined} (Use é)"
+
+                    elif word1.endswith('yn') and word2.startswith('m'):
+                        combined = word1[:-2] + 'y' + word2
+                        rule_explanation = f"{word1} + {word2} → {combined} (yn + m → ym)"
+
+                    elif word1.endswith('a') and word2[0] in 'ie':
+                        if word1.endswith('ga'):
+                            combined = word1[:-2] + 'gu' + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (ga + i/e → gui/gue)"
+                        elif word1.endswith('ca'):
+                            combined = word1[:-2] + 'k' + word2
+                            rule_explanation = f"{word1} + {word2} → {combined} (ca + i/e → ki/ke)"
+                        else:
                             combined = word1[:-1] + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Join same letter/sound)"
+                            rule_explanation = f"{word1} + {word2} → {combined} (Drop 'a' before i/e)"
 
-                        # elif word1[-1] in 'ao' and word2.startswith('e'):
-                        #     combined = word1 + 'i' + word2[1:]
-                        #     rule_explanation = f"{word1} + {word2} → {combined} (Replace 'e' with 'i')"
+                    elif word1[-1].lower() == word2[0].lower():
+                        combined = word1[:-1] + word2
+                        rule_explanation = f"{word1} + {word2} → {combined} (Join same letter/sound)"
 
-                        elif word1[-1] == 'a' and word2[0] in vowels:
-                            combined = word1[:-1] + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Join 'a' with following vowel)"
+                    # Last two letters are identical to first two letters - keep both
+                    elif len(word1) >= 2 and len(word2) >= 2 and word1[-2:].lower() == word2[:2].lower():
+                        combined = word1 + word2
+                        rule_explanation = f"{word1} + {word2} → {combined} (Join same syllable)"
 
-                        elif word1[-1] == 'u' and word2[0] in vowels:
-                            if word1.endswith(('eu', 'êu')):
-                                combined = word1 + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Keep 'eu/êu' before vowel)"
-                            else:
-                                combined = word1[:-1] + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Drop 'u' before vowel)"
+                    # -------------------------------------------------------------------------
+                    # If we set 'combined', we do a merge => skip the second token
+                    # -------------------------------------------------------------------------
+                    if combined is not None:
+                        print(f"DEBUG: Found combination: {rule_explanation}")  # Debug line
+                        combination_explanations.append(rule_explanation)
+                        transformed_tokens.append((combined, punct2))
+                        i += 2
+                        made_combination = True
+                        continue
 
-                        elif word1[-1] in 'sz' and word2[0] in vowels:
-                            combined = word1[:-1] + 'z' + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} ('s' between vowels becomes 'z')"
+                # If no merge happened, just append the current token
+                transformed_tokens.append((word1, punct1))
+                i += 1
+            else:
+                # Last token => just append it
+                transformed_tokens.append(tokens[i])
+                i += 1
 
-                        elif word1[-1] == 'm' and word2[0] in vowels:
-                            combined = word1 + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Join 'm' with following vowel)"
+        # Update tokens for next iteration (if any)
+        tokens = transformed_tokens
 
-                        elif word1.endswith('ia') and word2.startswith('i'):
-                            combined = word1[:-2] + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Drop 'ia' before 'i')"
+    # ---------------------------------------------------------------------
+    # 6) Reassemble the final text
+    # ---------------------------------------------------------------------
+    after_combinations = reassemble_tokens_smartly(transformed_tokens)
 
-                        elif word1.endswith('i') and word2[0] in 'eéê':
-                            combined = word1[:-1] + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Drop 'i' before e/é/ê)"
+    # ---------------------------------------------------------------------
+    # Run second pass combinations
+    # ---------------------------------------------------------------------
+    final_text, second_pass_explanations = apply_second_pass_combinations(after_combinations)
 
-                        elif word1.endswith('á') and word2.startswith('a'):
-                            combined = word1[:-1] + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Convert 'á' to 'a')"
-
-                        elif word1.endswith('ê') and word2.startswith('é'):
-                            combined = word1[:-1] + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Use é)"
-
-                        elif word1.endswith('yn') and word2.startswith('m'):
-                            combined = word1[:-2] + 'y' + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (yn + m → ym)"
-
-                        elif word1.endswith('a') and word2[0] in 'ie':
-                            if word1.endswith('ga'):
-                                combined = word1[:-2] + 'gu' + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (ga + i/e → gui/gue)"
-                            elif word1.endswith('ca'):
-                                combined = word1[:-2] + 'k' + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (ca + i/e → ki/ke)"
-                            else:
-                                combined = word1[:-1] + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Drop 'a' before i/e)"
-
-                        elif word1[-1] in vowels and word2[0] in vowels:
-                            combined = word1 + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Join vowels)"
-
-                        elif word1[-1].lower() == word2[0].lower():
-                            combined = word1[:-1] + word2
-                            rule_explanation = f"{word1} + {word2} → {combined} (Join same letter/sound)"
-
-                        # -------------------------------------------------------------------------
-                        # If we set 'combined', we do a merge => skip the second token
-                        # -------------------------------------------------------------------------
-                        if combined is not None:
-                            print(f"DEBUG: Found combination: {rule_explanation}")  # Debug line
-                            combination_explanations.append(rule_explanation)
-                            new_tokens.append((combined, punct2))
-                            i += 2
-                            made_combination = True
-                            continue
-
-                    # If no merge happened, just append the current token
-                    new_tokens.append((word1, punct1))
-                    i += 1
-                else:
-                    # Last token => just append it
-                    new_tokens.append(transformed_tokens[i])
-                    i += 1
-
-            # Update tokens for next iteration (if any)
-            transformed_tokens = new_tokens
-
-        # ---------------------------------------------------------------------
-        # 6) Reassemble the final text
-        # ---------------------------------------------------------------------
-        after_combinations = reassemble_tokens_smartly(transformed_tokens)
-
-        return {
-            'original': text,
-            'before': before_combinations,
-            'after': after_combinations,
-            'explanations': explanations,
-            'combinations': combination_explanations
-        }
-
-    except Exception as e:
-        print(f"Error in transform_text: {str(e)}")
-        return {
-            'original': text,
-            'before': text,
-            'after': text,
-            'explanations': [f"Error: {str(e)}"],
-            'combinations': []
-        }
+    return {
+        'original': text,
+        'before': before_combinations,
+        'after': final_text,
+        'explanations': explanations,
+        'combinations': [
+            "Combinations 1:",
+            *combination_explanations,
+            "",
+            "Combinations 2:",
+            *second_pass_explanations
+        ]
+    }
 
 def convert_text(text):
     """Convert Portuguese text to its phonetic representation with explanations."""
