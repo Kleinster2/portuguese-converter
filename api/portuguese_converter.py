@@ -732,8 +732,8 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
 
     # Rule 15p: Final 'am' becomes 'aun'
     if transformed.endswith('am'):
-        transformed = transformed[:-2] + 'ãu'
-        explanations.append("Final am → ãu")
+        transformed = transformed[:-2] + 'ã'
+        explanations.append("Final am → ã")
     
     # Rule 16p: Final 'em' becomes 'êin'
     if transformed.endswith('em'):
