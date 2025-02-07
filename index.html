@@ -65,8 +65,8 @@
         <button onclick="convertText()">Convert</button>
         
         <div id="result" class="result" style="display: none;">
-            <p><strong>Before:</strong> <span id="originalText"></span></p>
-            <p><strong>After:</strong> <span id="convertedText"></span></p>
+            <p><strong>Transformations:</strong> <span id="originalText"></span></p>
+            <p><strong>Combinations:</strong> <span id="convertedText"></span></p>
             <div class="explanations">
                 <h4>Word Transformations:</h4>
                 <ul id="explanationsList"></ul>
@@ -79,6 +79,10 @@
     </div>
 
     <script>
+        // Determine if we're in production (Vercel) or development
+        const isProduction = window.location.hostname !== 'localhost';
+        const API_BASE = isProduction ? '/api' : '';
+
         async function convertText() {
             const inputText = document.getElementById('inputText').value.trim();
             if (!inputText) {
@@ -87,7 +91,7 @@
             }
 
             try {
-                const response = await fetch('/api/portuguese_converter', {
+                const response = await fetch(`${API_BASE}/convert`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -104,17 +108,19 @@
                 // Show results
                 document.getElementById('result').style.display = 'block';
                 document.getElementById('error').style.display = 'none';
-                document.getElementById('originalText').textContent = data.before;
-                document.getElementById('convertedText').textContent = data.after;
+                document.getElementById('originalText').textContent = data.text || data.before || '';
+                document.getElementById('convertedText').textContent = data.converted_text || data.after || '';
                 
                 // Show explanations
                 const explanationsList = document.getElementById('explanationsList');
                 explanationsList.innerHTML = '';
-                data.explanations.forEach(explanation => {
-                    const li = document.createElement('li');
-                    li.textContent = explanation;
-                    explanationsList.appendChild(li);
-                });
+                if (data.explanations && data.explanations.length > 0) {
+                    data.explanations.forEach(explanation => {
+                        const li = document.createElement('li');
+                        li.textContent = explanation;
+                        explanationsList.appendChild(li);
+                    });
+                }
 
                 // Show combinations
                 const combinationsList = document.getElementById('combinationsList');
