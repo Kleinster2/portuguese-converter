@@ -995,76 +995,91 @@ def transform_text(text):
                         # Try each combination rule
                         if not made_combination:
                             # Rules for combining words
+                            # 1c: 'r' + vowel
                             if word1[-1] == 'r' and word2[0] in vowels:
                                 combined = word1 + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Keep 'r' when joining with vowel)"
+                                rule_explanation = f"1c: {word1} + {word2} → {combined} (Keep 'r' when joining with vowel)"
 
+                            # 2c: 'n' + 'm'
                             elif word1.endswith('n') and word2.startswith('m'):
                                 combined = word1[:-1] + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Drop 'n' before 'm')"
+                                rule_explanation = f"2c: {word1} + {word2} → {combined} (Drop 'n' before 'm')"
 
+                            # 3c: Same letter/sound
                             elif word1[-1].lower() == word2[0].lower():
                                 combined = word1[:-1] + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join same letter/sound)"
+                                rule_explanation = f"3c: {word1} + {word2} → {combined} (Join same letter/sound)"
 
+                            # 4c: 'a' + vowel
                             elif word1[-1] == 'a' and word2[0] in vowels:
                                 combined = word1[:-1] + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join 'a' with following vowel)"
+                                rule_explanation = f"4c: {word1} + {word2} → {combined} (Join 'a' with following vowel)"
 
+                            # 5c: 'u' + vowel
                             elif word1[-1] == 'u' and word2[0] in vowels:
                                 if word1.endswith(('eu', 'êu')):
                                     combined = word1 + word2
-                                    rule_explanation = f"{word1} + {word2} → {combined} (Keep 'eu/êu' before vowel)"
+                                    rule_explanation = f"5c.1: {word1} + {word2} → {combined} (Keep 'eu/êu' before vowel)"
                                 else:
                                     combined = word1[:-1] + word2
-                                    rule_explanation = f"{word1} + {word2} → {combined} (Drop 'u' before vowel)"
+                                    rule_explanation = f"5c.2: {word1} + {word2} → {combined} (Drop 'u' before vowel)"
 
+                            # 6c: 's/z' + vowel
                             elif word1[-1] in 'sz' and word2[0] in vowels:
                                 combined = word1[:-1] + 'z' + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} ('s' between vowels becomes 'z')"
+                                rule_explanation = f"6c: {word1} + {word2} → {combined} ('s' between vowels becomes 'z')"
 
+                            # 7c: 'm' + vowel
                             elif word1[-1] == 'm' and word2[0] in vowels:
                                 combined = word1 + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join 'm' with following vowel)"
+                                rule_explanation = f"7c: {word1} + {word2} → {combined} (Join 'm' with following vowel)"
 
+                            # 8c: 'ia' + 'i'
                             elif word1.endswith('ia') and word2.startswith('i'):
                                 combined = word1[:-2] + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Drop 'ia' before 'i')"
+                                rule_explanation = f"8c: {word1} + {word2} → {combined} (Drop 'ia' before 'i')"
 
+                            # 9c: 'i' + 'e/é/ê'
                             elif word1.endswith('i') and word2[0] in 'eéê':
                                 combined = word1[:-1] + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Drop 'i' before e/é/ê)"
+                                rule_explanation = f"9c: {word1} + {word2} → {combined} (Drop 'i' before e/é/ê)"
 
+                            # 10c: 'á' + 'a'
                             elif word1.endswith('á') and word2.startswith('a'):
                                 combined = word1[:-1] + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Convert 'á' to 'a')"
+                                rule_explanation = f"10c: {word1} + {word2} → {combined} (Convert 'á' to 'a')"
 
+                            # 11c: 'ê' + 'é'
                             elif word1.endswith('ê') and word2.startswith('é'):
                                 combined = word1[:-1] + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Use é)"
+                                rule_explanation = f"11c: {word1} + {word2} → {combined} (Use é)"
 
+                            # 12c: 'yn' + 'm'
                             elif word1.endswith('yn') and word2.startswith('m'):
                                 combined = word1[:-2] + 'y' + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (yn + m → ym)"
+                                rule_explanation = f"12c: {word1} + {word2} → {combined} (yn + m → ym)"
 
-                            elif word1.endswith('a') and word2[0] in 'ie':
+                            # 13c: 'a' + 'i/e' with special cases
+                            elif word1.endswith(('a', 'ã')) and word2[0] in 'ie':
                                 if word1.endswith('ga'):
                                     combined = word1[:-2] + 'gu' + word2
-                                    rule_explanation = f"{word1} + {word2} → {combined} (ga + i/e → gui/gue)"
+                                    rule_explanation = f"13c.1: {word1} + {word2} → {combined} (ga + i/e → gui/gue)"
                                 elif word1.endswith('ca'):
                                     combined = word1[:-2] + 'k' + word2
-                                    rule_explanation = f"{word1} + {word2} → {combined} (ca + i/e → ki/ke)"
+                                    rule_explanation = f"13c.2: {word1} + {word2} → {combined} (ca + i/e → ki/ke)"
                                 else:
                                     combined = word1[:-1] + word2
-                                    rule_explanation = f"{word1} + {word2} → {combined} (Drop 'a' before i/e)"
+                                    rule_explanation = f"13c.3: {word1} + {word2} → {combined} (Drop 'a' before i/e)"
 
+                            # 14c: vowel + vowel
                             elif word1[-1] in vowels and word2[0] in vowels:
                                 combined = word1 + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join vowels)"
+                                rule_explanation = f"14c: {word1} + {word2} → {combined} (Join vowels)"
 
+                            # 15c: Same letter/sound (catch-all)
                             elif word1[-1].lower() == word2[0].lower():
                                 combined = word1[:-1] + word2
-                                rule_explanation = f"{word1} + {word2} → {combined} (Join same letter/sound)"
+                                rule_explanation = f"15c: {word1} + {word2} → {combined} (Join same letter/sound)"
 
                             # If we found a combination to apply
                             if combined is not None and rule_explanation is not None:
