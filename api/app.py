@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from portuguese_converter import convert_text
 import sys
@@ -23,8 +23,8 @@ app = Flask(__name__)
 CORS(app)
 
 @app.route('/', methods=['GET'])
-def home():
-    return jsonify({"status": "running", "message": "Portuguese Text Converter API is running!"})
+def serve_index():
+    return send_from_directory('..', 'index.html')
 
 @app.route('/api/portuguese_converter', methods=['POST'])
 def convert():
