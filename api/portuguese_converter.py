@@ -638,10 +638,10 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             if next_word.lower() in pronouns:
                 # Check if the word after pronoun is a verb
                 if next_next_word and is_verb(next_next_word):
-                    return preserve_capital(word, "[" + word + "]"), "Subject pronoun before pronoun+verb: add brackets"
-            # If not a pronoun, check if it's a verb directly
-            elif is_verb(next_word):
-                return preserve_capital(word, "[" + word + "]"), "Subject pronoun before verb: add brackets"
+                    return preserve_capital(word, "[" + word + "]"), "Subject pronoun 'eu' before pronoun+verb: optional"
+                # If not a pronoun, check if it's a verb directly
+                elif is_verb(next_word):
+                    return preserve_capital(word, "[" + word + "]"), "Subject pronoun 'eu' before verb: optional"
 
     # Check if it's an irregular verb - if so, skip phonetic rules but allow combinations
     if lword in IRREGULAR_VERBS:
@@ -689,6 +689,18 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     elif word.endswith('osos'):
         transformed = word[:-4] + 'óso'
         explanations.append("Transform ending 'osos' to 'ósos'")
+
+    # Special verb ending rules
+    if is_verb(word):
+        if transformed.endswith('amos'):
+            transformed = transformed[:-4] + 'ãmu'
+            explanations.append("Verb ending 'amos' → 'ãmu'")
+        elif transformed.endswith('emos'):
+            transformed = transformed[:-4] + 'êmu'
+            explanations.append("Verb ending 'emos' → 'êmu'")
+        elif transformed.endswith('imos'):
+            transformed = transformed[:-4] + 'imu'
+            explanations.append("Verb ending 'imos' → 'imu'")
 
     # Rule 6p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', 'e'->'i', 'es'->'is')
     if transformed.endswith('o'):
@@ -769,7 +781,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     if transformed.endswith('um'):
         transformed = transformed[:-2] + 'un'
         explanations.append("Final um → un")
-    
+     
     # Rule 20p: Infinitive endings
     if is_verb(word):
         if transformed.endswith('ar'):
@@ -777,33 +789,21 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             explanations.append("Infinitive ending: ar → á")
         elif transformed.endswith('er'):
             transformed = transformed[:-2] + 'ê'
-            explanations.append("Infinitive ending: er →ê")
+            explanations.append("Infinitive ending: er → ê")
         elif transformed.endswith('ir'):
             transformed = transformed[:-2] + 'í'
             explanations.append("Infinitive ending: ir → í")
-
-    # Rule 20.5p: Nós verb endings
-    if is_verb(word):
-        if transformed.endswith('amos'):
-            transformed = transformed[:-4] + 'ãmu'
-            explanations.append("Verb ending 'amos' → 'ãmu'")
-        elif transformed.endswith('emos'):
-            transformed = transformed[:-4] + 'êmu'
-            explanations.append("Verb ending 'emos' → 'êmu'")
-        elif transformed.endswith('imos'):
-            transformed = transformed[:-4] + 'imu'
-            explanations.append("Verb ending 'imos' → 'imu'")
 
     # Rule 21p: Remove initial 'h'
     if transformed.startswith('h'):
         transformed = transformed[1:]
         explanations.append("Remove initial h")
-    
+
     # Rule 22p: Initial 'ex' becomes 'iz'
     if transformed.startswith('ex'):
         transformed = 'iz' + transformed[2:]
         explanations.append("Initial ex → iz")
-    
+
     # Rule 23p: Initial 'pol' becomes 'pul'
     if transformed.startswith('pol'):
         transformed = 'pul' + transformed[3:]
