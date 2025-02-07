@@ -1004,6 +1004,7 @@ def transform_text(text):
         #    (the big if/elif checks for 'r'+vowel, 'a'+vowel, 'sz'+vowel, etc.)
         # ---------------------------------------------------------------------
         combination_explanations = []
+        combinations = []  # Initialize combinations list
         made_combination = True  # Start as True to enter the loop
 
         while made_combination:
