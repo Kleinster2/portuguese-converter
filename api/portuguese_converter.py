@@ -589,16 +589,16 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     if lword in ["não", "nao", "nãun", "nãu"]:
         if next_word:
             # Check if the next word is a pronoun
-            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas"]
+            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "já"]
             if next_word.lower() in pronouns:
                 # Check if the word after pronoun is a verb
                 if next_next_word and is_verb(next_next_word):
-                    return preserve_capital(word, "num"), "Negation before pronoun+verb: não → num"
+                    return preserve_capital(word, "nũ"), "Negation before pronoun+verb: não → num"
                 elif is_verb(next_word):
-                    return preserve_capital(word, "num"), "Negation before verb: não → num"
+                    return preserve_capital(word, "nũ"), "Negation before verb: não → num"
             # If not a pronoun, check if it's a verb directly
             elif is_verb(next_word):
-                return preserve_capital(word, "num"), "Negation before verb: não → num"
+                return preserve_capital(word, "nũ"), "Negation before verb: não → num"
 
     # Special handling for ucê before verbs
     if lword in ["ucê", "você", "voce"]:
@@ -643,8 +643,10 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
 
     # Rule 1p: Transform initial 'en' to 'in'
     if transformed.startswith('en'):
-        transformed = 'in' + transformed[2:]
-        explanations.append("Initial en → in")
+        entrar_forms = ['entrar', 'entro', 'entra', 'entramos', 'entram', 'entrei', 'entrou', 'entraram', 'entrava', 'entravam']
+        if not word.lower() in entrar_forms:
+            transformed = 'in' + transformed[2:]
+            explanations.append("Initial en → in")
     
     # Rule 2p: Transform initial 'des' to 'dis'
     if transformed.startswith('des'):
