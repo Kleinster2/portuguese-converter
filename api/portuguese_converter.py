@@ -766,7 +766,19 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         elif transformed.endswith('ir'):
             transformed = transformed[:-2] + 'í'
             explanations.append("Infinitive ending: ir → í")
-    
+
+    # Rule 20.5p: Nós verb endings
+    if is_verb(word):
+        if transformed.endswith('amos'):
+            transformed = transformed[:-4] + 'ãmu'
+            explanations.append("Verb ending 'amos' → 'ãmu'")
+        elif transformed.endswith('emos'):
+            transformed = transformed[:-4] + 'êmu'
+            explanations.append("Verb ending 'emos' → 'êmu'")
+        elif transformed.endswith('imos'):
+            transformed = transformed[:-4] + 'imu'
+            explanations.append("Verb ending 'imos' → 'imu'")
+
     # Rule 21p: Remove initial 'h'
     if transformed.startswith('h'):
         transformed = transformed[1:]
@@ -846,6 +858,11 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     elif transformed.endswith('oras'):
         transformed = transformed[:-4] + 'óras'
         explanations.append("Transform ending 'oras' to 'óras'")
+
+    # Rule 36p: Transform final 'ês' to 'êis'
+    if transformed.endswith('ês'):
+        transformed = transformed[:-2] + 'êis'
+        explanations.append("Final 'ês' becomes 'êis'")
     
     # Preserve capitalization
     transformed = preserve_capital(word, transformed)
