@@ -1026,6 +1026,22 @@ def transform_text(text):
 
                         # Try each combination rule
                         if not made_combination:
+                            # Skip bracketed pronouns
+                            if word1 in ["[eu]", "[nós]"]:
+                                made_combination = True
+                                combined = word2
+                                rule_explanation = f"Skip bracketed pronoun: {word1} {word2} → {combined}"
+                                if combined is not None and rule_explanation is not None:
+                                    # Record this combination for explanation
+                                    combinations.append((i, rule_explanation))
+                                    # Update the tokens list
+                                    tokens[i] = combined
+                                    # Remove the second token since we merged it
+                                    tokens.pop(i + 1)
+                                    # Flag that we made a change
+                                    made_changes = True
+                                continue
+
                             # Rules for combining words
                             # 1c: 'r' + vowel
                             if word1[-1] == 'r' and word2[0] in vowels:
