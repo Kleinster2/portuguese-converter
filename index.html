@@ -65,11 +65,13 @@
         <button onclick="convertText()">Convert</button>
         
         <div id="result" class="result" style="display: none;">
-            <p><strong>Transformations:</strong> <span id="originalText"></span></p>
-            <p><strong>Combinations:</strong> <span id="convertedText"></span></p>
+            <p><strong>Before:</strong> <span id="originalText"></span></p>
+            <p><strong>After:</strong> <span id="convertedText"></span></p>
             <div class="explanations">
-                <h4>Explanations:</h4>
+                <h4>Word Transformations:</h4>
                 <ul id="explanationsList"></ul>
+                <h4>Word Combinations:</h4>
+                <ul id="combinationsList"></ul>
             </div>
         </div>
         
@@ -85,7 +87,7 @@
             }
 
             try {
-                const response = await fetch('/api/convert', {
+                const response = await fetch('/api/portuguese_converter', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -103,7 +105,7 @@
                 document.getElementById('result').style.display = 'block';
                 document.getElementById('error').style.display = 'none';
                 document.getElementById('originalText').textContent = data.before;
-                document.getElementById('convertedText').textContent = data.converted_text;
+                document.getElementById('convertedText').textContent = data.after;
                 
                 // Show explanations
                 const explanationsList = document.getElementById('explanationsList');
@@ -113,6 +115,21 @@
                     li.textContent = explanation;
                     explanationsList.appendChild(li);
                 });
+
+                // Show combinations
+                const combinationsList = document.getElementById('combinationsList');
+                combinationsList.innerHTML = '';
+                if (data.combinations && data.combinations.length > 0) {
+                    data.combinations.forEach(combination => {
+                        const li = document.createElement('li');
+                        li.textContent = combination;
+                        combinationsList.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.textContent = 'No word combinations applied';
+                    combinationsList.appendChild(li);
+                }
             } catch (error) {
                 showError(error.message);
             }
