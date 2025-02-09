@@ -374,7 +374,7 @@ IRREGULAR_VERBS = {
     "querer": "kerê", "quero": "kéru", "quer": "ké", "queremos": "kerêmu", "querem": "kéreym", "quis": "kis", "quisemos": "kizemu", "quiseram": "kizeraum",
     "poder": "podê", "posso": "póssu", "pode": "pódi", "podemos": "podêmu", "podem": "pódeym", "pude": "pudi", "pudemos": "pudemu", "puderam": "puderaum",
     "ver": "vê", "vejo": "veju", "vê": "vê", "ve": "vê", "vemos": "vemu", "veem": "veem", "vi": "vi", "viu": "viu", "vimos": "vimu", "viram": "viraum",
-    "saber": "sabê", "sei": "sei", "soube": "soube", "soubemos": "soubemos", "souberam": "souberam",
+    "saber": "sabê", "sei": "sei", "soube": "sóbe", "soubemos": "sobemos", "souberam": "soberam",
     "trazer": "trazê", "trago": "trago", "traz": "traz", "trazemos": "traizemu", "trazem": "traizeym", "trocar": "troca", "trocamos": "trocamu", "trocam": "trocaum", "trocaram": "trocaum",
     "mentir": "menti", "minto": "minto", "mente": "meinti", "mentimos": "mintimos", "mentem": "mentem", "mentia": "mintia", "mentiamos": "mintiamos", "mentiam": "mintiam", "mentiram": "mintiram",
     "ler": "lê", "leio": "lêiu", "lê": "lê", "lemos": "lêmus",
@@ -407,7 +407,7 @@ ACTION_VERB_ROOTS = {
 
 # Cognitive/Mental Verbs
 COGNITIVE_VERB_ROOTS = {
-    "ach", "acontec", "adivinh", "ador", "admir", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "analis", "anot", "aprend", "apresent", 
+    "ach", "acontec", "acredit", "adivinh", "ador", "admir", "admit", "afirm", "agrad", "aguent", "alcanç", "amanhec", "amar", "analis", "anot", "aprend", "apresent", 
     "assist", "assum", "chec", "coment", "comet", "compar", "concord", "conhec", "consegu", "consig", "consist", 
     "consent", "consult", "contempl", "cont", "convers", "decid", "defend", "defin", "demor", "depend", "desej", "desenh", "desenvolv", 
     "descobr", "desist", "dirig", "discut", "divid", "entend", "esper", "esquec", "esqueç", "estud", "evit", 
@@ -667,6 +667,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             explanations.append("Initial en → in")
     
     transformed = 'dis' + transformed[3:] if transformed.startswith('des') and not explanations.append("Transform initial 'des' to 'dis'") else transformed
+    transformed = 'mint' + transformed[4:] if transformed.startswith('ment') and not explanations.append("Transform initial 'ment' to 'mint'") else transformed
     transformed = word[:-3] + 'ôvo' if word.endswith('ovo') and not explanations.append("Transform ending 'ovo' to 'ôvo'") else transformed
     transformed = word[:-4] + 'óvos' if word.endswith('ovos') and not explanations.append("Transform ending 'ovos' to 'óvos'") else transformed
     transformed = word[:-3] + 'ôgo' if word.endswith('ogo') and not explanations.append("Transform ending 'ogo' to 'ôgo'") else transformed
@@ -679,6 +680,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = transformed[:-4] + 'êmu' if transformed.endswith('emos') and not explanations.append("Verb ending 'emos' → 'êmu'") else transformed
         transformed = transformed[:-4] + 'imu' if transformed.endswith('imos') and not explanations.append("Verb ending 'imos' → 'imu'") else transformed
 
+    transformed = transformed[1:] if transformed.startswith('a') and re.match(r'^a(i|e|d|j|g|ch|sh)', transformed) and not explanations.append("Drop initial 'a' before i,e,d,j,g,ch,sh") else transformed
     transformed = transformed[:-1] + ('u' if transformed.endswith('o') and not explanations.append("Final o → u") else transformed[-1])
     transformed = transformed[:-2] + ('us' if transformed.endswith('os') and not explanations.append("Final os → us") else transformed[-2:])
     transformed = transformed[:-1] + ('i' if transformed.endswith('e') and not explanations.append("Final e → i") else transformed[-1])
