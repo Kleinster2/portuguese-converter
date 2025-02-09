@@ -183,8 +183,8 @@ PHONETIC_DICTIONARY = {
     'muita': 'muynta',
     'muitas': 'muyntas',
     'muitos': 'muyntus',
-    'nao': 'nãun',
-    'não': 'nãun',
+    # 'nao': 'nãun',
+    # 'não': 'nãun',
     'obrigada': 'brigada',
     'obrigado': 'brigadu',
     'que': 'ki',
@@ -680,7 +680,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = transformed[:-4] + 'êmu' if transformed.endswith('emos') and not explanations.append("Verb ending 'emos' → 'êmu'") else transformed
         transformed = transformed[:-4] + 'imu' if transformed.endswith('imos') and not explanations.append("Verb ending 'imos' → 'imu'") else transformed
 
-    transformed = transformed[1:] if transformed.startswith('a') and re.match(r'^a(i|e|d|j|g|ch|sh)', transformed) and not explanations.append("Drop initial 'a' before i,e,d,j,g,ch,sh") else transformed
+    # transformed = transformed[1:] if transformed.startswith('a') and re.match(r'^a(i|e|d|j|g|ch|sh)', transformed) and not explanations.append("Drop initial 'a' before i,e,d,j,g,ch,sh") else transformed
     transformed = transformed[:-1] + ('u' if transformed.endswith('o') and not explanations.append("Final o → u") else transformed[-1])
     transformed = transformed[:-2] + ('us' if transformed.endswith('os') and not explanations.append("Final os → us") else transformed[-2:])
     transformed = transformed[:-1] + ('i' if transformed.endswith('e') and not explanations.append("Final e → i") else transformed[-1])
@@ -693,20 +693,9 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = re.sub(r'([aeiouáéíóúâêîô úãẽĩõũ])s([aeiouáéíóúâêîô úãẽĩõũ])', r'\1z\2', transformed, flags=re.IGNORECASE)
         explanations.append("s → z between vowels")
     
-    # Rule 10p: Transform 'olh' to 'ôly'
-    if not is_verb(word) and 'olh' in transformed:
-        transformed = transformed.replace('olh', 'ôly')
-        explanations.append("olh → ôly")
-    
-    # Rule 11p: 'lh' => 'ly'
-    if 'lh' in transformed:
-        transformed = transformed.replace('lh', 'ly')
-        explanations.append("lh → ly")
-    
-    # Rule 12p: Final 'ou' becomes 'ô'
-    if transformed.endswith('ou'):
-        transformed = transformed[:-2] + 'ô'
-        explanations.append("ou → ô")
+    transformed = transformed.replace('olh', 'ôly') if not is_verb(word) and 'olh' in transformed and not explanations.append("olh → ôly") else transformed
+    transformed = transformed.replace('lh', 'ly') if 'lh' in transformed and not explanations.append("lh → ly") else transformed
+    transformed = transformed[:-2] + 'ô' if transformed.endswith('ou') and not explanations.append("ou → ô") else transformed
     
     # Rule 13p: 'al' followed by a consonant becomes 'au'
     consonants = 'bcdfgjklmnpqrstvwxz'
