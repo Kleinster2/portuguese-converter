@@ -29,6 +29,8 @@ ACCENTED_L_WORDS = {
 # Pre-defined phonetic transformations that bypass regular rules
 PHONETIC_DICTIONARY = {
     # Pronouns and Articles
+    # 'não': 'nu',
+    # 'nao': 'nu',
     'ate': 'até',
     # 'algum': 'augun',
     # 'alguma': 'auguma',
@@ -137,6 +139,12 @@ PHONETIC_DICTIONARY = {
     'dessas': 'déssas',
     'desse': 'dêssi',
     'desses': 'dêssis',
+    'ainda': 'inda',
+    'adianta': 'dianta',
+    'adiantado': 'diantádu',
+    'adiantados': 'diantádus',
+    'adiantada': 'diantáda',
+    'adiantadas': 'diantádas',
 
     # Tech Terms
     'app': 'épi',
@@ -589,25 +597,34 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     explanations = []
 
     # Special handling for não before verbs
-    if lword in ["não", "nao", "nãun", "nãu"]:
+    if lword in ["não", "nao"]:
+        transformed = "nãu"  # Default transformation is now nãu
         if next_word:
             # Check if the next word is a pronoun
-            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "já"]
+            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "já", "adianta", "dianta"]
             if next_word.lower() in pronouns:
                 # Check if the word after pronoun is a verb
                 if next_next_word and is_verb(next_next_word):
-                    return preserve_capital(word, "nu"), "Negation before pronoun+verb: não → num"
+                    transformed = "nu"
+                    explanations.append("Negation before pronoun+verb: não → nu")
                 elif is_verb(next_word):
-                    return preserve_capital(word, "nu"), "Negation before verb: não → num"
+                    transformed = "nu"
+                    explanations.append("Negation before verb: não → nu")
             # If not a pronoun, check if it's a verb directly
             elif is_verb(next_word):
-                return preserve_capital(word, "nu"), "Negation before verb: não → num"
+                transformed = "nu"
+                explanations.append("Negation before verb: não → nu")
+            else:
+                explanations.append("Negation not before verb: não → nãu")
+        else:
+            explanations.append("Negation without following word: não → nãu")
+        return preserve_capital(word, transformed), " ".join(explanations)
 
     # Special handling for você/vocês before verbs
     if lword in ["você", "voce"]:
         if next_word:
             # Check if the next word is a pronoun
-            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "já"]
+            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "já", "adianta", "dianta"]
             if next_word.lower() in pronouns:
                 # Check if the word after pronoun is a verb
                 if next_next_word and is_verb(next_next_word):
@@ -622,7 +639,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     if lword in ["vocês", "voces", "vocêis"]:
         if next_word:
             # Check if the next word is a pronoun
-            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "já"]
+            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "já", "adianta", "dianta"]
             if next_word.lower() in pronouns:
                 # Check if the word after pronoun is a verb
                 if next_next_word and is_verb(next_next_word):
@@ -635,7 +652,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
 
     if lword in ["eu", "nós"]:
         if next_word:
-            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "já"]
+            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "já", "adianta", "dianta"]
             # Check for pronoun + verb sequence
             if next_word.lower() in pronouns and next_next_word and is_verb(next_next_word):
                 transformed = preserve_capital(word, "[" + word + "]")
@@ -759,10 +776,10 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         transformed = re.sub(r'on(?!h)([' + consonants + '])', r'oun\1', transformed)
         explanations.append("on+consonant → oun")
 
-    # Rule 15p: Final 'am' becomes 'aun'
+    # Rule 15p: Final 'am' becomes 'u'
     if transformed.endswith('am'):
-        transformed = transformed[:-2] + 'ã'
-        explanations.append("Final am → ã")
+        transformed = transformed[:-2] + 'u'
+        explanations.append("Final am → u")
     
     # Rule 16p: Final 'em' becomes 'êin'
     if transformed.endswith('em'):
