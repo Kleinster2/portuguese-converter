@@ -396,8 +396,7 @@ ACTION_VERB_ROOTS = {
     "abus", "acab", "aceit", "acess", "acompanh", "acord", "adiant", "afast", "ajud", "alug", "amarr", "ameaç", "amol", "apag", "avanç", "apanh", "apront", "apress",
     "aproveit", "arm", "arrast", "arremess", "arrum", "assin", "atend", "atra", "atras", "atravess", "atualiz", "aument", "avanç", "avis", "bail", 
     "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "coç", "colet", "colid", "colh", "começ",  "comec", 
-    "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", 
-    "danc", 
+    "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
     "danç", "descans", "desliz", "destac", "destru", "dit", "edit", "empreg", "empurr", "encontr", "encost", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
     "flert", "form", "grit", "guard", "imprim", "inund", "jog", "junt", "lav", "levant", "lig", "limp", "livr", "lut", "marc", 
     "met", "mex", "molh", "mord", "mostr", "mud", "olh", "peg", "proteg", "provoc", "reform", "reaj", "realiz", "receb", "reclam", "reduz", "reflet", "relax", "represent", "reserv", 
@@ -708,16 +707,10 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             explanations.append("Verb ending 'imos' → 'imu'")
 
     # Rule 6p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', 'e'->'i', 'es'->'is')
-    transformed = transformed[:-1] + 'u' if transformed.endswith('o') and not explanations.append("Final o → u") else transformed
-    if transformed.endswith('os'):
-        transformed = transformed[:-2] + 'us'
-        explanations.append("Final os → us")
-    elif transformed.endswith('e'):
-        transformed = transformed[:-1] + 'i'
-        explanations.append("Final e → i")
-    elif transformed.endswith('es'):
-        transformed = transformed[:-2] + 'is'
-        explanations.append("Final es → is")
+    transformed = transformed[:-1] + ('u' if transformed.endswith('o') and not explanations.append("Final o → u") else transformed[-1])
+    transformed = transformed[:-2] + ('us' if transformed.endswith('os') and not explanations.append("Final os → us") else transformed[-2:])
+    transformed = transformed[:-1] + ('i' if transformed.endswith('e') and not explanations.append("Final e → i") else transformed[-1])
+    transformed = transformed[:-2] + ('is' if transformed.endswith('es') and not explanations.append("Final es → is") else transformed[-2:])
     
     # Rule 7p: Initial 'es' becomes 'is'
     if transformed.startswith('es'):
