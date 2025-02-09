@@ -95,10 +95,12 @@ PHONETIC_DICTIONARY = {
     'nos' : 'nus',
     'o' : 'u',
     'os' : 'us',
-    'voce' : 'ucê',
-    'você' : 'ucê',
-    'voces' : 'ucêis',
-    'vocês' : 'ucêis',
+    'voce' : 'você',
+    'voces' : 'vocêis',
+    # 'voce' : 'ucê',
+    # 'você' : 'ucê',
+    # 'voces' : 'ucêis',
+    # 'vocês' : 'ucêis',
 
     # Adverbs
     'demais': 'dimais',
@@ -600,6 +602,36 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             # If not a pronoun, check if it's a verb directly
             elif is_verb(next_word):
                 return preserve_capital(word, "nu"), "Negation before verb: não → num"
+
+    # Special handling for você/vocês before verbs
+    if lword in ["você", "voce"]:
+        if next_word:
+            # Check if the next word is a pronoun
+            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "já"]
+            if next_word.lower() in pronouns:
+                # Check if the word after pronoun is a verb
+                if next_next_word and is_verb(next_next_word):
+                    return preserve_capital(word, "cê"), "Pronoun before pronoun+verb: você → cê"
+                elif is_verb(next_word):
+                    return preserve_capital(word, "cê"), "Pronoun before verb: você → cê"
+            # If not a pronoun, check if it's a verb directly
+            elif is_verb(next_word):
+                return preserve_capital(word, "cê"), "Pronoun before verb: você → cê"
+
+    # Special handling for vocês before verbs
+    if lword in ["vocês", "voces", "vocêis"]:
+        if next_word:
+            # Check if the next word is a pronoun
+            pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "já"]
+            if next_word.lower() in pronouns:
+                # Check if the word after pronoun is a verb
+                if next_next_word and is_verb(next_next_word):
+                    return preserve_capital(word, "cêis"), "Pronoun before pronoun+verb: vocês → cêis"
+                elif is_verb(next_word):
+                    return preserve_capital(word, "cêis"), "Pronoun before verb: vocês → cêis"
+            # If not a pronoun, check if it's a verb directly
+            elif is_verb(next_word):
+                return preserve_capital(word, "cêis"), "Pronoun before verb: vocês → cêis"
 
     if lword in ["eu", "nós"]:
         if next_word:
