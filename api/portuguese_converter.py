@@ -396,7 +396,8 @@ ACTION_VERB_ROOTS = {
     "abus", "acab", "aceit", "acess", "acompanh", "acord", "adiant", "afast", "ajud", "alug", "amarr", "ameaç", "amol", "apag", "avanç", "apanh", "apront", "apress",
     "aproveit", "arm", "arrast", "arremess", "arrum", "assin", "atend", "atra", "atras", "atravess", "atualiz", "aument", "avanç", "avis", "bail", 
     "baix", "beij", "brinc", "busc", "caç", "calç", "carreg", "cham", "chut", "coç", "colet", "colid", "colh", "começ",  "comec", 
-    "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", "danc", 
+    "compr", "comunic", "control", "convid", "coloc", "copi", "corrig", "cort", "cozinh", "cumpr", "curt", 
+    "danc", 
     "danç", "descans", "desliz", "destac", "destru", "dit", "edit", "empreg", "empurr", "encontr", "encost", "enfeit", "engol", "entreg", "envi", "escolh", "escut", 
     "flert", "form", "grit", "guard", "imprim", "inund", "jog", "junt", "lav", "levant", "lig", "limp", "livr", "lut", "marc", 
     "met", "mex", "molh", "mord", "mostr", "mud", "olh", "peg", "proteg", "provoc", "reform", "reaj", "realiz", "receb", "reclam", "reduz", "reflet", "relax", "represent", "reserv", 
@@ -665,62 +666,25 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             transformed = 'in' + transformed[2:]
             explanations.append("Initial en → in")
     
-    # Rule 2p: Transform initial 'des' to 'dis'
-    if transformed.startswith('des'):
-        transformed = 'dis' + transformed[3:]
-        explanations.append("Transform initial 'des' to 'dis'")
-
-    # Rule 3p: Transform 'ovo' and 'ovos' endings to 'ôvo' and 'óvos'
-    if word.endswith('ovo'):
-        transformed = word[:-3] + 'ôvo'
-        explanations.append("Transform ending 'ovo' to 'ôvo'")
-    elif word.endswith('ovos'):
-        transformed = word[:-4] + 'óvos'
-        explanations.append("Transform ending 'ovos' to 'óvos'")
+    transformed = 'dis' + transformed[3:] if transformed.startswith('des') and not explanations.append("Transform initial 'des' to 'dis'") else transformed
+    transformed = word[:-3] + 'ôvo' if word.endswith('ovo') and not explanations.append("Transform ending 'ovo' to 'ôvo'") else transformed
+    transformed = word[:-4] + 'óvos' if word.endswith('ovos') and not explanations.append("Transform ending 'ovos' to 'óvos'") else transformed
+    transformed = word[:-3] + 'ôgo' if word.endswith('ogo') and not explanations.append("Transform ending 'ogo' to 'ôgo'") else transformed
+    transformed = word[:-4] + 'ógos' if word.endswith('ogos') and not explanations.append("Transform ending 'ogos' to 'ógos'") else transformed
+    transformed = word[:-3] + 'ôso' if word.endswith('oso') and not explanations.append("Transform ending 'oso' to 'ôso'") else transformed
+    transformed = word[:-4] + 'ósos' if word.endswith('osos') and not explanations.append("Transform ending 'osos' to 'ósos'") else transformed
     
-    # Rule 4p: Transform 'ogo' and 'ogos' endings to 'ôgo' and 'ógos'
-    if word.endswith('ogo'):
-        transformed = word[:-3] + 'ôgo'
-        explanations.append("Transform ending 'ogo' to 'ôgo'")
-    elif word.endswith('ogos'):
-        transformed = word[:-4] + 'ógos'
-        explanations.append("Transform ending 'ogos' to 'ógos'")
-
-    # Rule 5p: Transform 'oso' and 'osos' endings to 'ôso' and 'óso'
-    if word.endswith('oso'):
-        transformed = word[:-3] + 'ôso'
-        explanations.append("Transform ending 'oso' to 'ôso'")
-    elif word.endswith('osos'):
-        transformed = word[:-4] + 'óso'
-        explanations.append("Transform ending 'osos' to 'ósos'")
-
-    # Special verb ending rules
     if is_verb(word):
-        if transformed.endswith('amos'):
-            transformed = transformed[:-4] + 'ãmu'
-            explanations.append("Verb ending 'amos' → 'ãmu'")
-        elif transformed.endswith('emos'):
-            transformed = transformed[:-4] + 'êmu'
-            explanations.append("Verb ending 'emos' → 'êmu'")
-        elif transformed.endswith('imos'):
-            transformed = transformed[:-4] + 'imu'
-            explanations.append("Verb ending 'imos' → 'imu'")
+        transformed = transformed[:-4] + 'ãmu' if transformed.endswith('amos') and not explanations.append("Verb ending 'amos' → 'ãmu'") else transformed
+        transformed = transformed[:-4] + 'êmu' if transformed.endswith('emos') and not explanations.append("Verb ending 'emos' → 'êmu'") else transformed
+        transformed = transformed[:-4] + 'imu' if transformed.endswith('imos') and not explanations.append("Verb ending 'imos' → 'imu'") else transformed
 
-    # Rule 6p: Final unstressed vowels reduce ('o'->'u', 'os'->'us', 'e'->'i', 'es'->'is')
     transformed = transformed[:-1] + ('u' if transformed.endswith('o') and not explanations.append("Final o → u") else transformed[-1])
     transformed = transformed[:-2] + ('us' if transformed.endswith('os') and not explanations.append("Final os → us") else transformed[-2:])
     transformed = transformed[:-1] + ('i' if transformed.endswith('e') and not explanations.append("Final e → i") else transformed[-1])
     transformed = transformed[:-2] + ('is' if transformed.endswith('es') and not explanations.append("Final es → is") else transformed[-2:])
-    
-    # Rule 7p: Initial 'es' becomes 'is'
-    if transformed.startswith('es'):
-        transformed = 'is' + transformed[2:]
-        explanations.append("Initial es → is")
-    
-    # Rule 8p: 'ão' at the end becomes 'aum'
-    if transformed.endswith('ão'):
-        transformed = transformed[:-2] + 'ãun'
-        explanations.append("ão → ãun")
+    transformed = 'is' + transformed[2:] if transformed.startswith('es') and not explanations.append("Initial es → is") else transformed
+    transformed = transformed[:-2] + 'ãun' if transformed.endswith('ão') and not explanations.append("ão → ãun") else transformed
     
     # Rule 9p: 's' between vowels becomes 'z'
     if re.search(r'([aeiouáéíóúâêîô úãẽĩõũ])s([aeiouáéíóúâêîô úãẽĩõũ])', transformed, re.IGNORECASE):
@@ -863,12 +827,8 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
         explanations.append("Transform initial 'des' to 'dis'")
     
     # Rule 35p: Transform 'ora' and 'oras' endings to 'óra' and 'óras'
-    if transformed.endswith('ora'):
-        transformed = transformed[:-3] + 'óra'
-        explanations.append("Transform ending 'ora' to 'óra'")
-    elif transformed.endswith('oras'):
-        transformed = transformed[:-4] + 'óras'
-        explanations.append("Transform ending 'oras' to 'óras'")
+    transformed = word[:-3] + 'óra' if word.endswith('ora') and not explanations.append("Transform ending 'ora' to 'óra'") else transformed
+    transformed = word[:-4] + 'óras' if word.endswith('oras') and not explanations.append("Transform ending 'oras' to 'óras'") else transformed
 
     # Rule 36p: Transform final 'ês' to 'êis'
     if transformed.endswith('ês'):
