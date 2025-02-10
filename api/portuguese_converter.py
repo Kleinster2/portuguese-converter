@@ -28,13 +28,9 @@ ACCENTED_L_WORDS = {
 # Pre-defined phonetic transformations that bypass regular rules
 PHONETIC_DICTIONARY = {
     # Pronouns and Articles
-    # 'não': 'nu',
-    # 'nao': 'nu',
-    'ate': 'até',
-    # 'algum': 'augun',
-    # 'alguma': 'auguma',
-    # 'algumas': 'augumas',
-    # 'alguns': 'auguns',
+    # 'não': 'nãu',
+    # 'nao': 'nãu',
+    'ate': 'té',
     'alguém': 'auguêin',
     'alguem': 'auguêin',
     'ninguém': 'ninguêin',
