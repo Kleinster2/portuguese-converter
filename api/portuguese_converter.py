@@ -30,6 +30,7 @@ PHONETIC_DICTIONARY = {
     # Pronouns and Articles
     # 'não': 'nãu',
     # 'nao': 'nãu',
+    'olá': 'oi',
     'ate': 'té',
     'alguém': 'auguêin',
     'alguem': 'auguêin',
@@ -578,7 +579,7 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     explanations = []
 
     # Special handling for não before verbs
-    if lword in ["não", "nao", "nãun", "nãu"]:
+    if lword in ["não", "nao", "nãun", "nãu", "nau", "no"]:
         if next_word:
             # Check if the next word is a pronoun
             pronouns = ["me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na", "nos", "nas", "já"]
@@ -591,6 +592,8 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
             # If not a pronoun, check if it's a verb directly
             elif is_verb(next_word):
                 return preserve_capital(word, "nu"), "Negation before verb: não → num"
+        # Default return if no conditions are met
+        return preserve_capital(word, "nãu"), "Default negation: não → nãu"
 
     # Special handling for você/vocês before verbs
     if lword in ["você", "voce"]:
