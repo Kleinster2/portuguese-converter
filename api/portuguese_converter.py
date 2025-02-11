@@ -366,7 +366,7 @@ IRREGULAR_VERBS = {
     "trazer": "trazê", "trago": "trago", "traz": "traz", "trazemos": "traizemu", "trazem": "traizeym", "trocar": "troca", "trocamos": "trocamu", "trocam": "trocaum", "trocaram": "trocaum",
     "mentir": "menti", "minto": "minto", "mente": "meinti", "mentimos": "mintimos", "mentem": "mentem", "mentia": "mintia", "mentiamos": "mintiamos", "mentiam": "mintiam", "mentiram": "mintiram",
     "ler": "lê", "leio": "lêiu", "lê": "lê", "lemos": "lêmus",
-    "olhar": "olia", "olho": "olho", "olhamos": "olhamus", "olham": "olham", "olharam": "olharam",
+    "olhar": "oliá", "olho": "óliu", "olhamos": "oliamus", "olham": "oliam", "olharam": "olharam",
     "errar": "erra", "erro": "erro", "erramos": "erramu", "erram": "erram", "errou": "errou", "erraram": "erraram",
     "experimentar": "isprimentá", "experimento": "isprimentu", "experimenta": "isprimenta", "experimentamos": "isprimentãmu", "experimentam": "isprimentam", "experimentei": "isprimentei", "experimentou": "isprimentou", "experimentaram": "isprimentaram",
 }
@@ -575,6 +575,21 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None, prev_word=No
 
     # First check if word is in pre-defined dictionary
     lword = word.lower()
+
+    # Special case for 'muito' variations using regex
+    if re.match(r'^muito[as]?$', lword):
+        # Before vowels → add "t"
+        if next_word and re.match(r'^[aeiou]', next_word.lower()):
+            trans = re.sub(r'^(m)uito(s?)$', r'mũt\2', lword)
+            trans = re.sub(r'^(m)uita(s?)$', r'mũta\2', trans)
+            trans = preserve_capital(word, trans)
+            return trans, f"Muito before vowel: {word} → {trans}"
+        # Before consonants → nasalize without "t"
+        else:
+            trans = re.sub(r'^(m)uito(s?)$', r'mũyntu\2', lword)
+            trans = re.sub(r'^(m)uita(s?)$', r'mũynta\2', trans)
+            trans = preserve_capital(word, trans)
+            return trans, f"Muito before consonant: {word} → {trans}"
 
     # Check direct transformations first - these bypass the pipeline completely
     if lword in DIRECT_TRANSFORMATIONS:
