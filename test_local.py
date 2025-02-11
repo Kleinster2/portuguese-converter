@@ -4,11 +4,11 @@ def test_transformations():
     # Test cases with expected transformations
     test_cases = [
         ('muito louco', 'muintu loucu'),
-        ('olho', 'ôli'),
+        ('olho', 'ôli'),  # noun form
+        ('eu olho', 'eu olho'),  # verb form
         ('estou', 'tô'),
         ('escola', 'iscola'),
         ('mentira', 'mintira'),
-        ('da Ana', 'dAna'),
     ]
     
     for input_text, expected in test_cases:

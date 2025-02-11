@@ -547,7 +547,7 @@ def merge_word_pairs(tokens):
 
     return new_tokens, explanations
 
-def apply_phonetic_rules(word, next_word=None, next_next_word=None):
+def apply_phonetic_rules(word, next_word=None, next_next_word=None, prev_word=None):
     """
     Apply Portuguese phonetic rules to transform a word.
     First checks a dictionary of pre-defined transformations,
@@ -644,16 +644,21 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
                 trans = preserve_capital(word, "[" + word + "]")
                 return trans, f"Subject pronoun '{word}' before verb: optional"
 
-    # Check if it's an irregular verb - if so, skip phonetic rules but allow combinations
-    if lword in IRREGULAR_VERBS:
-        trans = IRREGULAR_VERBS[lword].lower()
-        trans = preserve_capital(word, trans)
-        return trans, f"Irregular verb: {word} → {trans}"
-
+    # Check if it's in the phonetic dictionary first
     if lword in PHONETIC_DICTIONARY:
+        # Special case for 'olho' - treat as verb if preceded by 'eu'
+        if lword == 'olho' and next_word is None and word.lower() == 'olho':  # next_word being None means this is the current word
+            prev_word = prev_word.lower() if prev_word else None
+            if prev_word == 'eu':
+                if lword in IRREGULAR_VERBS:
+                    trans = IRREGULAR_VERBS[lword].lower()
+                    trans = preserve_capital(word, trans)
+                    return trans, f"Irregular verb: {word} → {trans}"
+        # Otherwise use dictionary transformation
         trans = PHONETIC_DICTIONARY[lword].lower()
-        explanations.append(f"Dictionary: {word} → {trans}")
-
+        trans = preserve_capital(word, trans)
+        return trans, f"Dictionary: {word} → {trans}"
+        
     entrar_forms = ['entrar', 'entro', 'entra', 'entramos', 'entram', 'entrei', 'entrou', 'entraram', 'entrava', 'entravam']
     trans = apply_transform(r'^en', 'in', trans, "Initial en → in") if word.lower() not in entrar_forms else trans
     trans = apply_transform(r'^des', 'dis', trans, "Transform initial 'des' to 'dis'")
@@ -827,9 +832,10 @@ def transform_text(text):
             if word:
                 next_word = tokens[i+1][0] if (i+1 < len(tokens)) else None
                 next_next_word = tokens[i+2][0] if (i+2 < len(tokens)) else None
+                prev_word = tokens[i-1][0] if (i-1 >= 0) else None
 
                 # Apply dictionary + phonetic rules to this single word
-                new_word, explanation = apply_phonetic_rules(word, next_word, next_next_word)
+                new_word, explanation = apply_phonetic_rules(word, next_word, next_next_word, prev_word)
                 if explanation != "No changes needed":
                     explanations.append(f"{word}: {explanation}")
 
