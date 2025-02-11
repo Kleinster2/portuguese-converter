@@ -678,6 +678,9 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     explanations.append("Transform ending 'osos' to 'ósos'") if transformed.endswith('ósos') else None
     
     if is_verb(word):
+        transformed = transformed[:-2] + 'á' if transformed.endswith('ar') and not explanations.append("Infinitive ending: ar → á") else transformed
+        transformed = transformed[:-2] + 'ê' if transformed.endswith('er') and not explanations.append("Infinitive ending: er →ê") else transformed
+        transformed = transformed[:-2] + 'í' if transformed.endswith('ir') and not explanations.append("Infinitive ending: ir → í") else transformed
         transformed = transformed[:-4] + 'ãmu' if transformed.endswith('amos') and not explanations.append("Verb ending 'amos' → 'ãmu'") else transformed
         transformed = transformed[:-4] + 'êmu' if transformed.endswith('emos') and not explanations.append("Verb ending 'emos' → 'êmu'") else transformed
         transformed = transformed[:-4] + 'imu' if transformed.endswith('imos') and not explanations.append("Verb ending 'imos' → 'imu'") else transformed
@@ -691,21 +694,16 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     transformed = transformed[:-2] + 'ãun' if transformed.endswith('ão') and not explanations.append("ão → ãun") else transformed
     
     # Rule 9p: 's' between vowels becomes 'z'
-    if re.search(r'([aeiouáéíóúâêîô úãẽĩõũ])s([aeiouáéíóúâêîô úãẽĩõũ])', transformed, re.IGNORECASE):
-        transformed = re.sub(r'([aeiouáéíóúâêîô úãẽĩõũ])s([aeiouáéíóúâêîô úãẽĩõũ])', r'\1z\2', transformed, flags=re.IGNORECASE)
+    if re.search(r'([aeiouáéíóúâêîôúãẽĩõũ])s([aeiouáéíóúâêîôúãẽĩõũ])', transformed, re.IGNORECASE):
+        transformed = re.sub(r'([aeiouáéíóúâêîôúãẽĩõũ])s([aeiouáéíóúâêîôúãẽĩõũ])', r'\1z\2', transformed, flags=re.IGNORECASE)
         explanations.append("s → z between vowels")
     
     transformed = transformed.replace('olh', 'ôly') if not is_verb(word) and 'olh' in transformed and not explanations.append("olh → ôly") else transformed
     transformed = transformed.replace('lh', 'ly') if 'lh' in transformed and not explanations.append("lh → ly") else transformed
     transformed = transformed[:-2] + 'ô' if transformed.endswith('ou') and not explanations.append("ou → ô") else transformed
-    
-    # Rule 13p: 'al' followed by a consonant becomes 'au'
     consonants = 'bcdfgjklmnpqrstvwxz'
-    if re.search(r'al[' + consonants + ']', transformed):
-        transformed = re.sub(r'al([' + consonants + '])', r'au\1', transformed)
-        explanations.append("al+consonant → au")
-
-    # Rule 14p: 'on' followed by a consonant becomes 'oun'
+    transformed = re.sub(r'al([' + consonants + '])', r'au\1', transformed) if re.search(r'al[' + consonants + ']', transformed) and not explanations.append("al+consonant → au") else transformed
+    
     if re.search(r'on[' + consonants + ']', transformed):
         transformed = re.sub(r'on(?!h)([' + consonants + '])', r'oun\1', transformed)
         explanations.append("on+consonant → oun")
@@ -715,19 +713,6 @@ def apply_phonetic_rules(word, next_word=None, next_next_word=None):
     #transformed = transformed[:-2] + 'in' if transformed.endswith('im') and not explanations.append("Final im → in") else transformed
     transformed = transformed[:-2] + 'ôun' if transformed.endswith('om') and not explanations.append("Final om → ôun") else transformed
     transformed = transformed[:-2] + 'un' if transformed.endswith('um') and not explanations.append("Final um → un") else transformed
-     
-    # Rule 20p: Infinitive endings
-    if is_verb(word):
-        if transformed.endswith('ar'):
-            transformed = transformed[:-2] + 'á'
-            explanations.append("Infinitive ending: ar → á")
-        elif transformed.endswith('er'):
-            transformed = transformed[:-2] + 'ê'
-            explanations.append("Infinitive ending: er →ê")
-        elif transformed.endswith('ir'):
-            transformed = transformed[:-2] + 'í'
-            explanations.append("Infinitive ending: ir → í")
-
     transformed = transformed[1:] if transformed.startswith('h') and not explanations.append("Remove initial h") else transformed
     transformed = 'iz' + transformed[2:] if transformed.startswith('ex') and not explanations.append("Initial ex → iz") else transformed
     transformed = 'pul' + transformed[3:] if transformed.startswith('pol') and not explanations.append("Initial pol → pul") else transformed
