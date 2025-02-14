@@ -148,61 +148,79 @@ def text_to_speech():
     try:
         data = request.get_json()
         if not data or 'text' not in data:
-            logger.error("No text provided in TTS request")
             return jsonify({'error': 'No text provided'}), 400
             
         text = data['text']
-        logger.debug(f"TTS request for text: {text}")
         
-        # Check Azure credentials
-        speech_key = os.getenv('AZURE_SPEECH_KEY')
-        speech_region = os.getenv('AZURE_SPEECH_REGION')
+        # Load Azure credentials
+        subscription_key = os.getenv('AZURE_SPEECH_KEY')
+        region = os.getenv('AZURE_SPEECH_REGION')
         
-        if not speech_key or not speech_region:
-            logger.error("Azure credentials not found")
+        if not subscription_key or not region:
             return jsonify({'error': 'Azure credentials not configured'}), 500
         
-        # Configure speech service
+        # Initialize speech config
         speech_config = speechsdk.SpeechConfig(
-            subscription=speech_key,
-            region=speech_region
+            subscription=subscription_key,
+            region=region
         )
-        
-        logger.debug("Speech config created successfully")
         
         # Set synthesis language and voice
         speech_config.speech_synthesis_language = "pt-BR"
         speech_config.speech_synthesis_voice_name = "pt-BR-FranciscaNeural"
         
-        # Create a temporary file for the audio
+        # Create temporary file using tempfile module
         with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_file:
-            audio_config = speechsdk.audio.AudioOutputConfig(filename=temp_file.name)
+            temp_filename = temp_file.name
+        
+        try:
+            # Configure audio output to file
+            audio_config = speechsdk.audio.AudioOutputConfig(filename=temp_filename)
             synthesizer = speechsdk.SpeechSynthesizer(
                 speech_config=speech_config,
                 audio_config=audio_config
             )
             
-            # Generate speech
-            result = synthesizer.speak_text_async(text).get()
+            # Generate SSML with prosody adjustments for better pronunciation
+            ssml = f"""
+            <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="pt-BR">
+                <voice name="pt-BR-FranciscaNeural">
+                    <prosody rate="1.1" pitch="+0%">
+                        {text}
+                    </prosody>
+                </voice>
+            </speak>
+            """
+            
+            # Synthesize speech
+            result = synthesizer.speak_ssml_async(ssml).get()
             
             if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
-                # Read the audio file
-                with open(temp_file.name, 'rb') as audio_file:
+                # Read the audio file and send it as response
+                with open(temp_filename, 'rb') as audio_file:
                     audio_data = audio_file.read()
                 
-                # Clean up
-                os.unlink(temp_file.name)
-                
-                # Return the audio file
-                return send_file(
+                # Return audio file
+                response = send_file(
                     io.BytesIO(audio_data),
                     mimetype='audio/wav',
                     as_attachment=True,
                     download_name='speech.wav'
                 )
+                
+                return response
             else:
-                return jsonify({'error': 'Failed to generate speech'}), 500
+                error_details = result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonErrorDetails)
+                return jsonify({'error': f'Speech synthesis failed: {error_details}'}), 500
+                
+        finally:
+            # Clean up temporary file
+            try:
+                if os.path.exists(temp_filename):
+                    os.remove(temp_filename)
+            except Exception as cleanup_error:
+                logger.error(f"Error cleaning up temporary file: {cleanup_error}")
                 
     except Exception as e:
-        logger.error(f"Error in TTS: {str(e)}")
+        logger.error(f"TTS Error: {str(e)}")
         return jsonify({'error': str(e)}), 500

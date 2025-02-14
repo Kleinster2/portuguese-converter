@@ -16,11 +16,18 @@
             "dest": "api/index.py"
         },
         {
+            "src": "/api/tts",
+            "dest": "api/index.py"
+        },
+        {
             "src": "/(.*)",
             "dest": "/$1"
         }
     ],
     "env": {
-        "PYTHONPATH": "/var/task/api"
+        "PYTHONPATH": "/var/task/api",
+        "AZURE_TTS_KEY": "",
+        "AZURE_TTS_REGION": "",
+        "AZURE_TTS_STYLE": ""
     }
 }
