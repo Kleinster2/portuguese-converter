@@ -12,10 +12,6 @@
     ],
     "routes": [
         {
-            "src": "/api/portuguese_converter",
-            "dest": "api/index.py"
-        },
-        {
             "src": "/api/convert",
             "dest": "api/index.py"
         },
