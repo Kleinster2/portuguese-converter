@@ -126,7 +126,15 @@ def convert_new():
         data = request.get_json()
         text = data.get('text', '')
         result = convert_text(text)
-        return jsonify(result)
+        
+        return jsonify({
+            'text': result.get('original', text),
+            'converted_text': result.get('after', ''),
+            'before': result.get('before', ''),
+            'after': result.get('after', ''),
+            'explanations': result.get('explanations', []),
+            'combinations': result.get('combinations', [])
+        })
         
     except Exception as e:
         logger.error(f"Error in /api/convert: {str(e)}")

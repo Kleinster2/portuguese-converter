@@ -108,8 +108,8 @@
                 // Show results
                 document.getElementById('result').style.display = 'block';
                 document.getElementById('error').style.display = 'none';
-                document.getElementById('originalText').textContent = data.before || '';
-                document.getElementById('convertedText').textContent = data.after || '';
+                document.getElementById('originalText').textContent = data.text || data.before || '';
+                document.getElementById('convertedText').textContent = data.converted_text || data.after || '';
                 
                 // Show explanations
                 const explanationsList = document.getElementById('explanationsList');
@@ -131,6 +131,10 @@
                         li.textContent = combination;
                         combinationsList.appendChild(li);
                     });
+                } else {
+                    const li = document.createElement('li');
+                    li.textContent = 'No word combinations applied';
+                    combinationsList.appendChild(li);
                 }
             } catch (error) {
                 showError(error.message);
