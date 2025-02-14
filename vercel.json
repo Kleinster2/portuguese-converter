@@ -6,11 +6,15 @@
             "use": "@vercel/python"
         },
         {
-            "src": "*.html",
+            "src": "index.html",
             "use": "@vercel/static"
         }
     ],
     "routes": [
+        {
+            "src": "/api/portuguese_converter",
+            "dest": "api/index.py"
+        },
         {
             "src": "/api/convert",
             "dest": "api/index.py"
@@ -21,6 +25,6 @@
         }
     ],
     "env": {
-        "PYTHONPATH": "."
+        "PYTHONPATH": "/var/task/api"
     }
 }

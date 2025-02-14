@@ -29,67 +29,17 @@ def serve_index():
 @app.route('/api/portuguese_converter', methods=['POST'])
 def convert():
     try:
-        # Get request data
         data = request.get_json()
-        if not data:
-            logger.error("No data provided in request")
-            return jsonify({
-                'error': 'No data provided',
-                'details': 'Request must include JSON data'
-            }), 400
-            
-        if 'text' not in data:
-            logger.error("No text field in request data")
-            return jsonify({
-                'error': 'No text provided',
-                'details': 'Request must include "text" field'
-            }), 400
+        if not data or 'text' not in data:
+            return jsonify({'error': 'No text provided'}), 400
             
         text = data['text']
-        if not isinstance(text, str):
-            logger.error(f"Invalid text format: {type(text)}")
-            return jsonify({
-                'error': 'Invalid text format',
-                'details': 'Text must be a string'
-            }), 400
+        result = convert_text(text)
         
-        if not text.strip():
-            logger.error("Empty text provided")
-            return jsonify({
-                'error': 'Empty text',
-                'details': 'Text cannot be empty'
-            }), 400
+        return jsonify(result)
         
-        # Convert the text
-        try:
-            result = convert_text(text)
-            logger.info(f"Successfully converted text: {text[:50]}...")
-            
-            # Return in the format expected by frontend
-            if isinstance(result, dict) and 'before' in result and 'after' in result:
-                logger.info(f"DEBUG: Result has combinations: {result.get('combinations', [])}")
-                return jsonify(result)
-            else:
-                logger.error(f"Unexpected result format from convert_text: {result}")
-                return jsonify({
-                    'error': 'Invalid result format',
-                    'details': 'Internal server error'
-                }), 500
-        except Exception as e:
-            logger.error(f"Error in convert_text: {str(e)}")
-            traceback.print_exc()
-            return jsonify({
-                'error': 'Conversion error',
-                'details': str(e)
-            }), 500
-
     except Exception as e:
-        logger.error(f"Error converting text: {str(e)}")
-        traceback.print_exc()
-        return jsonify({
-            'error': 'Server error',
-            'details': str(e)
-        }), 500
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/convert', methods=['POST'])
 def convert_new():

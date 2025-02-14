@@ -104,3 +104,30 @@ class handler(BaseHTTPRequestHandler):
 
     def do_OPTIONS(self):
         self._set_headers()
+
+@app.route('/api/portuguese_converter', methods=['POST'])
+def convert():
+    try:
+        data = request.get_json()
+        if not data or 'text' not in data:
+            return jsonify({'error': 'No text provided'}), 400
+            
+        text = data['text']
+        result = convert_text(text)
+        return jsonify(result)
+        
+    except Exception as e:
+        logger.error(f"Error in /api/portuguese_converter: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/convert', methods=['POST'])
+def convert_new():
+    try:
+        data = request.get_json()
+        text = data.get('text', '')
+        result = convert_text(text)
+        return jsonify(result)
+        
+    except Exception as e:
+        logger.error(f"Error in /api/convert: {str(e)}")
+        return jsonify({'error': str(e)}), 500
