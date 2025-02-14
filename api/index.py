@@ -26,15 +26,10 @@ except ImportError as e:
     logger.error(str(e))
 
 # Initialize Flask app
-app = Flask(__name__, static_folder='..', static_url_path='')
+app = Flask(__name__)
 CORS(app)
 
-@app.route('/')
-def root():
-    return app.send_static_file('index.html')
-
-@app.route('/api/portuguese_converter', methods=['POST'])
-def convert():
+def handle_portuguese_converter():
     try:
         data = request.get_json()
         if not data or 'text' not in data:
@@ -48,8 +43,7 @@ def convert():
         logger.error(f"Error in /convert: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
-@app.route('/api/tts', methods=['POST'])
-def text_to_speech():
+def handle_tts():
     try:
         data = request.get_json()
         if not data or 'text' not in data:
@@ -114,6 +108,24 @@ def text_to_speech():
         logger.error(f"Error in /tts: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    if path.startswith('api/'):
+        route = path[4:]  # Remove 'api/' prefix
+        if route == 'portuguese_converter' and request.method == 'POST':
+            return handle_portuguese_converter()
+        elif route == 'tts' and request.method == 'POST':
+            return handle_tts()
+        else:
+            return jsonify({'error': 'Not found'}), 404
+    
+    try:
+        return send_from_directory('../', 'index.html')
+    except Exception as e:
+        logger.error(f"Error serving static file: {str(e)}")
+        return jsonify({'error': 'Not found'}), 404
+
 # Error Handlers
 @app.errorhandler(404)
 def not_found(e):
@@ -123,5 +135,6 @@ def not_found(e):
 def internal_error(e):
     return jsonify({'error': 'Internal server error'}), 500
 
+# For local development
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
