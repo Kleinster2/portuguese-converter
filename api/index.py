@@ -1,10 +1,13 @@
 from http.server import BaseHTTPRequestHandler
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import os
 import sys
 import logging
 import json
+import io
+import azure.cognitiveservices.speech as speechsdk
+import tempfile
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -138,4 +141,56 @@ def convert_new():
         
     except Exception as e:
         logger.error(f"Error in /api/convert: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/tts', methods=['POST'])
+def text_to_speech():
+    try:
+        data = request.get_json()
+        if not data or 'text' not in data:
+            return jsonify({'error': 'No text provided'}), 400
+            
+        text = data['text']
+        
+        # Configure speech service
+        speech_config = speechsdk.SpeechConfig(
+            subscription=os.getenv('AZURE_SPEECH_KEY'),
+            region=os.getenv('AZURE_SPEECH_REGION')
+        )
+        
+        # Set synthesis language and voice
+        speech_config.speech_synthesis_language = "pt-BR"
+        speech_config.speech_synthesis_voice_name = "pt-BR-FranciscaNeural"
+        
+        # Create a temporary file for the audio
+        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_file:
+            audio_config = speechsdk.audio.AudioOutputConfig(filename=temp_file.name)
+            synthesizer = speechsdk.SpeechSynthesizer(
+                speech_config=speech_config,
+                audio_config=audio_config
+            )
+            
+            # Generate speech
+            result = synthesizer.speak_text_async(text).get()
+            
+            if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
+                # Read the audio file
+                with open(temp_file.name, 'rb') as audio_file:
+                    audio_data = audio_file.read()
+                
+                # Clean up
+                os.unlink(temp_file.name)
+                
+                # Return the audio file
+                return send_file(
+                    io.BytesIO(audio_data),
+                    mimetype='audio/wav',
+                    as_attachment=True,
+                    download_name='speech.wav'
+                )
+            else:
+                return jsonify({'error': 'Failed to generate speech'}), 500
+                
+    except Exception as e:
+        logger.error(f"Error in TTS: {str(e)}")
         return jsonify({'error': str(e)}), 500

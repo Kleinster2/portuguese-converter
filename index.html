@@ -54,6 +54,22 @@
             color: #dc3545;
             margin-top: 10px;
         }
+        .play-button {
+            background: none;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+            padding: 0 5px;
+            font-size: 16px;
+            vertical-align: middle;
+        }
+        .play-button:hover {
+            color: #0056b3;
+        }
+        .play-button:disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -65,8 +81,20 @@
         <button onclick="convertText()">Convert</button>
         
         <div id="result" class="result" style="display: none;">
-            <p><strong>Transformations:</strong> <span id="originalText"></span></p>
-            <p><strong>Combinations:</strong> <span id="convertedText"></span></p>
+            <p>
+                <strong>Transformations:</strong> 
+                <span id="originalText"></span>
+                <button onclick="playText('originalText')" class="play-button">
+                    <span>🔊</span>
+                </button>
+            </p>
+            <p>
+                <strong>Combinations:</strong> 
+                <span id="convertedText"></span>
+                <button onclick="playText('convertedText')" class="play-button">
+                    <span>🔊</span>
+                </button>
+            </p>
             <div class="explanations">
                 <h4>Word Transformations:</h4>
                 <ul id="explanationsList"></ul>
@@ -146,6 +174,37 @@
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
             document.getElementById('result').style.display = 'none';
+        }
+
+        async function playText(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            if (!text) return;
+            
+            try {
+                const response = await fetch('/api/tts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to generate speech');
+                }
+                
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                
+                // Clean up the URL after playing
+                audio.onended = () => URL.revokeObjectURL(audioUrl);
+                
+                await audio.play();
+            } catch (error) {
+                console.error('Error playing audio:', error);
+                alert('Failed to play audio');
+            }
         }
     </script>
 </body>
