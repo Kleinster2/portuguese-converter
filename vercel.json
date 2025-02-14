@@ -4,23 +4,15 @@
         {
             "src": "api/index.py",
             "use": "@vercel/python"
-        },
-        {
-            "src": "index.html",
-            "use": "@vercel/static"
         }
     ],
     "routes": [
         {
-            "src": "/api/(.*)",
-            "dest": "api/index.py"
-        },
-        {
             "src": "/(.*)",
-            "dest": "/$1"
+            "dest": "api/index.py"
         }
     ],
     "env": {
-        "PYTHONPATH": "/var/task/api"
+        "PYTHONPATH": "api"
     }
 }

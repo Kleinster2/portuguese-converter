@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 import os
 import sys
@@ -26,8 +26,12 @@ except ImportError as e:
     logger.error(str(e))
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(__name__, static_folder='..', static_url_path='')
 CORS(app)
+
+@app.route('/')
+def root():
+    return app.send_static_file('index.html')
 
 @app.route('/api/portuguese_converter', methods=['POST'])
 def convert():
@@ -109,6 +113,15 @@ def text_to_speech():
     except Exception as e:
         logger.error(f"Error in /tts: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
+
+# Error Handlers
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({'error': 'Not found'}), 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
     app.run()
