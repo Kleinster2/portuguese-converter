@@ -119,25 +119,38 @@
             }
 
             try {
+                // Show loading state
+                document.getElementById('error').style.display = 'none';
+                document.getElementById('result').style.display = 'none';
+                
                 const response = await fetch(`${API_BASE}/api/portuguese_converter`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({ text: inputText })
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to convert text');
+                // First try to get the response as text to debug any issues
+                const responseText = await response.text();
+                let data;
+                
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('Failed to parse response:', responseText);
+                    throw new Error('Invalid response from server');
                 }
 
-                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to convert text');
+                }
 
                 // Show results
                 document.getElementById('result').style.display = 'block';
                 document.getElementById('error').style.display = 'none';
-                document.getElementById('originalText').textContent = data.original || '';
+                document.getElementById('originalText').textContent = data.original || data.before || inputText;
                 document.getElementById('convertedText').textContent = data.after || '';
                 
                 // Show explanations
@@ -163,7 +176,8 @@
                 }
 
             } catch (error) {
-                showError(error.message);
+                console.error('Conversion error:', error);
+                showError(error.message || 'Failed to convert text');
             }
         }
 
@@ -183,6 +197,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'audio/wav'
                     },
                     body: JSON.stringify({ text })
                 });
