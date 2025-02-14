@@ -148,15 +148,27 @@ def text_to_speech():
     try:
         data = request.get_json()
         if not data or 'text' not in data:
+            logger.error("No text provided in TTS request")
             return jsonify({'error': 'No text provided'}), 400
             
         text = data['text']
+        logger.debug(f"TTS request for text: {text}")
+        
+        # Check Azure credentials
+        speech_key = os.getenv('AZURE_SPEECH_KEY')
+        speech_region = os.getenv('AZURE_SPEECH_REGION')
+        
+        if not speech_key or not speech_region:
+            logger.error("Azure credentials not found")
+            return jsonify({'error': 'Azure credentials not configured'}), 500
         
         # Configure speech service
         speech_config = speechsdk.SpeechConfig(
-            subscription=os.getenv('AZURE_SPEECH_KEY'),
-            region=os.getenv('AZURE_SPEECH_REGION')
+            subscription=speech_key,
+            region=speech_region
         )
+        
+        logger.debug("Speech config created successfully")
         
         # Set synthesis language and voice
         speech_config.speech_synthesis_language = "pt-BR"
